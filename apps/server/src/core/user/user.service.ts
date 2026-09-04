@@ -69,6 +69,14 @@ export class UserService {
       );
     }
 
+    if (typeof updateUserDto.sidebarPageTreeSort !== 'undefined') {
+      return this.userRepo.updatePreference(
+        userId,
+        'sidebarPageTreeSort',
+        updateUserDto.sidebarPageTreeSort,
+      );
+    }
+
     const notificationSettings: Record<string, NotificationSettingKey> = {
       notificationPageUpdates: 'page.updated',
       notificationPageUserMention: 'page.userMention',

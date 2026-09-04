@@ -8,12 +8,14 @@ import {
 } from "@mantine/core";
 import {
   IconArrowDown,
+  IconClockDown,
   IconDots,
   IconEye,
   IconEyeOff,
   IconFileExport,
   IconHome,
   IconPlus,
+  IconReorder,
   IconSearch,
   IconSettings,
   IconStar,
@@ -37,6 +39,7 @@ import SpaceSettingsModal from "@/features/space/components/settings-modal.tsx";
 import { useGetSpaceBySlugQuery } from "@/features/space/queries/space-query.ts";
 import { getSpaceUrl } from "@/lib/config.ts";
 import SpaceTree from "@/features/page/tree/components/space-tree.tsx";
+import { useSidebarTreeSort } from "@/features/page/tree/hooks/use-sidebar-tree-sort.ts";
 import { useSpaceAbility } from "@/features/space/permissions/use-space-ability.ts";
 import {
   SpaceCaslAction,
@@ -76,6 +79,7 @@ export function SpaceSidebar() {
   const spaceRules = space?.membership?.permissions;
   const spaceAbility = useSpaceAbility(spaceRules);
   const { handleCreate } = useTreeMutation(space?.id ?? "");
+  const { sortMode, toggleSortMode } = useSidebarTreeSort();
 
   if (!space) {
     return <></>;
@@ -84,6 +88,11 @@ export function SpaceSidebar() {
   function handleCreatePage() {
     handleCreate(null);
   }
+
+  const sortLabel =
+    sortMode === "manual"
+      ? t("Sort by last updated")
+      : t("Sort by manual order");
 
   return (
     <>
@@ -190,6 +199,18 @@ export function SpaceSidebar() {
             </Text>
 
             <Group gap="xs">
+              <Tooltip label={sortLabel} withArrow position="right">
+                <ActionIcon
+                  variant="default"
+                  size={18}
+                  onClick={toggleSortMode}
+                  aria-label={sortLabel}
+                  c={sortMode === "updatedAtDesc" ? undefined : "dimmed"}
+                >
+                  {sortMode === "manual" ? <IconReorder /> : <IconClockDown />}
+                </ActionIcon>
+              </Tooltip>
+
               <SpaceMenu
                 spaceId={space.id}
                 canManagePages={spaceAbility.can(

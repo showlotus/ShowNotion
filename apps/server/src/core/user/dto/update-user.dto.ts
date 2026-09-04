@@ -28,6 +28,11 @@ export class UpdateUserDto extends PartialType(
 
   @IsOptional()
   @IsString()
+  @IsIn(['manual', 'updatedAtDesc'])
+  sidebarPageTreeSort: string;
+
+  @IsOptional()
+  @IsString()
   locale: string;
 
   @IsOptional()

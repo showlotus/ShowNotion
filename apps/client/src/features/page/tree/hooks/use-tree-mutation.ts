@@ -150,6 +150,9 @@ export function useTreeMutation(spaceId: string): UseTreeMutation {
         spaceId: createdPage.spaceId,
         parentPageId: createdPage.parentPageId,
         hasChildren: false,
+        updatedAt: createdPage.updatedAt
+          ? new Date(createdPage.updatedAt).toISOString()
+          : undefined,
         children: [],
       };
 

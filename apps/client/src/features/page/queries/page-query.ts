@@ -349,7 +349,22 @@ function getChildrenCacheKeys(
     .map(([key]) => key);
 }
 
-export function invalidateOnCreatePage(data: Partial<IPage>) {
+// Only the fields the sidebar cache update consumes; also satisfied by tree
+// nodes arriving over the websocket (whose updatedAt is a string, not Date).
+type CreatedPageInput = Pick<
+  Partial<IPage>,
+  | "creatorId"
+  | "hasChildren"
+  | "icon"
+  | "id"
+  | "parentPageId"
+  | "position"
+  | "slugId"
+  | "spaceId"
+  | "title"
+>;
+
+export function invalidateOnCreatePage(data: CreatedPageInput) {
   const newPage: Partial<IPage> = {
     creatorId: data.creatorId,
     hasChildren: data.hasChildren,

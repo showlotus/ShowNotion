@@ -19,6 +19,7 @@ import {
 } from "@/features/editor/atoms/editor-atoms.ts";
 import { useEditorScroll } from "./hooks/use-editor-scroll";
 import { TransclusionLookupProvider } from "@/features/editor/components/transclusion/transclusion-lookup-context";
+import ImageLightbox from "@/features/editor/components/image/image-lightbox";
 import LightboxView, {
   getLightboxClickRequest,
 } from "@/features/editor/components/common/lightbox-view";
@@ -100,6 +101,7 @@ export default function ReadonlyPageEditor({
 
   return (
     <TransclusionLookupProvider shareId={shareId}>
+      <ImageLightbox />
       <div className="page-title">
         <EditorProvider
           editable={false}

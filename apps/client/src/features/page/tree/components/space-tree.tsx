@@ -12,10 +12,12 @@ import classes from "@/features/page/tree/styles/tree.module.css";
 import { treeDataAtom } from "@/features/page/tree/atoms/tree-data-atom.ts";
 import { openTreeNodesAtom } from "@/features/page/tree/atoms/open-tree-nodes-atom.ts";
 import { useTreeMutation } from "@/features/page/tree/hooks/use-tree-mutation.ts";
+import { useSidebarTreeSort } from "@/features/page/tree/hooks/use-sidebar-tree-sort.ts";
 import {
   buildTree,
   buildTreeWithChildren,
   mergeRootTrees,
+  sortTreeByUpdatedAtDesc,
 } from "@/features/page/tree/utils/utils.ts";
 import { SpaceTreeNode } from "@/features/page/tree/types.ts";
 import { getPageTitle } from "@/features/page/page.utils";
@@ -36,6 +38,7 @@ export default function SpaceTree({ spaceId, readOnly }: SpaceTreeProps) {
   const { pageSlug } = useParams();
   const [data, setData] = useAtom(treeDataAtom);
   const { handleMove } = useTreeMutation(spaceId);
+  const { sortMode } = useSidebarTreeSort();
   const {
     data: pagesData,
     hasNextPage,
@@ -182,10 +185,12 @@ export default function SpaceTree({ spaceId, readOnly }: SpaceTreeProps) {
     [data, setOpenTreeNodes, setData],
   );
 
-  const filteredData = useMemo(
-    () => data.filter((node) => node?.spaceId === spaceId),
-    [data, spaceId],
-  );
+  const filteredData = useMemo(() => {
+    const roots = data.filter((node) => node?.spaceId === spaceId);
+    return sortMode === "updatedAtDesc"
+      ? sortTreeByUpdatedAtDesc(roots)
+      : roots;
+  }, [data, spaceId, sortMode]);
 
   // Stable callbacks for DocTree. Without these, every parent render recreates
   // the props and tears down every row's draggable/dropTarget subscription,
@@ -197,8 +202,8 @@ export default function SpaceTree({ spaceId, readOnly }: SpaceTreeProps) {
     [readOnly],
   );
   const disableDragDrop = useCallback(
-    (n: SpaceTreeNode) => n.canEdit === false,
-    [],
+    (n: SpaceTreeNode) => sortMode === "updatedAtDesc" || n.canEdit === false,
+    [sortMode],
   );
   const getDragLabel = useCallback(
     (n: SpaceTreeNode) => getPageTitle(n.name, n.isBase, t),

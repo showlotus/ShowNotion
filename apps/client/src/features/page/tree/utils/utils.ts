@@ -9,6 +9,27 @@ export function sortPositionKeys(keys: any[]) {
   });
 }
 
+/**
+ * Deep-sort every sibling group by updatedAt descending (last updated first).
+ * Nodes without updatedAt sort last; ties keep their previous (stable) order.
+ */
+export function sortTreeByUpdatedAtDesc(
+  nodes: SpaceTreeNode[],
+): SpaceTreeNode[] {
+  const updatedAtMs = (node: SpaceTreeNode) => {
+    const time = node.updatedAt ? new Date(node.updatedAt).getTime() : 0;
+    return Number.isNaN(time) ? 0 : time;
+  };
+
+  return nodes
+    .map((node) =>
+      node.children?.length
+        ? { ...node, children: sortTreeByUpdatedAtDesc(node.children) }
+        : node,
+    )
+    .sort((a, b) => updatedAtMs(b) - updatedAtMs(a));
+}
+
 export function buildTree(pages: IPage[]): SpaceTreeNode[] {
   const pageMap: Record<string, SpaceTreeNode> = {};
 
@@ -26,6 +47,9 @@ export function buildTree(pages: IPage[]): SpaceTreeNode[] {
       parentPageId: page.parentPageId,
       isBase: page.isBase,
       canEdit: page.canEdit ?? page.permissions?.canEdit,
+      updatedAt: page.updatedAt
+        ? new Date(page.updatedAt).toISOString()
+        : undefined,
       children: [],
     };
   });

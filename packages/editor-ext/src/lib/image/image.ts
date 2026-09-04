@@ -9,6 +9,34 @@ import { ResizableNodeView } from "../resizable-nodeview";
 import type { ResizableNodeViewDirection } from "../resizable-nodeview";
 import { normalizeFileUrl, syncAltBadge } from "../media-utils";
 
+export const IMAGE_PREVIEW_EVENT = "docmost:image-preview-open";
+
+let resizeActive = false;
+let resizeGuardRefCount = 0;
+let resizeGuardAttached = false;
+
+const RESIZE_HANDLE_SELECTOR = "[data-resize-handle]";
+
+const onResizePointerDown = (event: PointerEvent) => {
+  const target = event.target as HTMLElement | null;
+  if (target && target.closest(RESIZE_HANDLE_SELECTOR)) {
+    resizeActive = true;
+  }
+};
+
+const onResizePointerEnd = () => {
+  resizeActive = false;
+};
+
+const ensureResizeGuard = () => {
+  if (resizeGuardAttached) return;
+  document.addEventListener("pointerdown", onResizePointerDown);
+  document.addEventListener("pointerup", onResizePointerEnd);
+  document.addEventListener("pointercancel", onResizePointerEnd);
+  document.addEventListener("lostpointercapture", onResizePointerEnd);
+  resizeGuardAttached = true;
+};
+
 export type ImageResizeOptions = {
   enabled: boolean;
   directions?: ResizableNodeViewDirection[];
@@ -267,6 +295,69 @@ export const TiptapImage = Image.extend<ImageOptions>({
 
       let currentNode = node;
 
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      let pendingDouble = false;
+
+      const openPreview = (fromRect: {
+        left: number;
+        top: number;
+        width: number;
+        height: number;
+      }) => {
+        window.dispatchEvent(
+          new CustomEvent(IMAGE_PREVIEW_EVENT, {
+            detail: {
+              src: node.attrs.src,
+              attachmentId: node.attrs.attachmentId,
+              alt: node.attrs.alt,
+              fromRect,
+            },
+          }),
+        );
+      };
+
+      el.addEventListener("click", () => {
+        if (resizeActive) return;
+        if (!this.editor.isEditable) {
+          if (timer) {
+            clearTimeout(timer);
+            pendingDouble = true;
+          } else {
+            const r = el.getBoundingClientRect();
+            timer = setTimeout(() => {
+              timer = null;
+              openPreview({
+                left: r.left,
+                top: r.top,
+                width: r.width,
+                height: r.height,
+              });
+            }, 350);
+          }
+        }
+      });
+
+      el.addEventListener("dblclick", () => {
+        if (resizeActive) return;
+        const shouldOpen = pendingDouble || this.editor.isEditable;
+        if (pendingDouble) {
+          clearTimeout(timer);
+          pendingDouble = false;
+        }
+        if (shouldOpen) {
+          const r = el.getBoundingClientRect();
+          openPreview({
+            left: r.left,
+            top: r.top,
+            width: r.width,
+            height: r.height,
+          });
+        }
+      });
+
+      ensureResizeGuard();
+      resizeGuardRefCount++;
+
       const nodeView = new ResizableNodeView({
         element: el,
         editor,
@@ -371,6 +462,19 @@ export const TiptapImage = Image.extend<ImageOptions>({
       el.onload = () => {
         dom.style.pointerEvents = "";
         el.classList.remove("media-pulse");
+      };
+
+      const originalDestroy = nodeView.destroy.bind(nodeView);
+      nodeView.destroy = () => {
+        resizeGuardRefCount = Math.max(0, resizeGuardRefCount - 1);
+        if (resizeGuardRefCount === 0 && resizeGuardAttached) {
+          document.removeEventListener("pointerdown", onResizePointerDown);
+          document.removeEventListener("pointerup", onResizePointerEnd);
+          document.removeEventListener("pointercancel", onResizePointerEnd);
+          document.removeEventListener("lostpointercapture", onResizePointerEnd);
+          resizeGuardAttached = false;
+        }
+        originalDestroy();
       };
 
       return nodeView;
