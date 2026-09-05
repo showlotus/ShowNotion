@@ -50,7 +50,6 @@ import { ReadonlyBubbleMenu } from "@/features/editor/components/bubble-menu/rea
 import TableMenu from "@/features/editor/components/table/table-menu.tsx";
 import { TableHandlesLayer } from "@/features/editor/components/table/handle/table-handles-layer";
 import ImageMenu from "@/features/editor/components/image/image-menu.tsx";
-import ImageLightbox from "@/features/editor/components/image/image-lightbox.tsx";
 import CalloutMenu from "@/features/editor/components/callout/callout-menu.tsx";
 import VideoMenu from "@/features/editor/components/video/video-menu.tsx";
 import PdfMenu from "@/features/editor/components/pdf/pdf-menu.tsx";
@@ -144,7 +143,6 @@ export default function PageEditor({
 
   return (
     <TransclusionLookupProvider>
-      <ImageLightbox />
       {collabQuery?.token ? (
         <HocuspocusProviderWebsocketComponent websocketProvider={socket}>
           <HocuspocusRoom
