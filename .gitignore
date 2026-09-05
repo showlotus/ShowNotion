@@ -41,3 +41,9 @@ lerna-debug.log*
 .nx
 .nx/installation
 .nx/cache
+
+# AI
+.zcode/
+
+# Local compose overrides (machine-specific port mappings)
+docker-compose.override.yml
