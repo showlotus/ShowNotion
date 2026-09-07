@@ -34,10 +34,45 @@ const red: MantineColorsTuple = [
   "#93151b",
 ];
 
+// Notion-style warm grays. Each step keeps the luminance of Mantine's default
+// cool gray but shifts the hue from blue-tinted to Notion's warm (55,53,47)
+// family, so borders, hovers and muted text read warm in both color schemes.
+const gray: MantineColorsTuple = [
+  "#f8f8f7",
+  "#f1f1ef",
+  "#e9e9e7",
+  "#dededc",
+  "#cfceca",
+  "#b4b3b0",
+  "#8b8a86",
+  "#4a4845",
+  "#353430",
+  "#232220",
+];
+
+// Notion's current dark palette: dark-7 is the page/content background
+// (#191919), dark-8 the layout/sidebar shell (#202020), dark-0 the primary
+// text (rgba(255,255,255,0.9)), dark-1 the secondary text (#9b9b9b),
+// dark-4 the divider (#373737) and dark-6 the hover surface (#2f2f2f).
+const dark: MantineColorsTuple = [
+  "#e6e6e6",
+  "#9b9b9b",
+  "#8c8c8c",
+  "#6f6f6f",
+  "#373737",
+  "#313131",
+  "#2f2f2f",
+  "#191919",
+  "#202020",
+  "#141414",
+];
+
 export const theme = createTheme({
   colors: {
     blue,
     red,
+    gray,
+    dark,
   },
   defaultRadius: 'sm',
   components: {
@@ -91,8 +126,15 @@ export const mantineCssResolver: CSSVariablesResolver = (theme) => ({
   },
   light: {
     ...v8CssVariablesResolver(theme).light,
-    "--mantine-color-dimmed": "#4b5563",
-    "--mantine-color-dark-light-color": "#4e5359",
+    // Notion's primary ink (rgb(55,53,47)) instead of pure black, for body
+    // text and default-variant controls in light mode.
+    "--mantine-color-text": "#37352F",
+    "--mantine-color-default-color": "#37352F",
+    // Notion's secondary text (rgba(55,53,47,0.65) ≈ #7d7c78) darkened just
+    // enough to clear WCAG AA 4.5:1 (~5.3:1 on white, ~5.0:1 on the #f7f7f5
+    // sidebar). Replaces the previous cool blue-gray #4b5563.
+    "--mantine-color-dimmed": "#6b6a64",
+    "--mantine-color-dark-light-color": "#4a4845",
     "--mantine-color-dark-light-hover": "var(--mantine-color-gray-light-hover)",
     // Override the semantic error color so input error text / borders /
     // required asterisks meet WCAG AA 4.5:1 contrast on the filled-input
@@ -127,6 +169,8 @@ export const mantineCssResolver: CSSVariablesResolver = (theme) => ({
   },
   dark: {
     ...v8CssVariablesResolver(theme).dark,
+    // Notion's dark default-control text is 90% white, not pure white.
+    "--mantine-color-default-color": "#e6e6e6",
     "--mantine-color-dark-light-color": "var(--mantine-color-gray-4)",
     "--mantine-color-dark-light-hover": "var(--mantine-color-default-hover)",
   },
