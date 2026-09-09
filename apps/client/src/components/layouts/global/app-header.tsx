@@ -1,3 +1,8 @@
+/**
+ * 顶部 Header 已由侧边栏内嵌入口方案替代（工作区菜单移至侧边栏顶部，
+ * 搜索/通知/AI Chat 移至侧边栏），入口见 global-app-shell.tsx。
+ * 本文件整体停用，保留代码以备恢复。
+ */
 import {
   ActionIcon,
   Badge,

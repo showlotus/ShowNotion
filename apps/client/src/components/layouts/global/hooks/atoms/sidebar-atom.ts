@@ -8,6 +8,9 @@ export const desktopSidebarAtom = atomWithWebStorage<boolean>(
   true,
 );
 
+// 鼠标接近屏幕左边缘时的临时预览状态（peek 悬浮已暂时停用，保留以备恢复）
+// export const sidebarPeekAtom = atom<boolean>(false);
+
 export const desktopAsideAtom = atom<boolean>(false);
 
 // Valid `tab` values: "" | "comments" | "toc" | "chat" | "details"

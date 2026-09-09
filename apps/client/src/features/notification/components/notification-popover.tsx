@@ -7,8 +7,10 @@ import {
   Popover,
   ScrollArea,
   Tabs,
+  Text,
   Title,
   Tooltip,
+  UnstyledButton,
 } from "@mantine/core";
 import {
   IconBell,
@@ -29,7 +31,18 @@ import {
 } from "../queries/notification-query";
 import classes from "../notification.module.css";
 
-export function NotificationPopover() {
+interface NotificationPopoverProps {
+  // icon 为图标按钮样式，row 为侧边栏底部行样式（图标 + 文案 + 未读数）
+  variant?: "icon" | "row";
+  rowClassName?: string;
+  rowIconClassName?: string;
+}
+
+export function NotificationPopover({
+  variant = "icon",
+  rowClassName,
+  rowIconClassName,
+}: NotificationPopoverProps) {
   const { t } = useTranslation();
   const titleId = useId();
   const [opened, setOpened] = useState(false);
@@ -50,7 +63,7 @@ export function NotificationPopover() {
 
   return (
     <Popover
-      position="bottom-end"
+      position="bottom-start"
       shadow="lg"
       opened={opened}
       onChange={setOpened}
@@ -60,26 +73,44 @@ export function NotificationPopover() {
       closeOnEscape={!isSubMenuOpen}
     >
       <Popover.Target>
-        <Tooltip label={t("Notifications")} withArrow>
-          <ActionIcon
-            variant="subtle"
-            color="dark"
-            size="sm"
+        {variant === "row" ? (
+          <UnstyledButton
+            className={rowClassName}
             aria-label={t("Notifications")}
             aria-haspopup="dialog"
             aria-expanded={opened}
             onClick={() => setOpened((o) => !o)}
           >
-            <Indicator
-              offset={5}
-              color="red"
-              withBorder
-              disabled={unreadCount === 0}
+            <IconBell className={rowIconClassName} size={20} stroke={2} />
+            <span>{t("Notifications")}</span>
+            {unreadCount > 0 && (
+              <Text span size="xs" c="dimmed" ml="auto" pr={8}>
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </Text>
+            )}
+          </UnstyledButton>
+        ) : (
+          <Tooltip label={t("Notifications")} withArrow>
+            <ActionIcon
+              variant="subtle"
+              color="dark"
+              size="sm"
+              aria-label={t("Notifications")}
+              aria-haspopup="dialog"
+              aria-expanded={opened}
+              onClick={() => setOpened((o) => !o)}
             >
-              <IconBell size={20} />
-            </Indicator>
-          </ActionIcon>
-        </Tooltip>
+              <Indicator
+                offset={5}
+                color="red"
+                withBorder
+                disabled={unreadCount === 0}
+              >
+                <IconBell size={20} />
+              </Indicator>
+            </ActionIcon>
+          </Tooltip>
+        )}
       </Popover.Target>
 
       <Popover.Dropdown

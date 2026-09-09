@@ -1,5 +1,4 @@
 import {
-  Group,
   Menu,
   Text,
   UnstyledButton,
@@ -33,14 +32,13 @@ import useAuth from "@/features/auth/hooks/use-auth.ts";
 import { CustomAvatar } from "@/components/ui/custom-avatar.tsx";
 import { useTranslation } from "react-i18next";
 import { AvatarIconType } from "@/features/attachments/types/attachment.types.ts";
+import classes from "./top-menu.module.css";
 
+// 侧边栏顶部的工作区菜单：工作区设置、成员管理、个人空间
 export default function TopMenu() {
   const { t } = useTranslation();
   const [currentUser] = useAtom(currentUserAtom);
-  const { logout } = useAuth();
-  const { colorScheme, setColorScheme } = useMantineColorScheme();
 
-  const user = currentUser?.user;
   const workspace = currentUser?.workspace;
 
   const hasPersonalSpaces = useHasFeature(Feature.PERSONAL_SPACES);
@@ -51,28 +49,26 @@ export default function TopMenu() {
     { open: openCreate, close: closeCreate },
   ] = useDisclosure(false);
 
-  if (!user || !workspace) {
+  if (!workspace) {
     return <></>;
   }
 
   return (
     <>
-    <Menu width={250} position="bottom-end" withArrow shadow={"lg"}>
+    <Menu width={250} position="bottom-start" shadow={"lg"}>
       <Menu.Target>
-        <UnstyledButton>
-          <Group gap={7} wrap={"nowrap"}>
-            <CustomAvatar
-              avatarUrl={workspace?.logo}
-              name={workspace?.name}
-              variant="filled"
-              size="sm"
-              type={AvatarIconType.WORKSPACE_ICON}
-            />
-            <Text fw={500} size="sm" lh={1} mr={3} lineClamp={1}>
-              {workspace?.name}
-            </Text>
-            <IconChevronDown size={16} />
-          </Group>
+        <UnstyledButton className={classes.trigger} aria-label={workspace?.name}>
+          <CustomAvatar
+            avatarUrl={workspace?.logo}
+            name={workspace?.name}
+            variant="filled"
+            size="sm"
+            type={AvatarIconType.WORKSPACE_ICON}
+          />
+          <Text fw={500} size="sm" lh={1} className={classes.triggerName} lineClamp={1}>
+            {workspace?.name}
+          </Text>
+          <IconChevronDown size={16} className={classes.triggerChevron} />
         </UnstyledButton>
       </Menu.Target>
       <Menu.Dropdown>
@@ -94,43 +90,6 @@ export default function TopMenu() {
           {t("Manage members")}
         </Menu.Item>
 
-        <Menu.Divider />
-
-        <Menu.Label>{t("Account")}</Menu.Label>
-        <Menu.Item component={Link} to={APP_ROUTE.SETTINGS.ACCOUNT.PROFILE}>
-          <Group wrap={"nowrap"}>
-            <CustomAvatar
-              size={"sm"}
-              avatarUrl={user.avatarUrl}
-              name={user.name}
-            />
-
-            <div style={{ width: 190 }}>
-              <Text size="sm" fw={500} lineClamp={1}>
-                {user.name}
-              </Text>
-              <Text size="xs" c="dimmed" truncate="end">
-                {user.email}
-              </Text>
-            </div>
-          </Group>
-        </Menu.Item>
-        <Menu.Item
-          component={Link}
-          to={APP_ROUTE.SETTINGS.ACCOUNT.PROFILE}
-          leftSection={<IconUserCircle size={16} />}
-        >
-          {t("My profile")}
-        </Menu.Item>
-
-        <Menu.Item
-          component={Link}
-          to={APP_ROUTE.SETTINGS.ACCOUNT.PREFERENCES}
-          leftSection={<IconBrush size={16} />}
-        >
-          {t("My preferences")}
-        </Menu.Item>
-
         {personalSpace ? (
           <Menu.Item
             component={Link}
@@ -150,6 +109,65 @@ export default function TopMenu() {
             </Menu.Item>
           )
         )}
+      </Menu.Dropdown>
+    </Menu>
+
+      <CreatePersonalSpaceModal opened={createOpened} onClose={closeCreate} />
+    </>
+  );
+}
+
+// 侧边栏底部的个人账户菜单：个人资料、偏好设置、主题切换、登出
+export function UserMenu() {
+  const { t } = useTranslation();
+  const [currentUser] = useAtom(currentUserAtom);
+  const { logout } = useAuth();
+  const { colorScheme, setColorScheme } = useMantineColorScheme();
+
+  const user = currentUser?.user;
+
+  if (!user) {
+    return <></>;
+  }
+
+  return (
+    <Menu width={250} position="top-start" shadow={"lg"}>
+      <Menu.Target>
+        <UnstyledButton className={classes.userTrigger} aria-label={user.name}>
+          <CustomAvatar
+            size={"md"}
+            avatarUrl={user.avatarUrl}
+            name={user.name}
+          />
+          <div className={classes.userMeta}>
+            <Text size="sm" fw={500} lineClamp={1}>
+              {user.name}
+            </Text>
+            <Text size="xs" c="dimmed" truncate="end">
+              {user.email}
+            </Text>
+          </div>
+          <IconChevronDown size={16} className={classes.triggerChevron} />
+        </UnstyledButton>
+      </Menu.Target>
+      <Menu.Dropdown>
+        <Menu.Label>{t("Account")}</Menu.Label>
+
+        <Menu.Item
+          component={Link}
+          to={APP_ROUTE.SETTINGS.ACCOUNT.PROFILE}
+          leftSection={<IconUserCircle size={16} />}
+        >
+          {t("My profile")}
+        </Menu.Item>
+
+        <Menu.Item
+          component={Link}
+          to={APP_ROUTE.SETTINGS.ACCOUNT.PREFERENCES}
+          leftSection={<IconBrush size={16} />}
+        >
+          {t("My preferences")}
+        </Menu.Item>
 
         <Menu.Sub>
           <Menu.Sub.Target>
@@ -196,8 +214,5 @@ export default function TopMenu() {
         </Menu.Item>
       </Menu.Dropdown>
     </Menu>
-
-      <CreatePersonalSpaceModal opened={createOpened} onClose={closeCreate} />
-    </>
   );
 }

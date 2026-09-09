@@ -1,0 +1,54 @@
+/* 桌面端侧边栏收起时左上角常驻的展开按钮 */
+.expandButton {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px 3px 3px;
+  border-radius: var(--mantine-radius-md);
+  background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
+  box-shadow: var(--mantine-shadow-sm);
+  cursor: pointer;
+
+  @mixin hover {
+    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-5));
+  }
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    display: none;
+  }
+}
+
+.expandIcon {
+  color: var(--mantine-color-dimmed);
+}
+
+/* 移动端左上角汉堡按钮，用于打开抽屉式侧边栏 */
+.mobileButton {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 150;
+
+  @media (min-width: calc($mantine-breakpoint-sm + 1px)) {
+    display: none;
+  }
+}
+
+/* peek 边缘感应条已暂时停用，保留以备恢复 */
+/* .edgeTrigger {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 16px;
+  z-index: 90;
+  background: transparent;
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    display: none;
+  }
+} */

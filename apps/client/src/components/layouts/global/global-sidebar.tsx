@@ -8,6 +8,8 @@ import {
   IconSettings,
   IconUserPlus,
   IconTemplate,
+  IconSearch,
+  IconSparkles,
 } from "@tabler/icons-react";
 import { Link, useLocation } from "react-router-dom";
 import classes from "./global-sidebar.module.css";
@@ -17,6 +19,7 @@ import { mobileSidebarAtom } from "@/components/layouts/global/hooks/atoms/sideb
 import { useToggleSidebar } from "@/components/layouts/global/hooks/hooks/use-toggle-sidebar";
 import { useFavoritesQuery } from "@/features/favorite/queries/favorite-query";
 import { getSpaceUrl } from "@/lib/config";
+import { platformModifierLabel } from "@/lib";
 import { useDisclosure } from "@mantine/hooks";
 import { WorkspaceInviteForm } from "@/features/workspace/components/members/components/workspace-invite-form";
 import { CustomAvatar } from "@/components/ui/custom-avatar";
@@ -24,6 +27,10 @@ import { AvatarIconType } from "@/features/attachments/types/attachment.types";
 import { useHasFeature } from "@/ee/hooks/use-feature";
 import { Feature } from "@/ee/features";
 import { useUpgradeLabel } from "@/ee/hooks/use-upgrade-label";
+import TopMenu, { UserMenu } from "@/components/layouts/global/top-menu.tsx";
+import { searchSpotlight } from "@/features/search/constants.ts";
+import { NotificationPopover } from "@/features/notification/components/notification-popover.tsx";
+import { workspaceAtom } from "@/features/user/atoms/current-user-atom.ts";
 
 export default function GlobalSidebar() {
   const { t } = useTranslation();
@@ -31,6 +38,8 @@ export default function GlobalSidebar() {
   const [active, setActive] = useState(location.pathname);
   const [mobileSidebarOpened] = useAtom(mobileSidebarAtom);
   const toggleMobileSidebar = useToggleSidebar(mobileSidebarAtom);
+  const [workspace] = useAtom(workspaceAtom);
+  const aiChatEnabled = workspace?.settings?.ai?.chat === true;
   const hasTemplates = useHasFeature(Feature.TEMPLATES);
   const upgradeLabel = useUpgradeLabel();
   const mainNavItems = [
@@ -67,8 +76,22 @@ export default function GlobalSidebar() {
 
   return (
     <div className={classes.navbar}>
+      <div className={classes.section}>
+        <TopMenu />
+      </div>
       <ScrollArea w="100%" style={{ flex: 1 }}>
         <div className={classes.section}>
+          <UnstyledButton
+            className={classes.link}
+            onClick={searchSpotlight.open}
+            aria-label={t("Search")}
+          >
+            <IconSearch className={classes.linkIcon} stroke={2} />
+            <span>{t("Search")}</span>
+            <Text span fz="xs" c="dimmed" ml="auto" pr={8}>
+              {platformModifierLabel} + K
+            </Text>
+          </UnstyledButton>
           {mainNavItems.map((item) =>
             item.disabled ? (
               <Tooltip
@@ -150,6 +173,23 @@ export default function GlobalSidebar() {
       </ScrollArea>
 
       <div className={classes.bottomSection}>
+        {aiChatEnabled && (
+          <Link
+            className={classes.link}
+            data-active={active.startsWith("/ai") || undefined}
+            aria-current={active.startsWith("/ai") ? "page" : undefined}
+            to="/ai"
+            onClick={handleNavClick}
+          >
+            <IconSparkles className={classes.linkIcon} stroke={2} />
+            <span>{t("AI Chat")}</span>
+          </Link>
+        )}
+        <NotificationPopover
+          variant="row"
+          rowClassName={classes.link}
+          rowIconClassName={classes.linkIcon}
+        />
         <UnstyledButton
           className={classes.link}
           onClick={openInvite}
@@ -167,6 +207,7 @@ export default function GlobalSidebar() {
           <IconSettings className={classes.linkIcon} stroke={2} />
           <span>{t("Settings")}</span>
         </Link>
+        <UserMenu />
       </div>
 
       <Modal

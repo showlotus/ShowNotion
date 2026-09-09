@@ -15,7 +15,8 @@ import { SpaceSidebar } from "@/features/space/components/sidebar/space-sidebar.
 const AiChatSidebar = React.lazy(
   () => import("@/ee/ai-chat/components/ai-chat-sidebar.tsx"),
 );
-import { AppHeader } from "@/components/layouts/global/app-header.tsx";
+// 顶部 Header 已由侧边栏内嵌入口方案替代，保留代码以备恢复
+// import { AppHeader } from "@/components/layouts/global/app-header.tsx";
 import Aside from "@/components/layouts/global/aside.tsx";
 import classes from "./app-shell.module.css";
 import { useTrialEndAction } from "@/ee/hooks/use-trial-end-action.tsx";
@@ -23,6 +24,9 @@ import { useToggleSidebar } from "@/components/layouts/global/hooks/hooks/use-to
 import GlobalSidebar from "@/components/layouts/global/global-sidebar.tsx";
 import { ASIDE_PANEL_ID } from "@/hooks/use-toggle-aside.tsx";
 import { MAIN_CONTENT_ID, SkipToMain } from "@/components/ui/skip-to-main.tsx";
+// peek 悬浮已暂时停用，保留以备恢复
+// import { sidebarPeekAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
+import { SidebarToggleOverlay } from "@/components/layouts/global/sidebar-toggle-overlay.tsx";
 
 export default function GlobalAppShell({
   children,
@@ -34,6 +38,9 @@ export default function GlobalAppShell({
   const [mobileOpened] = useAtom(mobileSidebarAtom);
   const toggleMobile = useToggleSidebar(mobileSidebarAtom);
   const [desktopOpened] = useAtom(desktopSidebarAtom);
+  // peek 悬浮已暂时停用，保留以备恢复
+  // const [isPeek] = useAtom(sidebarPeekAtom);
+  // const [, setPeek] = useAtom(sidebarPeekAtom);
   const [{ isAsideOpen, tab: asideTab }] = useAtom(asideStateAtom);
   const [sidebarWidth, setSidebarWidth] = useAtom(sidebarWidthAtom);
   const [isResizing, setIsResizing] = useState(false);
@@ -89,7 +96,11 @@ export default function GlobalAppShell({
     <>
       <SkipToMain />
       <AppShell
-      header={{ height: 45 }}
+      // 顶部 Header 已由侧边栏内嵌入口方案替代，保留代码以备恢复
+      // header={{ height: 45 }}
+      className={classes.shell}
+      // peek 悬浮已暂时停用，保留以备恢复
+      // data-peek={isPeek ? "true" : undefined}
       navbar={{
         width: isSpaceRoute ? sidebarWidth : 300,
         breakpoint: "sm",
@@ -107,13 +118,17 @@ export default function GlobalAppShell({
       }
       padding="md"
     >
-      <AppShell.Header px="md" className={classes.header}>
+      {/* 顶部 Header 已由侧边栏内嵌入口方案替代，保留代码以备恢复 */}
+      {/* <AppShell.Header px="md" className={classes.header}>
         <AppHeader />
-      </AppShell.Header>
+      </AppShell.Header> */}
+      <SidebarToggleOverlay />
       <AppShell.Navbar
         className={classes.navbar}
         withBorder={false}
         ref={sidebarRef}
+        // peek 悬浮已暂时停用，保留以备恢复
+        // onMouseLeave={() => setPeek(false)}
         aria-label={
           isSpaceRoute
             ? t("Space navigation")

@@ -1,0 +1,51 @@
+/* 侧边栏顶部的工作区菜单触发按钮（Notion 风格全宽按钮） */
+.trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+  padding: rem(5px) var(--mantine-spacing-xs);
+  border-radius: var(--mantine-radius-sm);
+  cursor: pointer;
+  user-select: none;
+
+  @mixin hover {
+    background-color: var(--notion-hover);
+  }
+}
+
+/* 工作区名称占满剩余空间，超出省略 */
+.triggerName {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+/* 右侧箭头固定尺寸不参与压缩 */
+.triggerChevron {
+  flex-shrink: 0;
+  color: var(--mantine-color-dimmed);
+}
+
+/* 侧边栏底部的个人账户菜单触发按钮（头像 + 名称 + 邮箱） */
+.userTrigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+  padding: rem(6px) var(--mantine-spacing-xs);
+  border-radius: var(--mantine-radius-sm);
+  cursor: pointer;
+  user-select: none;
+
+  @mixin hover {
+    background-color: var(--notion-hover);
+  }
+}
+
+/* 名称与邮箱占满剩余空间，超出省略 */
+.userMeta {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}

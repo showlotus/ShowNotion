@@ -10,11 +10,22 @@
   }
 }
 
-.aside {
+/* 顶部 Header 已由侧边栏内嵌入口方案替代，保留代码以备恢复 */
+/* .aside {
   @media (max-width: $mantine-breakpoint-sm) {
     margin-top: 45px;
   }
-}
+} */
+
+/* 鼠标预览（peek）已暂时停用，保留以备恢复 */
+/* .shell[data-peek="true"] {
+  --app-shell-navbar-offset: 0px !important;
+} */
+
+/* 鼠标预览（peek）时为悬浮的侧边栏加阴影以区分层级 */
+/* .shell[data-peek="true"] .navbar {
+  box-shadow: var(--mantine-shadow-lg);
+} */
 
 .resizeHandle {
   width: 3px;

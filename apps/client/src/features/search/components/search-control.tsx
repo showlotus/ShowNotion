@@ -1,3 +1,7 @@
+/**
+ * 顶部 Header 已由侧边栏内嵌入口方案替代，本组件随 Header 停用
+ * （搜索入口已移至侧边栏导航区），保留代码以备恢复。
+ */
 import { IconSearch } from "@tabler/icons-react";
 import cx from "clsx";
 import {

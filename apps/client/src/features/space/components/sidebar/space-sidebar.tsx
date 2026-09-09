@@ -18,12 +18,12 @@ import {
   IconReorder,
   IconSearch,
   IconSettings,
+  IconSparkles,
   IconStar,
   IconStarFilled,
   IconTemplate,
   IconTrash,
-} from "@tabler/icons-react";
-import {
+} from "@tabler/icons-react";import {
   useSpaceWatchStatusQuery,
   useWatchSpaceMutation,
   useUnwatchSpaceMutation,
@@ -64,6 +64,10 @@ import { useHasFeature } from "@/ee/hooks/use-feature";
 import { useUpgradeLabel } from "@/ee/hooks/use-upgrade-label";
 import { Feature } from "@/ee/features";
 import { ErrorBoundary } from "react-error-boundary";
+import TopMenu from "@/components/layouts/global/top-menu.tsx";
+import useToggleAside from "@/hooks/use-toggle-aside.tsx";
+import { NotificationPopover } from "@/features/notification/components/notification-popover.tsx";
+import { workspaceAtom } from "@/features/user/atoms/current-user-atom.ts";
 
 export function SpaceSidebar() {
   const { t } = useTranslation();
@@ -80,6 +84,10 @@ export function SpaceSidebar() {
   const spaceAbility = useSpaceAbility(spaceRules);
   const { handleCreate } = useTreeMutation(space?.id ?? "");
   const { sortMode, toggleSortMode } = useSidebarTreeSort();
+  const toggleAside = useToggleAside();
+  const [workspace] = useAtom(workspaceAtom);
+  const aiChatEnabled = workspace?.settings?.ai?.chat === true;
+  const isPageRoute = location.pathname.includes("/p/");
 
   if (!space) {
     return <></>;
@@ -97,6 +105,9 @@ export function SpaceSidebar() {
   return (
     <>
       <div className={classes.navbar}>
+        <div className={classes.section}>
+          <TopMenu />
+        </div>
         <div
           className={classes.section}
           style={{
@@ -248,6 +259,39 @@ export function SpaceSidebar() {
               )}
             />
           </div>
+        </div>
+
+        <div className={classes.bottomSection}>
+          {aiChatEnabled && (
+            <UnstyledButton
+              component={Link}
+              to="/ai"
+              className={classes.menu}
+              onClick={(e: React.MouseEvent) => {
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) {
+                  return;
+                }
+                if (isPageRoute) {
+                  e.preventDefault();
+                  toggleAside("chat");
+                }
+              }}
+            >
+              <div className={classes.menuItemInner}>
+                <IconSparkles
+                  size={18}
+                  className={classes.menuItemIcon}
+                  stroke={2}
+                />
+                <span>{t("AI Chat")}</span>
+              </div>
+            </UnstyledButton>
+          )}
+          <NotificationPopover
+            variant="row"
+            rowClassName={classes.menu}
+            rowIconClassName={classes.menuItemIcon}
+          />
         </div>
       </div>
 
