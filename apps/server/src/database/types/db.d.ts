@@ -74,6 +74,7 @@ export interface Audit {
   resourceId: string | null;
   resourceType: string;
   spaceId: string | null;
+  userAgent: string | null;
   workspaceId: string;
 }
 
@@ -335,6 +336,18 @@ export interface Pages {
   ydoc: Buffer | null;
 }
 
+export interface PublicSpaces {
+  createdAt: Generated<Timestamp>;
+  creatorId: string | null;
+  enabled: Generated<boolean>;
+  id: Generated<string>;
+  searchIndexing: Generated<boolean>;
+  settings: Json | null;
+  spaceId: string;
+  updatedAt: Generated<Timestamp>;
+  workspaceId: string;
+}
+
 export interface Shares {
   createdAt: Generated<Timestamp>;
   creatorId: string | null;
@@ -359,6 +372,30 @@ export interface SpaceMembers {
   spaceId: string;
   updatedAt: Generated<Timestamp>;
   userId: string | null;
+}
+
+export interface SiemDestinations {
+  config: Json;
+  consecutiveFailures: Generated<number>;
+  createdAt: Generated<Timestamp>;
+  creatorId: string | null;
+  cursorCreatedAt: Generated<Timestamp>;
+  cursorId: Generated<string>;
+  cursorSnapshot: string | null;
+  enabled: Generated<boolean>;
+  failingSince: Timestamp | null;
+  id: Generated<string>;
+  lastDeliveredAt: Timestamp | null;
+  lastError: string | null;
+  lastErrorAt: Timestamp | null;
+  name: string;
+  nextAttemptAt: Timestamp | null;
+  secrets: string;
+  status: Generated<string>;
+  type: string;
+  updatedAt: Generated<Timestamp>;
+  version: Generated<number>;
+  workspaceId: string;
 }
 
 export interface Spaces {
@@ -722,8 +759,10 @@ export interface DB {
   pageVerifications: PageVerifications;
   pageVerifiers: PageVerifiers;
   pages: Pages;
+  publicSpaces: PublicSpaces;
   scimTokens: ScimTokens;
   shares: Shares;
+  siemDestinations: SiemDestinations;
   spaceMembers: SpaceMembers;
   spaces: Spaces;
   templates: Templates;

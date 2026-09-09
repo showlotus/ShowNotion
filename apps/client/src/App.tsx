@@ -44,6 +44,15 @@ const ShareLayout = lazy(
   () => import("@/features/share/components/share-layout.tsx"),
 );
 const ShareRedirect = lazy(() => import("@/pages/share/share-redirect.tsx"));
+const PublicSpacePage = lazy(
+  () => import("@/pages/public-space/public-space-page.tsx"),
+);
+const PublicSpaceLayout = lazy(
+  () => import("@/features/public-space/components/public-space-layout.tsx"),
+);
+const PublicSpaceDirectoryPage = lazy(
+  () => import("@/pages/public-space/public-space-directory-page.tsx"),
+);
 const SpacesPage = lazy(() => import("@/pages/spaces/spaces.tsx"));
 const MfaChallengePage = lazy(() =>
   import("@/ee/mfa/pages/mfa-challenge-page").then((m) => ({
@@ -119,6 +128,15 @@ export default function App() {
           <Route path={"/share/p/:pageSlug"} element={<SharedPage />} />
         </Route>
 
+        <Route path={"/docs"} element={<PublicSpaceDirectoryPage />} />
+        <Route element={<PublicSpaceLayout />}>
+          <Route path={"/docs/:spaceSlug"} element={<PublicSpacePage />} />
+          <Route
+            path={"/docs/:spaceSlug/:pageSlug"}
+            element={<PublicSpacePage />}
+          />
+        </Route>
+
         <Route path={"/pdf-render/:pageId"} element={<PdfRenderPage />} />
         <Route path={"/share/:shareId"} element={<ShareRedirect />} />
         <Route path={"/p/:pageSlug"} element={<PageRedirect />} />
@@ -166,6 +184,11 @@ export default function App() {
             <Route path={"ai"} element={<AiSettings />} />
             <Route path={"ai/mcp"} element={<AiSettings />} />
             <Route path={"audit"} element={<AuditLogs />} />
+            <Route path={"audit/siem"} element={<AuditLogs />} />
+            <Route
+              path={"siem"}
+              element={<Navigate to="/settings/audit/siem" replace />}
+            />
             <Route path={"verifications"} element={<VerifiedPages />} />
             {!isCloud() && <Route path={"license"} element={<License />} />}
             {isCloud() && <Route path={"billing"} element={<Billing />} />}
