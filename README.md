@@ -12,49 +12,82 @@
 </div>
 <br />
 
-## Getting started
+## Local development (from scratch)
 
-ShowNotion is a fork of [Docmost](https://github.com/docmost/docmost). For setup and
-development instructions, refer to the upstream
-[documentation](https://docmost.com/docs/self-hosting/development).
+### Prerequisites
 
-## Features
+- Node.js 22+
+- pnpm (enable once with `corepack enable`, version is pinned in `package.json`)
+- Docker Desktop running
 
-- Real-time collaboration
-- Diagrams (Draw.io, Excalidraw and Mermaid)
-- Spaces
-- Permissions management
-- Groups
-- Comments
-- Page history
-- Search
-- File attachments
-- Embeds (Airtable, Loom, Miro and more)
-- Translations (10+ languages)
+### 1. Configure environment variables
 
-### License
-Docmost core is licensed under the open-source AGPL 3.0 license.
-Enterprise features are available under an enterprise license (Enterprise Edition).
+```bash
+cp .env.example .env
+```
 
-All files in the following directories are licensed under the Docmost Enterprise license defined in `packages/ee/License`.
-  - apps/server/src/ee
-  - apps/client/src/ee
-  - packages/ee
+Key values to set:
+
+| Variable | Example value |
+| --- | --- |
+| `APP_SECRET` | a long random string |
+| `DATABASE_URL` | `postgresql://docmost:STRONG_DB_PASSWORD@localhost:5432/docmost` |
+| `REDIS_URL` | `redis://127.0.0.1:6379` |
+
+The DB password in `DATABASE_URL` must match `POSTGRES_PASSWORD` in `docker-compose.yml`.
+
+### 2. Install dependencies
+
+```bash
+pnpm install
+```
+
+### 3. Start infrastructure services
+
+```bash
+docker compose up -d db redis
+```
+
+> Only start `db` and `redis` — the `docmost` container is not needed for local development
+> and would conflict with `pnpm dev` on port `3000`.
+
+### 4. Run database migrations (required)
+
+```bash
+pnpm --filter ./apps/server run migration:latest
+```
+
+> Migrations run automatically only in production. In dev you must run them manually after
+> pulling code with new migrations, otherwise API calls will fail with 500 errors.
+
+### 5. Start the dev servers
+
+```bash
+pnpm dev
+```
+
+- Frontend: http://localhost:5173
+- Backend: http://localhost:3000
+
+### 6. First-run initialization
+
+With a fresh database, opening http://localhost:3000 shows the setup wizard — create the
+workspace and the admin account there.
+
+### One-liner
+
+```bash
+docker compose up -d db redis && pnpm install && pnpm --filter ./apps/server run migration:latest && pnpm dev
+```
+
+## License
+
+Docmost core is licensed under the open-source AGPL 3.0 license. Enterprise features
+(`apps/server/src/ee`, `apps/client/src/ee`, `packages/ee`) are licensed under the Docmost
+Enterprise license defined in `packages/ee/License`.
 
 This fork keeps the AGPL 3.0 license and upstream copyright notices intact.
 
-### Contributing
+## Contributing
 
 See the upstream [development documentation](https://docmost.com/docs/self-hosting/development)
-
-## Thanks
-Special thanks to;
-
-<img width="100" alt="Crowdin" src="https://github.com/user-attachments/assets/a6c3d352-e41b-448d-b6cd-3fbca3109f07" />
-
-[Crowdin](https://crowdin.com/) for providing access to their localization platform.
-
-
-<img width="48" alt="Algolia-mark-square-white" src="https://github.com/user-attachments/assets/6ccad04a-9589-4965-b6a1-d5cb1f4f9e94" />
-
-[Algolia](https://www.algolia.com/) for providing full-text search to the docs.
