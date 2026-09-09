@@ -16,7 +16,7 @@ export default function DocsFooterBranding({
         target="_blank"
         rel="noreferrer"
       >
-        Powered by Docmost
+        Powered by ShowNotion
       </a>
     </footer>
   );

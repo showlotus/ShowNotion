@@ -224,7 +224,7 @@ export default function PublicSpaceDirectoryPage() {
                 target="_blank"
                 rel="noreferrer"
               >
-                Docmost
+                ShowNotion
               </a>
             </div>
           </div>
