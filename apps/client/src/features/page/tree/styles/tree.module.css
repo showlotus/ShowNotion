@@ -20,14 +20,17 @@
     height: 100%;
     width: 100%;
     text-decoration: none;
-    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+    /* Notion sidebar tree: rows rest muted (light #7d7a75 / dark #bcbab6,
+     * measured live). Hover and selection brighten to the main ink. */
+    color: var(--notion-text-muted);
 
     /* Gate hover styles to mouse-capable devices. Touch browsers synthesize
        :hover on the first tap (sticky hover) and only fire click on the
        second tap, requiring a double-tap to navigate. */
     @media (hover: hover) {
         &:hover {
-            background-color: light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-5));
+            background-color: var(--notion-hover);
+            color: var(--notion-text-strong);
         }
 
         &:hover .actions {
@@ -103,10 +106,7 @@
 }
 
 .node:focus-visible {
-    outline: 2px solid light-dark(
-        var(--mantine-color-blue-5),
-        var(--mantine-color-blue-4)
-    );
+    outline: 2px solid var(--mantine-color-blue-6);
     outline-offset: -2px;
 }
 
@@ -114,14 +114,26 @@
     outline-offset: -2px;
 }
 
-.node[data-selected="true"] {
-    background-color: light-dark(
-        var(--mantine-color-gray-3),
-        var(--mantine-color-dark-6)
-    );
+.node[data-selected="true"],
+.node[aria-selected="true"],
+.node[aria-current="page"] {
+    background-color: var(--notion-selected);
+    color: var(--notion-text-strong);
 }
 
-.node[data-selected="true"] .actions {
+/* The tree renders two stacked .node elements per row (a selection-aware
+ * wrapper DIV plus the anchor that carries role="treeitem" with aria attrs).
+ * When the wrapper holds data-selected, keep the inner anchor transparent so
+ * the selected surface is not double-painted, and pass the strong ink down —
+ * the anchor's own .node color rule would otherwise win over inheritance. */
+.node[data-selected="true"] .node {
+    background-color: transparent;
+    color: var(--notion-text-strong);
+}
+
+.node[data-selected="true"] .actions,
+.node[aria-selected="true"] .actions,
+.node[aria-current="page"] .actions {
     opacity: 1;
     pointer-events: auto;
 }

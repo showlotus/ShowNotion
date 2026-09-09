@@ -8,17 +8,21 @@ import {
   v8CssVariablesResolver,
 } from "@mantine/core";
 
+// Notion's interactive blue family (measured live 2026-09 from app.notion.com):
+// 6 = primary fill #2383e2 (palUiBlu600), 7 = hover #0077d4, 8 = pressed/depth
+// #105fad (palUiBlu700). The bright end follows Notion's blue tint ramp
+// (#cee3f7 bluBacTer, #5e9fe8 bluBacAccSec) so 0-5 stay monotonic in luminance.
 const blue: MantineColorsTuple = [
-  "#e7f3ff",
-  "#d0e4ff",
-  "#a1c6fa",
-  "#6ea6f6",
-  "#458bf2",
-  "#2b7af1",
-  "#0b60d8",
-  "#1b72f2",
-  "#0056c1",
-  "#004aac",
+  "#e6f3fe",
+  "#cee3f7",
+  "#a8d3f3",
+  "#7db8ee",
+  "#5e9fe8",
+  "#3d90e5",
+  "#2383e2",
+  "#0077d4",
+  "#105fad",
+  "#0d4f8f",
 ];
 
 const red: MantineColorsTuple = [
@@ -50,13 +54,15 @@ const gray: MantineColorsTuple = [
   "#232220",
 ];
 
-// Notion's current dark palette: dark-7 is the page/content background
-// (#191919), dark-8 the layout/sidebar shell (#202020), dark-0 the primary
-// text (rgba(255,255,255,0.9)), dark-1 the secondary text (#9b9b9b),
-// dark-4 the divider (#373737) and dark-6 the hover surface (#2f2f2f).
+// Notion's current dark palette (measured live 2026-09): dark-0 is the primary
+// text #f0efed (texInvPri), dark-1 the secondary text #ada9a3 (texInvSec),
+// dark-7 the page/content background (#191919), dark-8 the layout/sidebar shell
+// (#202020), dark-4 the divider (#373737) and dark-6 the hover surface
+// (#2f2f2f). Sidebar tree rows additionally use the muted #bcbab6 (texDis) —
+// exposed as --notion-text-muted below.
 const dark: MantineColorsTuple = [
-  "#e6e6e6",
-  "#9b9b9b",
+  "#f0efed",
+  "#ada9a3",
   "#8c8c8c",
   "#6f6f6f",
   "#373737",
@@ -68,6 +74,11 @@ const dark: MantineColorsTuple = [
 ];
 
 export const theme = createTheme({
+  // Notion's page font stack, measured live from app.notion.com (2026-09).
+  // Pure system fonts — zero webfonts. Chinese text resolves to PingFang SC
+  // (macOS) / Microsoft YaHei (Windows) ahead of the Latin fallbacks.
+  fontFamily:
+    'ui-sans-serif, -apple-system, "system-ui", "Segoe UI Variable Display", "Segoe UI", Helvetica, "PingFang SC", "Microsoft YaHei", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"',
   colors: {
     blue,
     red,
@@ -123,17 +134,32 @@ export const mantineCssResolver: CSSVariablesResolver = (theme) => ({
   variables: {
     ...v8CssVariablesResolver(theme).variables,
     "--input-error-size": theme.fontSizes.sm,
+    // Font rendering switch. Mantine v9 applies smoothing on body via
+    // var(--mantine-webkit-font-smoothing), so a raw `html { ... }` rule
+    // loses to the body rule (direct beats inheritance). "auto" = subpixel
+    // rendering (user preference, 2026-09); set "antialiased" to restore
+    // Notion-style grayscale smoothing.
+    "--mantine-webkit-font-smoothing": "auto",
   },
   light: {
     ...v8CssVariablesResolver(theme).light,
-    // Notion's primary ink (rgb(55,53,47)) instead of pure black, for body
-    // text and default-variant controls in light mode.
-    "--mantine-color-text": "#37352F",
-    "--mantine-color-default-color": "#37352F",
-    // Notion's secondary text (rgba(55,53,47,0.65) ≈ #7d7c78) darkened just
-    // enough to clear WCAG AA 4.5:1 (~5.3:1 on white, ~5.0:1 on the #f7f7f5
-    // sidebar). Replaces the previous cool blue-gray #4b5563.
-    "--mantine-color-dimmed": "#6b6a64",
+    // Notion's primary ink #2c2c2b (texPri, measured live 2026-09; replaced
+    // the older rgb(55,53,47)) for body text and default-variant controls.
+    "--mantine-color-text": "#2C2C2B",
+    "--mantine-color-default-color": "#2C2C2B",
+    // Notion's secondary text (--c-texSec) #7d7a75, pixel-faithful. Known
+    // deviation: 3.94:1 on white is below WCAG AA 4.5:1 (previous value
+    // #6b6a64 passed at ~5.3:1). Accepted deliberately to match Notion.
+    "--mantine-color-dimmed": "#7D7A75",
+    // Semantic state tokens measured from app.notion.com (2026-09).
+    // muted/strong drive the sidebar tree: rows rest muted, hover/selected
+    // brighten to the main ink — exactly how notion.so behaves.
+    "--notion-text-muted": "#7D7A75",
+    "--notion-text-strong": "#2C2C2B",
+    // Hover: Notion's warm-gray ~8% surface (grayscale ramp alpha Gra75).
+    "--notion-hover": "rgba(84, 72, 49, 0.08)",
+    // Selected (current page/tree node): one step above hover, ~12%.
+    "--notion-selected": "#E9E9E7",
     "--mantine-color-dark-light-color": "#4a4845",
     "--mantine-color-dark-light-hover": "var(--mantine-color-gray-light-hover)",
     // Override the semantic error color so input error text / borders /
@@ -169,8 +195,19 @@ export const mantineCssResolver: CSSVariablesResolver = (theme) => ({
   },
   dark: {
     ...v8CssVariablesResolver(theme).dark,
-    // Notion's dark default-control text is 90% white, not pure white.
-    "--mantine-color-default-color": "#e6e6e6",
+    // Notion's dark default-control text is #f0efed (texInvPri), not pure
+    // white and no longer the old 90% white.
+    "--mantine-color-default-color": "#F0EFED",
+    // Notion's dark secondary text (texInvSec) for Mantine's dimmed token —
+    // menu descriptions, disabled items, muted labels.
+    "--mantine-color-dimmed": "#ADA9A3",
+    // Sidebar tree states, measured live from app.notion.com (2026-09):
+    // rows rest muted #bcbab6 (texDis); hover paints rgba(255,255,255,0.055)
+    // and brightens text; selected stays one step stronger at 0.09.
+    "--notion-text-muted": "#BCBAB6",
+    "--notion-text-strong": "#F0EFED",
+    "--notion-hover": "rgba(255, 255, 255, 0.055)",
+    "--notion-selected": "rgba(255, 255, 255, 0.09)",
     "--mantine-color-dark-light-color": "var(--mantine-color-gray-4)",
     "--mantine-color-dark-light-hover": "var(--mantine-color-default-hover)",
   },

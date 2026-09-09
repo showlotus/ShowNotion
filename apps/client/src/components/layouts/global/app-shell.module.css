@@ -1,5 +1,7 @@
 .header, .navbar, .aside {
-  background-color: light-dark(#f7f7f5, var(--mantine-color-dark-8));
+  /* Notion's light shell background #f9f8f7 (bacSec, measured live
+   * 2026-09); dark shell stays at dark-8 (#202020). */
+  background-color: light-dark(#f9f8f7, var(--mantine-color-dark-8));
 }
 
 .navbar, .aside {

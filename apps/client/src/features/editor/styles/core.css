@@ -138,7 +138,7 @@
   }
 
   hr.ProseMirror-selectednode {
-    border-top: 1px solid #68cef8;
+    border-top: 1px solid #2383e2;
   }
 
   &[contenteditable="false"] hr.ProseMirror-selectednode {
@@ -146,7 +146,7 @@
   }
 
   .ProseMirror-selectednode {
-    outline: 2px solid #70cff8;
+    outline: 2px solid #2383e2;
   }
 
   &[contenteditable="false"] .ProseMirror-selectednode {
@@ -185,7 +185,13 @@
 
   .selection,
   *::selection {
-    background-color: light-dark(Highlight, var(--mantine-color-gray-7));
+    /* Notion's live ::selection: primary blue at 14% (light). Dark mode has
+     * no measured counterpart; 35% keeps the same-blue language readable on
+     * #191919. Replaces the OS Highlight / gray-7 treatment. */
+    background-color: light-dark(
+      rgba(35, 131, 226, 0.14),
+      rgba(35, 131, 226, 0.35)
+    );
   }
 
   .comment-mark {

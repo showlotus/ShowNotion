@@ -16,7 +16,9 @@
     align-items: center;
     text-decoration: none;
     font-size: var(--mantine-font-size-sm);
-    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
+    /* Notion sidebar: rows rest muted, hover/selection brighten to the main
+     * ink (light #7d7a75→#2c2c2b, dark #bcbab6→#f0efed, measured live). */
+    color: var(--notion-text-muted);
     padding-left: var(--mantine-spacing-xs);
     min-height: 30px;
     border-radius: var(--mantine-radius-sm);
@@ -24,11 +26,8 @@
     user-select: none;
 
     @mixin hover {
-        background-color: light-dark(
-                var(--mantine-color-gray-1),
-                var(--mantine-color-dark-6)
-        );
-        color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+        background-color: var(--notion-hover);
+        color: var(--notion-text-strong);
     }
 
     &:focus-visible {
@@ -39,8 +38,8 @@
     &[data-active] {
         &,
         & :hover {
-            background-color: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-6));
-            color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+            background-color: var(--notion-selected);
+            color: var(--notion-text-strong);
         }
     }
 
@@ -50,13 +49,15 @@
 
         @mixin hover {
             background-color: transparent;
-            color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
+            color: var(--notion-text-muted);
         }
     }
 }
 
 .linkIcon {
-    color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-2));
+    /* Notion icon tokens: icoPri #383836 (light) / icoSec #8e8b86;
+     * dark sidebar icons sit at the secondary text level (#ada9a3). */
+    color: light-dark(#8e8b86, #ada9a3);
     margin-right: var(--mantine-spacing-sm);
     width: rem(16px);
     height: rem(16px);
@@ -87,7 +88,7 @@
     gap: var(--mantine-spacing-sm);
     text-decoration: none;
     font-size: var(--mantine-font-size-sm);
-    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
+    color: var(--notion-text-muted);
     padding-left: var(--mantine-spacing-xs);
     min-height: 30px;
     border-radius: var(--mantine-radius-sm);
@@ -95,11 +96,8 @@
     user-select: none;
 
     @mixin hover {
-        background-color: light-dark(
-                var(--mantine-color-gray-1),
-                var(--mantine-color-dark-6)
-        );
-        color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+        background-color: var(--notion-hover);
+        color: var(--notion-text-strong);
     }
 
     &:focus-visible {

@@ -5,11 +5,10 @@
  */
 
 /* Mantine's default disabled menu item uses opacity: 0.5 on the active text
- * color, which collapses to ~3.94:1 on white — below WCAG AA 4.5:1.
- * (WCAG 1.4.3 exempts "inactive" UI components, but the text becomes hard
- * to read.) Force opacity back to 1 and use the dimmed color so the item
- * still feels subdued vs. active items but is comfortably readable
- * (~7.56:1 on white).
+ * color, which lands at ~3.94:1 on white (#7d7a75, Notion's --c-texSec
+ * value). This is below WCAG AA 4.5:1 — accepted deliberately (see theme.ts)
+ * to match Notion's muted-text look. The item still reads subdued vs active
+ * items because of the opacity reset.
  */
 .mantine-Menu-item[data-disabled] {
   opacity: 1;
@@ -37,27 +36,32 @@
 /* Spotlight's selected action ships as primary-filled blue with white text,
  * but our custom action children (gray badge, dimmed snippet, gray icons)
  * keep their light-surface colors on it and drop below WCAG AA 4.5:1
- * (WCAG 1.4.3). Use a gray selection one step above the gray-0/dark-6
- * hover instead - it matches the app's selection styling (we use no blue
- * fills) and keeps every child at its already-passing resting contrast.
+ * (WCAG 1.4.3). Use the app-wide selected surface (--notion-selected, one
+ * step above the hover surface) instead of a blue fill — it matches the
+ * sidebar/tree selection language and keeps every child at its
+ * already-passing resting contrast.
  */
 .mantine-Spotlight-action[data-selected] {
-  background-color: light-dark(
-    var(--mantine-color-gray-1),
-    var(--mantine-color-dark-5)
-  );
+  background-color: var(--notion-selected);
   color: var(--mantine-color-text);
   --action-description-color: var(--mantine-color-dimmed);
   --action-description-opacity: 1;
 }
 
 /* Result actions are tab stops (tabIndex restored via ref); give keyboard
- * focus the same gray treatment as arrow-key selection so both navigation
- * modes read identically (WCAG 2.4.7 focus visible).
+ * focus the same selected-surface treatment as arrow-key selection so both
+ * navigation modes read identically (WCAG 2.4.7 focus visible).
  */
 .mantine-Spotlight-action:focus-visible {
-  background-color: light-dark(
-    var(--mantine-color-gray-1),
-    var(--mantine-color-dark-5)
-  );
+  background-color: var(--notion-selected);
 }
+
+/*
+ * Font smoothing: Mantine v9 already wires smoothing on `body` through
+ * var(--mantine-webkit-font-smoothing) / var(--mantine-moz-font-smoothing)
+ * (defaults: antialiased / grayscale — equivalent to Notion's
+ * .notion-subpixel-antialiasing-off). A raw `html { -webkit-font-smoothing: ... }`
+ * rule loses to Mantine's direct body rule (direct beats inheritance), so
+ * the switch lives in theme.ts as a CSS variable: "auto" keeps subpixel
+ * rendering; "antialiased" restores Notion-style grayscale smoothing.
+ */
