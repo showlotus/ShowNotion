@@ -1,4 +1,13 @@
-import { ActionIcon, Group, Menu, Text, ThemeIcon, Tooltip } from "@mantine/core";
+import {
+  ActionIcon,
+  Group,
+  Menu,
+  Popover,
+  ScrollArea,
+  Text,
+  ThemeIcon,
+  Tooltip,
+} from "@mantine/core";
 import {
   IconArrowRight,
   IconArrowsHorizontal,
@@ -7,6 +16,7 @@ import {
   IconEyeOff,
   IconFileExport,
   IconHistory,
+  IconInfoCircle,
   IconLink,
   IconList,
   IconMarkdown,
@@ -19,7 +29,7 @@ import {
   IconWifiOff,
 } from "@tabler/icons-react";
 import React, { useEffect, useRef, useState } from "react";
-import { useAsideTriggerProps } from "@/hooks/use-toggle-aside.tsx";
+import { asideStateAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { useAtom, useAtomValue } from "jotai";
 import { historyAtoms } from "@/features/page-history/atoms/history-atoms.ts";
 import { useDisclosure, useHotkeys } from "@mantine/hooks";
@@ -38,6 +48,7 @@ import ExportModal from "@/components/common/export-modal";
 import { htmlToMarkdown } from "@docmost/editor-ext";
 import {
   floatingTocAtom,
+  pageActionMenuOpenAtom,
   pageEditorAtom,
   yjsConnectionStatusAtom,
 } from "@/features/editor/atoms/editor-atoms.ts";
@@ -62,13 +73,67 @@ import {
   useUnwatchPageMutation,
 } from "@/features/page/queries/watcher-query";
 
+const CommentListWithTabs = React.lazy(
+  () => import("@/features/comment/components/comment-list-with-tabs.tsx"),
+);
+const PageDetailsAside = React.lazy(() =>
+  import("@/features/page-details/components/page-details-aside.tsx").then(
+    (m) => ({ default: m.PageDetailsAside }),
+  ),
+);
+
+const activeIconProps = (active: boolean) => ({
+  "data-active": active || undefined,
+  "aria-expanded": active,
+  style: active ? { backgroundColor: "var(--ai-hover)" } : undefined,
+});
+
 interface PageHeaderMenuProps {
   readOnly?: boolean;
 }
 export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
   const { t } = useTranslation();
-  const commentsTriggerProps = useAsideTriggerProps("comments");
+  const [{ isAsideOpen, tab: asideTab }, setAsideState] = useAtom(asideStateAtom);
+  const [, setActionMenuOpen] = useAtom(pageActionMenuOpenAtom);
+  const commentsOpened = isAsideOpen && asideTab === "comments";
+  const detailsOpened = isAsideOpen && asideTab === "details";
+  const togglePanel = (tab: "comments" | "details") => {
+    setActionMenuOpen(false);
+    setAsideState((state) =>
+      state.tab === tab && state.isAsideOpen
+        ? { ...state, isAsideOpen: false }
+        : { tab, isAsideOpen: true },
+    );
+  };
+  const closePanel = () =>
+    setAsideState((state) => ({ ...state, isAsideOpen: false }));
+  useEffect(() => {
+    if (!commentsOpened && !detailsOpened) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closePanel();
+    };
+    const handleMouseDown = (event: MouseEvent | TouchEvent) => {
+      const keepOpen = event.composedPath().some(
+        (node) =>
+          node instanceof HTMLElement &&
+          (node.hasAttribute("data-mantine-shared-portal-node") ||
+            node.hasAttribute("data-panel-trigger")),
+      );
+      if (!keepOpen) closePanel();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("touchstart", handleMouseDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener("touchstart", handleMouseDown);
+    };
+  }, [commentsOpened, detailsOpened]);
   const [floatingTocOpen, setFloatingTocOpen] = useAtom(floatingTocAtom);
+  useEffect(() => {
+    if (isAsideOpen) setFloatingTocOpen(false);
+  }, [isAsideOpen, setFloatingTocOpen]);
   const { pageSlug } = useParams();
   const { data: page } = usePageQuery({
     pageId: extractPageSlugId(pageSlug),
@@ -111,7 +176,9 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
           variant="subtle"
           color="dark"
           aria-label={t("Comments")}
-          {...commentsTriggerProps}
+          {...activeIconProps(commentsOpened)}
+          data-panel-trigger="comments"
+          onClick={() => togglePanel("comments")}
         >
           <IconMessage size={20} stroke={2} />
         </ActionIcon>
@@ -123,21 +190,95 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
             variant="subtle"
             color="dark"
             data-floating-toc-trigger
-            data-active={floatingTocOpen || undefined}
             aria-label={t("Table of contents")}
-            aria-expanded={floatingTocOpen}
             aria-controls={FLOATING_TOC_PANEL_ID}
-            style={
-              floatingTocOpen
-                ? { backgroundColor: "var(--ai-hover)" }
-                : undefined
-            }
-            onClick={() => setFloatingTocOpen((open) => !open)}
+            {...activeIconProps(floatingTocOpen)}
+            onClick={() => {
+              setActionMenuOpen(false);
+              closePanel();
+              setFloatingTocOpen((open) => !open);
+            }}
           >
             <IconList size={20} stroke={2} />
           </ActionIcon>
         </Tooltip>
       )}
+
+      <Tooltip label={t("Details")} openDelay={250} withArrow>
+        <ActionIcon
+          variant="subtle"
+          color="dark"
+          aria-label={t("Details")}
+          {...activeIconProps(detailsOpened)}
+          data-panel-trigger="details"
+          onClick={() => togglePanel("details")}
+        >
+          <IconInfoCircle size={20} stroke={2} />
+        </ActionIcon>
+      </Tooltip>
+
+      <Popover
+        opened={commentsOpened || detailsOpened}
+        onChange={(opened) => !opened && closePanel()}
+        closeOnClickOutside={false}
+        floatingStrategy="fixed"
+        shadow="xl"
+        position="bottom-end"
+        offset={20}
+        width={commentsOpened ? 350 : 320}
+        withRoles={false}
+        hideDetached={false}
+      >
+        <Popover.Target>
+          <div
+            aria-hidden
+            style={{
+              position: "fixed",
+              top: "var(--page-header-height, 44px)",
+              right: 25,
+              width: 0,
+              height: 0,
+              pointerEvents: "none",
+            }}
+          />
+        </Popover.Target>
+        <Popover.Dropdown
+          role="dialog"
+          aria-label={commentsOpened ? t("Comments") : t("Details")}
+          p={commentsOpened ? 0 : undefined}
+          style={
+            commentsOpened
+              ? {
+                  display: "flex",
+                  flexDirection: "column",
+                  height: "min(600px, 70vh)",
+                }
+              : undefined
+          }
+        >
+          {commentsOpened ? (
+            <div
+              style={{
+                flex: 1,
+                minHeight: 0,
+                display: "flex",
+                flexDirection: "column",
+                padding: "var(--mantine-spacing-md)",
+              }}
+            >
+              <React.Suspense fallback={null}>
+                <CommentListWithTabs />
+              </React.Suspense>
+            </div>
+          ) : (
+            <ScrollArea.Autosize mah={520} type="scroll" scrollbarSize={5}>
+              <React.Suspense fallback={null}>
+                <PageDetailsAside />
+              </React.Suspense>
+            </ScrollArea.Autosize>
+          )}
+        </Popover.Dropdown>
+      </Popover>
 
       <PageActionMenu readOnly={readOnly} />
     </>
@@ -180,6 +321,13 @@ function PageActionMenu({ readOnly }: PageActionMenuProps) {
   const { data: watchStatus } = useWatchStatusQuery(page?.id);
   const watchPage = useWatchPageMutation();
   const unwatchPage = useUnwatchPageMutation();
+  const [actionMenuOpen, setActionMenuOpen] = useAtom(pageActionMenuOpenAtom);
+  const [, setFloatingTocOpen] = useAtom(floatingTocAtom);
+  const [, setAsideState] = useAtom(asideStateAtom);
+
+  useEffect(() => {
+    return () => setActionMenuOpen(false);
+  }, [setActionMenuOpen]);
 
   const handleCopyLink = () => {
     const pageUrl =
@@ -231,12 +379,21 @@ function PageActionMenu({ readOnly }: PageActionMenuProps) {
         width={230}
         withArrow
         arrowPosition="center"
+        opened={actionMenuOpen}
+        onChange={setActionMenuOpen}
+        onOpen={() => {
+          setActionMenuOpen(true);
+          setFloatingTocOpen(false);
+          setAsideState((state) => ({ ...state, isAsideOpen: false }));
+        }}
+        onClose={() => setActionMenuOpen(false)}
       >
         <Menu.Target>
           <ActionIcon
             variant="subtle"
             color="dark"
             aria-label={t("Page actions")}
+            {...activeIconProps(actionMenuOpen)}
           >
             <IconDots size={20} />
           </ActionIcon>

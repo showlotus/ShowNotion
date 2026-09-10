@@ -19,6 +19,10 @@ export const showLinkMenuAtom = atom(false);
 // Notion-style floating table of contents (right-edge tick rail + panel).
 export const floatingTocAtom = atom<boolean>(false);
 
+// Page actions (⋯) dropdown open state — drives the trigger's selected look
+// and suppresses the floating TOC while the menu is open.
+export const pageActionMenuOpenAtom = atom<boolean>(false);
+
 export type LightboxRequest = {
   src: string;
   type: "image" | "video";

@@ -21,20 +21,3 @@
     max-width: calc(900px + 12rem);
 }
 
-.byline {
-    /* Aligns with the .ProseMirror 6rem content gutter (Notion 96px). */
-    padding-left: 6rem;
-
-    @media (max-width: $mantine-breakpoint-lg) {
-        padding-left: 3rem;
-    }
-
-    @media (max-width: $mantine-breakpoint-sm) {
-        padding-left: 1rem;
-    }
-
-    @media print {
-        padding-left: 0;
-    }
-}
-

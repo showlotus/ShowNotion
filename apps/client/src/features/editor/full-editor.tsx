@@ -2,29 +2,13 @@ import classes from "@/features/editor/styles/editor.module.css";
 import React from "react";
 import { TitleEditor } from "@/features/editor/title-editor";
 import PageEditor from "@/features/editor/page-editor";
-import {
-  ActionIcon,
-  Container,
-  Divider,
-  Group,
-  Popover,
-  Stack,
-  Text,
-  Tooltip,
-  UnstyledButton,
-} from "@mantine/core";
-import { IconInfoCircle } from "@tabler/icons-react";
+import { Container } from "@mantine/core";
 import { useAtom } from "jotai";
 import { userAtom } from "@/features/user/atoms/current-user-atom.ts";
-import { CustomAvatar } from "@/components/ui/custom-avatar.tsx";
-import { PageVerificationBadge } from "@/ee/page-verification";
-import { useTranslation } from "react-i18next";
 import { IContributor } from "@/features/page/types/page.types.ts";
 import { FixedToolbar } from "@/features/editor/components/fixed-toolbar/fixed-toolbar";
 import { PageEditMode } from "@/features/user/types/user.types.ts";
-import { useAsideTriggerProps } from "@/hooks/use-toggle-aside.tsx";
 import { DeletedPageBanner } from "@/features/page/trash/components/deleted-page-banner.tsx";
-import clsx from "clsx";
 import { currentPageEditModeAtom } from "@/features/editor/atoms/editor-atoms.ts";
 import { EmptyPageGetStarted } from "@/features/editor/components/empty-page/empty-page-get-started";
 import { FloatingToc } from "@/features/editor/components/table-of-contents/floating-toc";
@@ -59,8 +43,6 @@ export function FullEditor({
   content,
   spaceSlug,
   editable,
-  creator,
-  contributors,
   canComment,
 }: FullEditorProps) {
   const [user] = useAtom(userAtom);
@@ -88,11 +70,6 @@ export function FullEditor({
         spaceSlug={spaceSlug}
         editable={editable}
       />
-      <PageByline
-        creator={creator}
-        contributors={contributors}
-        readOnly={!editable}
-      />
       <MemoizedPageEditor
         pageId={pageId}
         editable={editable}
@@ -102,104 +79,5 @@ export function FullEditor({
       <FloatingToc pageId={pageId} />
       <EmptyPageGetStarted pageId={pageId} editable={editable} />
     </Container>
-  );
-}
-
-type PageBylineProps = {
-  creator?: PageUser;
-  contributors?: IContributor[];
-  readOnly?: boolean;
-};
-
-function PageByline({ creator, contributors, readOnly }: PageBylineProps) {
-  const { t } = useTranslation();
-  const detailsTriggerProps = useAsideTriggerProps("details");
-
-  const otherContributors = (contributors ?? []).filter(
-    (c) => c.id !== creator?.id,
-  );
-
-  return (
-    <Group
-      gap="sm"
-      mb="md"
-      className={clsx("print-hide", classes.byline)}
-      style={{ marginTop: "-0.5em" }}
-    >
-      {creator && (
-        <Popover position="bottom-start" shadow="md" width={280} withArrow>
-          <Popover.Target>
-            <UnstyledButton
-              aria-label={t("Created by {{name}}", { name: creator.name })}
-            >
-              <Group gap={6}>
-                <CustomAvatar
-                  avatarUrl={creator.avatarUrl}
-                  name={creator.name}
-                  size={22}
-                />
-                <Text size="sm" c="dimmed">
-                  {t("By {{name}}", { name: creator.name })}
-                </Text>
-              </Group>
-            </UnstyledButton>
-          </Popover.Target>
-          <Popover.Dropdown>
-            <Stack gap="xs">
-              <Group gap="sm">
-                <CustomAvatar
-                  avatarUrl={creator.avatarUrl}
-                  name={creator.name}
-                  size={36}
-                />
-                <div>
-                  <Text size="sm" fw={500}>
-                    {creator.name}
-                  </Text>
-                  <Text size="xs" c="dimmed">
-                    {otherContributors.length === 0
-                      ? t("Owner, no contributors")
-                      : t("Owner")}
-                  </Text>
-                </div>
-              </Group>
-
-              {otherContributors.length > 0 && (
-                <>
-                  <Divider />
-                  <Text size="xs" fw={500} c="dimmed" tt="uppercase">
-                    {t("Contributors")}
-                  </Text>
-                  <Stack gap={6}>
-                    {otherContributors.map((contributor) => (
-                      <Group gap="sm" key={contributor.id}>
-                        <CustomAvatar
-                          avatarUrl={contributor.avatarUrl}
-                          name={contributor.name}
-                          size={28}
-                        />
-                        <Text size="sm">{contributor.name}</Text>
-                      </Group>
-                    ))}
-                  </Stack>
-                </>
-              )}
-            </Stack>
-          </Popover.Dropdown>
-        </Popover>
-      )}
-      <Tooltip label={t("Details")} withArrow openDelay={250}>
-        <ActionIcon
-          variant="subtle"
-          color="gray"
-          aria-label={t("Details")}
-          {...detailsTriggerProps}
-        >
-          <IconInfoCircle size={20} stroke={1.5} />
-        </ActionIcon>
-      </Tooltip>
-
-      <PageVerificationBadge readOnly={readOnly} />
-    </Group>
   );
 }

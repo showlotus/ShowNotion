@@ -101,6 +101,9 @@ export default function GlobalAppShell({
   const isAiRoute = location.pathname.startsWith("/ai");
   const isPageRoute = location.pathname.includes("/p/");
   const showGlobalSidebar = !isSpaceRoute && !isSettingsRoute && !isAiRoute;
+  // 评论、详情已改为页头浮层，右侧栏仅承载 AI 对话与目录
+  const showShellAside =
+    isAsideOpen && (asideTab === "chat" || asideTab === "toc");
 
   return (
     <>
@@ -124,7 +127,7 @@ export default function GlobalAppShell({
         isPageRoute && {
           width: 350,
           breakpoint: "sm",
-          collapsed: { mobile: !isAsideOpen, desktop: !isAsideOpen },
+          collapsed: { mobile: !showShellAside, desktop: !showShellAside },
         }
       }
       padding="md"
@@ -190,7 +193,7 @@ export default function GlobalAppShell({
                     : undefined
           }
         >
-          <Aside />
+          {showShellAside && <Aside />}
         </AppShell.Aside>
       )}
     </AppShell>

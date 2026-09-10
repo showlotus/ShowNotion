@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { asideStateAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import {
   floatingTocAtom,
+  pageActionMenuOpenAtom,
   pageEditorAtom,
 } from "@/features/editor/atoms/editor-atoms.ts";
 import classes from "./floating-toc.module.css";
@@ -20,6 +21,7 @@ export function FloatingToc({ pageId }: { pageId?: string }) {
   const { t } = useTranslation();
   const editor = useAtomValue(pageEditorAtom);
   const [{ isAsideOpen }] = useAtom(asideStateAtom);
+  const actionMenuOpen = useAtomValue(pageActionMenuOpenAtom);
   const [pinned, setPinned] = useAtom(floatingTocAtom);
   const [hoverOpen, setHoverOpen] = useState(false);
   const openTimer = useRef<number | undefined>(undefined);
@@ -49,7 +51,7 @@ export function FloatingToc({ pageId }: { pageId?: string }) {
     };
   }, [pinned]);
 
-  if (isAsideOpen) return null;
+  if (isAsideOpen || actionMenuOpen) return null;
 
   const open = pinned || hoverOpen;
   const activeLink = activeElement ?? links[0]?.element;
