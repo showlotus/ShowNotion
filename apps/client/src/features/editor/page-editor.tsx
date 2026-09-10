@@ -88,6 +88,8 @@ import {
   getCollabSocket,
   releaseCollabSocket,
 } from "@/features/editor/collab-socket";
+import { treeDataAtom } from "@/features/page/tree/atoms/tree-data-atom";
+import { treeModel } from "@/features/page/tree/model/tree-model";
 
 interface PageEditorProps {
   pageId: string;
@@ -107,6 +109,7 @@ export default function PageEditor({
   const { pageSlug } = useParams();
   const slugId = extractPageSlugId(pageSlug);
   const [socket] = useState(getCollabSocket);
+  const [, setTreeData] = useAtom(treeDataAtom);
   const hasCollabToken = !!collabQuery?.token;
 
   useEffect(() => {
@@ -129,6 +132,10 @@ export default function PageEditor({
           }),
         });
       }
+
+      setTreeData((prev) =>
+        treeModel.update(prev, pageId, { updatedAt: message.updatedAt }),
+      );
     } catch {
       // ignore unrelated stateless messages
     }

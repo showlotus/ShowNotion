@@ -22,13 +22,23 @@ ol ol ol ol ol ol ol ol ol ol ol ol {
 
 ol {
   list-style-position: outside;
-  margin-left: 0.25rem;
 }
 
-/* Nested list spacing */
-ol ol,
-ol ul,
-ul ol {
-  margin-top: 0.1rem;
-  margin-bottom: 0.1rem;
+/* Nested lists add no margin: Notion stacks list items at a uniform 30px
+ * pitch, and each nesting level steps in via the base list padding. Scoped
+ * under .ProseMirror so it wins over the core .ProseMirror ul/ol margin. */
+.ProseMirror {
+  ul ul,
+  ul ol,
+  ol ul,
+  ol ol {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  /* The first nested item sits 30px below its parent line (Notion's item
+   * pitch): 24px line + 2px + 2px li padding + a 2px top offset. */
+  ul:not([data-type="taskList"]) ul {
+    margin-top: 2px;
+  }
 }

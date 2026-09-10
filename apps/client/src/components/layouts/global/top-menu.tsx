@@ -1,6 +1,10 @@
+import { useState } from "react";
 import {
+  Group,
   Menu,
+  ScrollArea,
   Text,
+  TextInput,
   UnstyledButton,
   useMantineColorScheme,
 } from "@mantine/core";
@@ -10,23 +14,26 @@ import {
   IconCheck,
   IconChevronDown,
   IconDeviceDesktop,
+  IconLayoutGrid,
   IconLogout,
   IconMoon,
+  IconSearch,
   IconSettings,
   IconSun,
   IconUser,
   IconUserCircle,
   IconUsers,
 } from "@tabler/icons-react";
-import { useDisclosure } from "@mantine/hooks";
+import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
 import { getSpaceUrl } from "@/lib/config.ts";
 import { useHasFeature } from "@/ee/hooks/use-feature";
 import { Feature } from "@/ee/features";
 import { usePersonalSpaceQuery } from "@/ee/personal-space/queries/personal-space-query";
+import { useGetSpacesQuery } from "@/features/space/queries/space-query.ts";
 import CreatePersonalSpaceModal from "@/ee/personal-space/components/create-personal-space-modal";
 import { useAtom } from "jotai";
 import { currentUserAtom } from "@/features/user/atoms/current-user-atom.ts";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import APP_ROUTE from "@/lib/app-route.ts";
 import useAuth from "@/features/auth/hooks/use-auth.ts";
 import { CustomAvatar } from "@/components/ui/custom-avatar.tsx";
@@ -34,9 +41,14 @@ import { useTranslation } from "react-i18next";
 import { AvatarIconType } from "@/features/attachments/types/attachment.types.ts";
 import classes from "./top-menu.module.css";
 
+// 暂时隐藏空间搜索（空间数量不多，搜索意义不大），需要时改回 true
+const SHOW_SPACE_SEARCH = false;
+
 // 侧边栏顶部的工作区菜单：工作区设置、成员管理、个人空间
 export default function TopMenu() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { spaceSlug: currentSpaceSlug } = useParams<{ spaceSlug: string }>();
   const [currentUser] = useAtom(currentUserAtom);
 
   const workspace = currentUser?.workspace;
@@ -49,13 +61,34 @@ export default function TopMenu() {
     { open: openCreate, close: closeCreate },
   ] = useDisclosure(false);
 
+  // Notion 式工作区面板：内嵌空间搜索与列表，点击直接切换
+  const [menuOpened, setMenuOpened] = useState(false);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebouncedValue(search, 300);
+  const { data: spacesData } = useGetSpacesQuery({
+    query: debouncedSearch,
+    limit: 50,
+  });
+  const spaces = spacesData?.items ?? [];
+
+  const handleSelectSpace = (slug: string) => {
+    setMenuOpened(false);
+    navigate(getSpaceUrl(slug));
+  };
+
   if (!workspace) {
     return <></>;
   }
 
   return (
     <>
-    <Menu width={250} position="bottom-start" shadow={"lg"}>
+    <Menu
+      width={280}
+      position="bottom-start"
+      shadow={"lg"}
+      opened={menuOpened}
+      onChange={setMenuOpened}
+    >
       <Menu.Target>
         <UnstyledButton className={classes.trigger} aria-label={workspace?.name}>
           <CustomAvatar
@@ -72,7 +105,20 @@ export default function TopMenu() {
         </UnstyledButton>
       </Menu.Target>
       <Menu.Dropdown>
-        <Menu.Label>{t("Workspace")}</Menu.Label>
+        <Menu.Label>
+          <Group gap="xs" wrap="nowrap">
+            <CustomAvatar
+              avatarUrl={workspace?.logo}
+              name={workspace?.name}
+              variant="filled"
+              size={22}
+              type={AvatarIconType.WORKSPACE_ICON}
+            />
+            <Text size="sm" fw={600} lineClamp={1}>
+              {workspace?.name}
+            </Text>
+          </Group>
+        </Menu.Label>
 
         <Menu.Item
           component={Link}
@@ -109,6 +155,66 @@ export default function TopMenu() {
             </Menu.Item>
           )
         )}
+
+        <Menu.Divider />
+
+        <Menu.Label>{t("Spaces")}</Menu.Label>
+
+        {SHOW_SPACE_SEARCH && (
+          <TextInput
+            size="xs"
+            placeholder={t("Search for spaces")}
+            aria-label={t("Search for spaces")}
+            leftSection={<IconSearch size={14} />}
+            value={search}
+            onChange={(event) => setSearch(event.currentTarget.value)}
+            mb="xs"
+          />
+        )}
+
+        <ScrollArea.Autosize mah={240} type="scroll" scrollbarSize={6}>
+          {spaces.length === 0 ? (
+            <Text size="xs" c="dimmed" ta="center" py="xs">
+              {t("No space found")}
+            </Text>
+          ) : (
+            spaces.map((space) => (
+              <Menu.Item
+                key={space.slug}
+                onClick={() => handleSelectSpace(space.slug)}
+                leftSection={
+                  <CustomAvatar
+                    name={space.name}
+                    avatarUrl={space.logo}
+                    type={AvatarIconType.SPACE_ICON}
+                    color="initials"
+                    variant="filled"
+                    size={20}
+                  />
+                }
+                rightSection={
+                  space.slug === currentSpaceSlug ? (
+                    <IconCheck size={14} />
+                  ) : undefined
+                }
+              >
+                <Text size="sm" lineClamp={1} component="span">
+                  {space.name}
+                </Text>
+              </Menu.Item>
+            ))
+          )}
+        </ScrollArea.Autosize>
+
+        <Menu.Divider />
+
+        <Menu.Item
+          component={Link}
+          to="/spaces"
+          leftSection={<IconLayoutGrid size={16} />}
+        >
+          {t("View all")}
+        </Menu.Item>
       </Menu.Dropdown>
     </Menu>
 

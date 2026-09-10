@@ -2,8 +2,9 @@
   /* Height of the fixed PageHeader at the top of every page. Used by
    * standalone base layout (paddingTop) and by sticky bands inside
    * inline base embeds (top offset). One source of truth; if the
-   * page header ever changes height, edit only this. */
-  --page-header-height: 45px;
+   * page header ever changes height, edit only this. Notion's topbar
+   * measures 44px (live 2026-09). */
+  --page-header-height: 44px;
 }
 
 .ProseMirror {
@@ -16,12 +17,20 @@
     var(--mantine-color-dark-0)
   );
   font-size: var(--mantine-font-size-md);
-  line-height: var(--mantine-line-height-xl);
+  line-height: 1.5;
   font-weight: 400;
   width: 100%;
 
-  padding-left: 3rem;
-  padding-right: 3rem;
+  /* Notion's content gutter: 96px each side on wide screens (measured live
+   * 2026-09), stepping down through the old 48px and 16px as the viewport
+   * narrows. */
+  padding-left: 6rem;
+  padding-right: 6rem;
+
+  @media (max-width: $mantine-breakpoint-lg) {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
 
   @media (max-width: $mantine-breakpoint-sm) {
     padding-left: 1rem;
@@ -41,15 +50,30 @@
   }
 
   p {
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
+    margin-top: 16px;
+    margin-bottom: 16px;
   }
 
   ul,
   ol {
-    padding: 0 1rem;
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
+    padding-inline-start: 2rem;
+    padding-inline-end: 0;
+    margin-top: 16px;
+    margin-bottom: 16px;
+  }
+
+  li {
+    padding-block: 3px;
+  }
+
+  ul:not([data-type="taskList"]) > li {
+    padding-block: 2px;
+  }
+
+  ul:not([data-type="taskList"]) > li::marker {
+    font-size: 1.5em;
+    line-height: 1;
+    font-family: Arial, sans-serif;
   }
 
   ul p,
@@ -61,10 +85,10 @@
   h1,
   h2,
   h3 {
-    letter-spacing: -0.01em;
-    line-height: 1.2;
+    letter-spacing: normal;
+    line-height: 1.3;
     font-weight: 600;
-    margin-bottom: 0;
+    margin-bottom: 16px;
   }
 
   h1 strong,
@@ -75,17 +99,17 @@
 
   h1 {
     font-size: 1.875rem;
-    margin-top: 1.875rem;
+    margin-top: 40px;
   }
 
   h2 {
     font-size: 1.5rem;
-    margin-top: 1.5rem;
+    margin-top: 36px;
   }
 
   h3 {
     font-size: 1.25rem;
-    margin-top: 1.25rem;
+    margin-top: 32px;
   }
 
   h4,
@@ -95,41 +119,38 @@
     margin-bottom: 10px;
   }
 
-  code {
-    background-color: light-dark(
-      var(--mantine-color-gray-0),
-      var(--mantine-color-dark-8)
-    );
-    color: #616161;
-  }
-
   a {
-    color: light-dark(var(--mantine-color-dark-4), var(--mantine-color-dark-1));
-    @mixin light {
-      border-bottom: 0.07em solid var(--mantine-color-dark-0);
-    }
-    @mixin dark {
-      border-bottom: 0.07em solid var(--mantine-color-dark-2);
-    }
-    font-weight: 500;
-    text-decoration: none;
+    color: inherit;
+    font-weight: 400;
+    text-decoration: underline;
+    text-decoration-thickness: 0.05em;
+    text-underline-offset: 10%;
+    text-decoration-color: light-dark(
+      rgba(55, 53, 47, 0.4),
+      rgba(255, 255, 255, 0.282)
+    );
+    opacity: 0.7;
     cursor: pointer;
   }
 
   blockquote {
-    padding-left: 1rem;
-    border-left: 3px solid
-      light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-4));
-    margin: 0;
+    margin: 16px 8px;
+    padding: 0 22px;
+    border-left: 3px solid currentColor;
+  }
+
+  blockquote p {
+    margin-top: 0;
+    margin-bottom: 0;
   }
 
   hr {
     border: none;
     @mixin light {
-      border-top: 1px solid var(--mantine-color-gray-4);
+      border-top: 1px solid rgba(28, 19, 1, 0.11);
     }
     @mixin dark {
-      border-top: 1px solid var(--mantine-color-dark-4);
+      border-top: 1px solid rgba(255, 255, 235, 0.1);
     }
 
     &:hover {
@@ -295,10 +316,13 @@
 }
 
 .page-title .ProseMirror h1 {
+  /* Notion's page title: 40px/700, line-height 1.2, with a tight 0.25em
+   * gap to the first block (measured live 2026-09). */
   font-size: 2.5rem;
+  line-height: 1.2;
   font-weight: 700;
   margin-top: 0;
-  margin-bottom: 0.75em;
+  margin-bottom: 0.25em;
 }
 
 /* The full-page base view positions its title with its own outer

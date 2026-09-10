@@ -46,38 +46,44 @@ export function SidebarToggleOverlay() {
 
   return (
     <>
-      <Tooltip label={t("Sidebar toggle")} position="right" withArrow openDelay={300}>
-        <UnstyledButton
-          className={classes.expandButton}
-          aria-label={t("Sidebar toggle")}
-          aria-expanded={desktopOpened}
-          visibleFrom="sm"
-          onClick={() => {
-            // setPeek(false);
-            setDesktopOpened(true);
-          }}
-        >
-          <CustomAvatar
-            avatarUrl={workspace?.logo}
-            name={workspace?.name ?? ""}
-            variant="filled"
-            size="sm"
-            type={AvatarIconType.WORKSPACE_ICON}
-          />
-          <IconLayoutSidebarRightExpand className={classes.expandIcon} size={14} />
-        </UnstyledButton>
-      </Tooltip>
+      {/* 仅在侧边栏收起时显示展开按钮，展开时避免悬浮按钮遮挡工作区名称 */}
+      {!desktopOpened && (
+        <Tooltip label={t("Sidebar toggle")} position="right" withArrow openDelay={300}>
+          <UnstyledButton
+            className={classes.expandButton}
+            aria-label={t("Sidebar toggle")}
+            aria-expanded={desktopOpened}
+            visibleFrom="sm"
+            onClick={() => {
+              // setPeek(false);
+              setDesktopOpened(true);
+            }}
+          >
+            <CustomAvatar
+              avatarUrl={workspace?.logo}
+              name={workspace?.name ?? ""}
+              variant="filled"
+              size="sm"
+              type={AvatarIconType.WORKSPACE_ICON}
+            />
+            <IconLayoutSidebarRightExpand className={classes.expandIcon} size={14} />
+          </UnstyledButton>
+        </Tooltip>
+      )}
 
-      <ActionIcon
-        className={classes.mobileButton}
-        variant="subtle"
-        color="gray"
-        aria-label={t("Sidebar toggle")}
-        aria-expanded={mobileSidebarOpened}
-        onClick={toggleMobileSidebar}
-      >
-        <IconLayoutSidebarRightCollapse size={20} />
-      </ActionIcon>
+      {/* 移动端抽屉打开时隐藏汉堡按钮，避免遮挡工作区入口 */}
+      {!mobileSidebarOpened && (
+        <ActionIcon
+          className={classes.mobileButton}
+          variant="subtle"
+          color="gray"
+          aria-label={t("Sidebar toggle")}
+          aria-expanded={mobileSidebarOpened}
+          onClick={toggleMobileSidebar}
+        >
+          <IconLayoutSidebarRightCollapse size={20} />
+        </ActionIcon>
+      )}
 
       {/* peek 边缘感应条已暂时停用，保留以备恢复 */}
       {/* {!desktopOpened && (

@@ -2,7 +2,8 @@
 
 .ProseMirror {
   /* Blue */
-  mark[data-color="#98d8f2"] {
+  mark[data-color="#98d8f2"],
+  mark[data-color="blue"] {
     background-color: light-dark(
       rgb(224 242 254),
       rgba(37, 99, 235, 0.35)
@@ -10,7 +11,8 @@
   }
 
   /* Green */
-  mark[data-color="#7edb6c"] {
+  mark[data-color="#7edb6c"],
+  mark[data-color="green"] {
     background-color: light-dark(
       rgb(220 252 231),
       rgba(0, 138, 0, 0.35)
@@ -18,7 +20,8 @@
   }
 
   /* Purple */
-  mark[data-color="#e0d6ed"] {
+  mark[data-color="#e0d6ed"],
+  mark[data-color="purple"] {
     background-color: light-dark(
       rgb(243 232 255),
       rgba(147, 51, 234, 0.35)
@@ -26,7 +29,8 @@
   }
 
   /* Red */
-  mark[data-color="#ffc6c2"] {
+  mark[data-color="#ffc6c2"],
+  mark[data-color="red"] {
     background-color: light-dark(
       rgb(255 228 230),
       rgba(224, 0, 0, 0.35)
@@ -34,7 +38,8 @@
   }
 
   /* Yellow */
-  mark[data-color="#faf594"] {
+  mark[data-color="#faf594"],
+  mark[data-color="yellow"] {
     background-color: light-dark(
       rgb(254 249 195),
       rgba(234, 179, 8, 0.35)
@@ -42,7 +47,8 @@
   }
 
   /* Orange */
-  mark[data-color="#f5c8a9"] {
+  mark[data-color="#f5c8a9"],
+  mark[data-color="orange"] {
     background-color: light-dark(
       rgb(251, 236, 221),
       rgba(255, 165, 0, 0.45)
@@ -50,7 +56,8 @@
   }
 
   /* Pink */
-  mark[data-color="#f5cfe0"] {
+  mark[data-color="#f5cfe0"],
+  mark[data-color="pink"] {
     background-color: light-dark(
       rgb(252, 241, 246),
       rgba(186, 64, 129, 0.35)
@@ -58,7 +65,8 @@
   }
 
   /* Gray */
-  mark[data-color="#dfdfd7"] {
+  mark[data-color="#dfdfd7"],
+  mark[data-color="gray"] {
     background-color: light-dark(
       rgb(238 238 235),
       rgba(168, 162, 158, 0.35)
@@ -66,7 +74,8 @@
   }
 
   /* Brown */
-  mark[data-color="#d7c4b7"] {
+  mark[data-color="#d7c4b7"],
+  mark[data-color="brown"] {
     background-color: light-dark(
       rgb(215 196 183),
       rgba(146, 64, 14, 0.35)

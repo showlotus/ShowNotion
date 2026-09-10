@@ -1,7 +1,8 @@
 .notificationItem {
   display: block;
   padding: 8px 12px;
-  border-radius: 4px;
+  /* Notion inbox/list rows: 6px interactive face, follows the theme scale. */
+  border-radius: var(--mantine-radius-sm);
   cursor: pointer;
   user-select: none;
 }

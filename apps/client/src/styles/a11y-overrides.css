@@ -75,3 +75,42 @@
 #main-content:focus-visible {
   outline: none;
 }
+
+/*
+ * Notion floating sheets (measured live 2026-09): a 10px container with no
+ * hard border — the 1px ring is the first layer of the box-shadow — over a
+ * #252525 (dark) / white (light) surface (--notion-popover-* tokens in
+ * theme.ts). Menu items stay at the 6px interactive radius. Static class
+ * selectors tie with Mantine's package rules but are imported later, so
+ * these win the cascade without specificity hacks. Tooltip is standalone
+ * Floating and deliberately untouched.
+ */
+.mantine-Popover-dropdown,
+.mantine-Menu-dropdown,
+.mantine-HoverCard-dropdown {
+  border: none;
+  border-radius: 10px;
+  background-color: var(--notion-popover-bg);
+  box-shadow: var(--notion-popover-shadow);
+}
+
+/* Menu items inherit --popover-radius from the dropdown (Mantine hardcodes
+ * it on the item rule), so pin them back to the 6px interactive face. */
+.mantine-Menu-item {
+  border-radius: var(--mantine-radius-sm);
+}
+
+/* Click-opened floating panels (Menu / Popover / HoverCard) drop the outer
+ * pointer arrow to match Notion's flat sheets; Tooltip keeps its arrow. */
+.mantine-Menu-arrow,
+.mantine-Popover-arrow,
+.mantine-HoverCard-arrow {
+  display: none;
+}
+
+/* 全局取消 Mantine 的按压位移效果：.mantine-active:active 在
+ * global.css 中会让元素下沉 translateY(1px)，点击时产生上下弹动观感。
+ * 本文件在 Mantine 样式之后导入，同特异性即可覆盖。 */
+.mantine-active:active {
+  transform: none;
+}

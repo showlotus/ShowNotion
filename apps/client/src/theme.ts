@@ -57,15 +57,17 @@ const gray: MantineColorsTuple = [
 // Notion's current dark palette (measured live 2026-09): dark-0 is the primary
 // text #f0efed (texInvPri), dark-1 the secondary text #ada9a3 (texInvSec),
 // dark-7 the page/content background (#191919), dark-8 the layout/sidebar shell
-// (#202020), dark-4 the divider (#373737) and dark-6 the hover surface
-// (#2f2f2f). Sidebar tree rows additionally use the muted #bcbab6 (texDis) —
-// exposed as --notion-text-muted below.
+// (#202020), dark-4 the divider (Notion's hairline rgba(255,255,243,0.082),
+// swapped from the old solid #373737 — control outlines are pinned separately
+// via --mantine-color-default-border) and dark-6 the hover surface (#2f2f2f).
+// Sidebar tree rows additionally use the muted #bcbab6 (texDis) — exposed as
+// --notion-text-muted below.
 const dark: MantineColorsTuple = [
   "#f0efed",
   "#ada9a3",
   "#8c8c8c",
   "#6f6f6f",
-  "#373737",
+  "rgba(255, 255, 243, 0.082)",
   "#313131",
   "#2f2f2f",
   "#191919",
@@ -86,6 +88,13 @@ export const theme = createTheme({
     dark,
   },
   defaultRadius: 'sm',
+  // Notion's corner scale (measured live 2026-09): interactive faces
+  // (buttons, sidebar rows, menu items, inputs) sit at 6px, small icon
+  // containers / kbd at 4px, floating surfaces (menus, popovers, modals)
+  // at 10px. lg/xl keep Mantine's defaults. Floating sheets get their
+  // 10px ring-shadow treatment in styles/a11y-overrides.css (Menu passes
+  // resolved defaults straight to Popover, so theme defaultProps lose).
+  radius: { xs: "4px", sm: "6px", md: "10px", lg: "16px", xl: "32px" },
   components: {
     Tooltip: Tooltip.extend({
       defaultProps: {
@@ -160,6 +169,14 @@ export const mantineCssResolver: CSSVariablesResolver = (theme) => ({
     "--notion-hover": "rgba(84, 72, 49, 0.08)",
     // Selected (current page/tree node): one step above hover, ~12%.
     "--notion-selected": "#E9E9E7",
+    // Notion hairline tokens. Dark values are measured live (2026-09);
+    // light values approximate Notion's warm-gray hairlines — re-verify
+    // against a light-theme capture if they look off.
+    "--notion-border": "rgba(55, 53, 47, 0.09)",
+    "--notion-border-strong": "rgba(55, 53, 47, 0.16)",
+    "--notion-popover-bg": "#FFFFFF",
+    "--notion-popover-shadow":
+      "rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px 16px",
     "--mantine-color-dark-light-color": "#4a4845",
     "--mantine-color-dark-light-hover": "var(--mantine-color-gray-light-hover)",
     // Override the semantic error color so input error text / borders /
@@ -208,6 +225,18 @@ export const mantineCssResolver: CSSVariablesResolver = (theme) => ({
     "--notion-text-strong": "#F0EFED",
     "--notion-hover": "rgba(255, 255, 255, 0.055)",
     "--notion-selected": "rgba(255, 255, 255, 0.09)",
+    // Notion hairlines, measured live 2026-09: sidebar seams paint
+    // rgb(44,44,43) (their inset box-shadow line), control outlines
+    // rgb(56,56,54), popovers sit on #252525 with a ring + elevation
+    // shadow. --mantine-color-default-border pins Mantine's default
+    // outlines to border-strong so the dark-4 divider swap above doesn't
+    // wash out input/card borders.
+    "--notion-border": "rgb(44, 44, 43)",
+    "--notion-border-strong": "rgb(56, 56, 54)",
+    "--mantine-color-default-border": "var(--notion-border-strong)",
+    "--notion-popover-bg": "rgb(37, 37, 37)",
+    "--notion-popover-shadow":
+      "rgb(56, 56, 54) 0px 0px 0px 1px, rgba(25, 25, 25, 0.2) 0px 14px 28px -6px, rgba(25, 25, 25, 0.118) 0px 2px 4px -1px",
     "--mantine-color-dark-light-color": "var(--mantine-color-gray-4)",
     "--mantine-color-dark-light-hover": "var(--mantine-color-default-hover)",
   },

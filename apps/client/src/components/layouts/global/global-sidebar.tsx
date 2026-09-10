@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { ScrollArea, Text, Divider, Modal, UnstyledButton, Tooltip } from "@mantine/core";
+import { ScrollArea, Text, Modal, UnstyledButton, Tooltip } from "@mantine/core";
 import {
   IconHome,
-  IconClock,
   IconStar,
   IconLayoutGrid,
   IconSettings,
@@ -32,6 +31,7 @@ import { searchSpotlight } from "@/features/search/constants.ts";
 import { NotificationPopover } from "@/features/notification/components/notification-popover.tsx";
 import { workspaceAtom } from "@/features/user/atoms/current-user-atom.ts";
 
+// Notion 风格侧边栏：顶部横向图标操作行 + 纵向导航行 + 收藏空间分组
 export default function GlobalSidebar() {
   const { t } = useTranslation();
   const location = useLocation();
@@ -43,7 +43,6 @@ export default function GlobalSidebar() {
   const hasTemplates = useHasFeature(Feature.TEMPLATES);
   const upgradeLabel = useUpgradeLabel();
   const mainNavItems = [
-    { label: "Home", icon: IconHome, path: "/home" },
     { label: "Favorites", icon: IconStar, path: "/favorites" },
     { label: "Spaces", icon: IconLayoutGrid, path: "/spaces" },
     {
@@ -79,19 +78,51 @@ export default function GlobalSidebar() {
       <div className={classes.section}>
         <TopMenu />
       </div>
-      <ScrollArea w="100%" style={{ flex: 1 }}>
-        <div className={classes.section}>
+
+      {/* Notion 顶部图标操作行：主页(带文字) + AI 聊天 + 通知 + 搜索(靠右) */}
+      <div className={classes.actionRow}>
+        <Link
+          className={classes.actionItem}
+          data-active={active === "/home" || undefined}
+          aria-current={active === "/home" ? "page" : undefined}
+          to="/home"
+          onClick={handleNavClick}
+        >
+          <IconHome className={classes.actionIcon} stroke={1.8} />
+          <span>{t("Home")}</span>
+        </Link>
+        {aiChatEnabled && (
+          <Tooltip label={t("AI Chat")} position="bottom" withArrow>
+            <Link
+              className={classes.actionItem}
+              data-active={active.startsWith("/ai") || undefined}
+              aria-current={active.startsWith("/ai") ? "page" : undefined}
+              aria-label={t("AI Chat")}
+              to="/ai"
+              onClick={handleNavClick}
+            >
+              <IconSparkles className={classes.actionIcon} stroke={1.8} />
+            </Link>
+          </Tooltip>
+        )}
+        <NotificationPopover variant="icon" />
+        <Tooltip
+          label={`${t("Search")} ${platformModifierLabel} K`}
+          position="bottom"
+          withArrow
+        >
           <UnstyledButton
-            className={classes.link}
+            className={`${classes.actionItem} ${classes.actionSearch}`}
             onClick={searchSpotlight.open}
             aria-label={t("Search")}
           >
-            <IconSearch className={classes.linkIcon} stroke={2} />
-            <span>{t("Search")}</span>
-            <Text span fz="xs" c="dimmed" ml="auto" pr={8}>
-              {platformModifierLabel} + K
-            </Text>
+            <IconSearch className={classes.actionIcon} stroke={1.8} />
           </UnstyledButton>
+        </Tooltip>
+      </div>
+
+      <ScrollArea w="100%" style={{ flex: 1 }}>
+        <div className={classes.section}>
           {mainNavItems.map((item) =>
             item.disabled ? (
               <Tooltip
@@ -126,7 +157,6 @@ export default function GlobalSidebar() {
           )}
         </div>
 
-        <Divider my="xs" />
         <div className={classes.section}>
           <Text component="h2" className={classes.sectionHeader}>{t("Favorite spaces")}</Text>
           {!isFavoritesPending && sortedFavoriteSpaces.length === 0 ? (
@@ -173,23 +203,6 @@ export default function GlobalSidebar() {
       </ScrollArea>
 
       <div className={classes.bottomSection}>
-        {aiChatEnabled && (
-          <Link
-            className={classes.link}
-            data-active={active.startsWith("/ai") || undefined}
-            aria-current={active.startsWith("/ai") ? "page" : undefined}
-            to="/ai"
-            onClick={handleNavClick}
-          >
-            <IconSparkles className={classes.linkIcon} stroke={2} />
-            <span>{t("AI Chat")}</span>
-          </Link>
-        )}
-        <NotificationPopover
-          variant="row"
-          rowClassName={classes.link}
-          rowIconClassName={classes.linkIcon}
-        />
         <UnstyledButton
           className={classes.link}
           onClick={openInvite}
@@ -217,7 +230,6 @@ export default function GlobalSidebar() {
         title={t("Invite new members")}
         centered
       >
-        <Divider size="xs" mb="xs" />
         <ScrollArea h="80%">
           <WorkspaceInviteForm onClose={closeInvite} />
         </ScrollArea>

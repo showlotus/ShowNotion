@@ -1,7 +1,7 @@
 .sidebar {
   height: 100%;
   width: 100%;
-  padding: var(--mantine-spacing-md);
+  padding: var(--mantine-spacing-sm) rem(8px);
   display: flex;
   flex-direction: column;
   gap: var(--mantine-spacing-xs);
@@ -35,10 +35,10 @@
 
 .chatGroupLabel {
   margin: 0;
-  padding: 4px var(--mantine-spacing-xs);
-  font-size: var(--mantine-font-size-xs);
-  font-weight: 600;
-  color: var(--mantine-color-dimmed);
+  padding: 4px rem(8px);
+  font-size: rem(12px);
+  font-weight: 500;
+  color: var(--notion-text-muted);
   user-select: none;
 }
 
@@ -73,27 +73,24 @@
 .chatItem {
   display: flex;
   align-items: center;
-  padding: 8px var(--mantine-spacing-xs);
-  border-radius: var(--mantine-radius-sm);
+  padding: 4px rem(8px);
+  min-height: rem(28px);
+  border-radius: rem(6px);
   cursor: pointer;
   text-decoration: none;
-  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
+  color: var(--notion-text-muted);
   font-size: var(--mantine-font-size-sm);
   user-select: none;
   gap: var(--mantine-spacing-xs);
 
   @mixin hover {
-    background-color: light-dark(
-      var(--mantine-color-gray-1),
-      var(--mantine-color-dark-6)
-    );
+    background-color: var(--notion-hover);
+    color: var(--notion-text-strong);
   }
 
   &[data-active] {
-    background-color: light-dark(
-      var(--mantine-color-gray-2),
-      var(--mantine-color-dark-6)
-    );
+    background-color: var(--notion-selected);
+    color: var(--notion-text-strong);
   }
 }
 

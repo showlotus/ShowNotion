@@ -24,4 +24,5 @@ export const asideStateAtom = atom<AsideStateType>({
   isAsideOpen: false,
 });
 
-export const sidebarWidthAtom = atomWithWebStorage<number>('sidebarWidth', 300);
+// Notion 侧边栏宽度：默认 240，拖拽范围 220–400（global-app-shell 内统一 clamp）
+export const sidebarWidthAtom = atomWithWebStorage<number>("sidebarWidth", 270);

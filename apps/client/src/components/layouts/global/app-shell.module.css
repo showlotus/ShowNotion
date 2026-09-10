@@ -4,6 +4,17 @@
   background-color: light-dark(#f9f8f7, var(--mantine-color-dark-8));
 }
 
+/* Notion paints a 1px hairline on the sidebar↔content seams (its dark
+ * inset box-shadow line rgb(44,44,43); light is the warm-gray equivalent).
+ * The AppShell's built-in borders stay off — these own the seam. */
+.navbar {
+  border-right: 1px solid var(--notion-border);
+}
+
+.aside {
+  border-left: 1px solid var(--notion-border);
+}
+
 .navbar, .aside {
   @media (max-width: $mantine-breakpoint-sm) {
     width: 350px;

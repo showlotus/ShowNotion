@@ -1,32 +1,27 @@
 .ProseMirror {
   .codeBlock {
-    padding: 4px;
-    border-radius: var(--mantine-radius-default);
-    background-color: light-dark(var(--mantine-color-gray-0),  var(--mantine-color-dark-8));
-    }
+    padding: 8px;
+    border-radius: var(--mantine-radius-md);
+    background-color: light-dark(
+      rgba(66, 35, 3, 0.03),
+      rgba(252, 252, 252, 0.03)
+    );
+  }
 
   pre {
-    padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
-    margin: 4px;
-    font-family: "JetBrainsMono", var(--mantine-font-family-monospace);
-    border-radius: var(--mantine-radius-default);
-    tab-size: 4;
-
-    @mixin light {
-      background-color: var(--mantine-color-gray-0);
-      color: var(--mantine-color-gray-9);
-    }
-
-    @mixin dark {
-      background-color: var(--mantine-color-dark-8);
-      color: var(--mantine-color-dark-1);
-    }
+    margin: 0;
+    padding: 8px 14px 24px;
+    font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono",
+      "Liberation Mono", Courier, monospace;
+    line-height: 1.5;
+    tab-size: 2;
+    color: inherit;
 
     code {
       color: inherit;
       padding: 0;
       background: none;
-      font-size: var(--mantine-font-size-sm);
+      font-size: 85%;
     }
 
     /* Code styling */
@@ -96,20 +91,24 @@
   }
 
   :not(pre) > code {
-    font-family: "JetBrainsMono", var(--mantine-font-family-monospace);
-    line-height: var(--mantine-line-height);
-    padding: 2px calc(var(--mantine-spacing-xs) / 2);
-    border-radius: var(--mantine-radius-sm);
+    font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono",
+      "Liberation Mono", Courier, monospace;
+    font-size: 85%;
+    line-height: normal;
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
     margin: 0;
+    position: relative;
+    bottom: 0.065em;
 
     @mixin where-light {
-      background-color: var(--mantine-color-gray-1);
-      color: var(--mantine-color-text);
+      background-color: rgba(33, 27, 23, 0.05);
+      color: #cf5148;
     }
 
     @mixin where-dark {
-      background-color: var(--mantine-color-dark-5) !important;
-      color: var(--mantine-color-text);
+      background-color: rgba(255, 255, 255, 0.055);
+      color: #cf5148;
     }
   }
 }

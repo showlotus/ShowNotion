@@ -3,6 +3,31 @@
     min-height: 25px;
 }
 
+/* Notion's language label (top-right of a code block) is plain secondary
+ * text that only gains a subtle surface on hover — no resting outline.
+ * Specificity beats the global a11y input rule in styles/a11y-overrides.css
+ * (.mantine-Input-input[data-variant="default"]) without touching it, so
+ * other inputs keep their WCAG-compliant border. Focus keeps the blue
+ * --input-bd-focus ring for keyboard users. */
+.menuGroup .selectInput[data-variant="default"] {
+    border-color: transparent;
+    background-color: transparent;
+    color: var(--mantine-color-dimmed);
+
+    &:hover {
+        background-color: light-dark(
+            rgba(33, 27, 23, 0.05),
+            rgba(255, 255, 255, 0.055)
+        );
+        color: var(--mantine-color-text);
+    }
+
+    &:focus {
+        border-color: var(--input-bd-focus);
+        color: var(--mantine-color-text);
+    }
+}
+
 .error {
     color: light-dark(var(--mantine-color-red-8), var(--mantine-color-red-7));
     background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-gray-8));

@@ -14,30 +14,18 @@
 
 .node {
     position: relative;
-    border-radius: 4px;
+    /* Notion sidebar rows: 6px interactive face, follows the theme scale. */
+    border-radius: var(--mantine-radius-sm);
     display: flex;
     align-items: center;
     height: 100%;
     width: 100%;
     text-decoration: none;
     /* Notion sidebar tree: rows rest muted (light #7d7a75 / dark #bcbab6,
-     * measured live). Hover and selection brighten to the main ink. */
+     * measured live). Hover and selection brighten to the main ink. The
+     * hover/selected SURFACES paint on .rowWrapper (full row width) — the
+     * node layers stay transparent so the indent never shrinks them. */
     color: var(--notion-text-muted);
-
-    /* Gate hover styles to mouse-capable devices. Touch browsers synthesize
-       :hover on the first tap (sticky hover) and only fire click on the
-       second tap, requiring a double-tap to navigate. */
-    @media (hover: hover) {
-        &:hover {
-            background-color: var(--notion-hover);
-            color: var(--notion-text-strong);
-        }
-
-        &:hover .actions {
-            opacity: 1;
-            pointer-events: auto;
-        }
-    }
 
     .actions {
         display: inline-flex;
@@ -62,6 +50,14 @@
 
 .actionIcon {
     color: light-dark(var(--mantine-color-dark-3), var(--mantine-color-gray-4));
+
+    /* Hovering these buttons happens on top of the row's own hover surface
+     * (--notion-hover). Painting the subtle hover background again would
+     * stack into a visibly darker block, so let the row hover carry the
+     * highlight and keep the button itself transparent. */
+    &:hover {
+        background-color: transparent;
+    }
 }
 
 .text {
@@ -98,7 +94,35 @@
     position: relative;
     display: flex;
     align-items: center;
-    border-radius: 4px;
+    border-radius: var(--mantine-radius-sm);
+
+    /* Row highlight owns the FULL row width: the tree indent (padding-left
+     * here) only shifts content and must never shrink the hover/selected
+     * block — Notion paints its highlight edge-to-edge the same way. The
+     * nested .node surfaces stay transparent; only the ink changes here. */
+    @media (hover: hover) {
+        /* Gate hover to mouse-capable devices: touch browsers synthesize
+         * :hover on the first tap (sticky hover) and only fire click on
+         * the second tap. */
+        &:hover {
+            background-color: var(--notion-hover);
+        }
+
+        &:hover .node {
+            color: var(--notion-text-strong);
+        }
+
+        &:hover .actions {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    }
+
+    &:has(.node[data-selected="true"]),
+    &:has(.node[aria-selected="true"]),
+    &:has(.node[aria-current="page"]) {
+        background-color: var(--notion-selected);
+    }
 }
 
 .node[data-dragging="true"] {
@@ -114,20 +138,17 @@
     outline-offset: -2px;
 }
 
+/* The selected surface paints on .rowWrapper (full row width); these layers
+ * only brighten the ink. The wrapper DIV holds data-selected, the anchor
+ * carries aria attributes — cover both so the ink passes down (the anchor's
+ * own .node color rule would otherwise win over inheritance). */
 .node[data-selected="true"],
 .node[aria-selected="true"],
 .node[aria-current="page"] {
-    background-color: var(--notion-selected);
     color: var(--notion-text-strong);
 }
 
-/* The tree renders two stacked .node elements per row (a selection-aware
- * wrapper DIV plus the anchor that carries role="treeitem" with aria attrs).
- * When the wrapper holds data-selected, keep the inner anchor transparent so
- * the selected surface is not double-painted, and pass the strong ink down —
- * the anchor's own .node color rule would otherwise win over inheritance. */
 .node[data-selected="true"] .node {
-    background-color: transparent;
     color: var(--notion-text-strong);
 }
 

@@ -1,8 +1,10 @@
 .header {
-  height: 45px;
+  /* Notion's topbar: 44px tall with 12px side padding (measured live
+   * 2026-09); the height token in core.css must stay in sync. */
+  height: 44px;
   background-color: var(--mantine-color-body);
-  padding-left: var(--mantine-spacing-md);
-  padding-right: var(--mantine-spacing-md);
+  padding-left: 12px;
+  padding-right: 12px;
   position: fixed;
   z-index: 99;
   top: var(--app-shell-header-offset, 0rem);

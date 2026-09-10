@@ -1,5 +1,5 @@
 import classes from "@/features/editor/styles/editor.module.css";
-import React, { useEffect } from "react";
+import React from "react";
 import { TitleEditor } from "@/features/editor/title-editor";
 import PageEditor from "@/features/editor/page-editor";
 import {
@@ -27,6 +27,7 @@ import { DeletedPageBanner } from "@/features/page/trash/components/deleted-page
 import clsx from "clsx";
 import { currentPageEditModeAtom } from "@/features/editor/atoms/editor-atoms.ts";
 import { EmptyPageGetStarted } from "@/features/editor/components/empty-page/empty-page-get-started";
+import { FloatingToc } from "@/features/editor/components/table-of-contents/floating-toc";
 
 const MemoizedTitleEditor = React.memo(TitleEditor);
 const MemoizedPageEditor = React.memo(PageEditor);
@@ -38,10 +39,6 @@ type PageUser = {
   name: string;
   avatarUrl: string;
 };
-
-// Module-level flag: survives component unmount/remount on page navigation,
-// reset only on full page reload (i.e. a new app session).
-let defaultEditModeApplied = false;
 
 export interface FullEditorProps {
   pageId: string;
@@ -70,21 +67,8 @@ export function FullEditor({
   const fullPageWidth = user.settings?.preferences?.fullPageWidth;
   const editorToolbarEnabled =
     user.settings?.preferences?.editorToolbar ?? false;
-  const [currentPageEditMode, setCurrentPageEditMode] = useAtom(
-    currentPageEditModeAtom,
-  );
-  const userPageEditMode =
-    user.settings?.preferences?.pageEditMode ?? PageEditMode.Edit;
+  const [currentPageEditMode] = useAtom(currentPageEditModeAtom);
   const isEditMode = currentPageEditMode === PageEditMode.Edit;
-
-  // Apply the user's saved preference only once on initial load, not on every
-  // page navigation — so the mode sticks across navigations within a session.
-  useEffect(() => {
-    if (!defaultEditModeApplied) {
-      setCurrentPageEditMode(userPageEditMode as PageEditMode);
-      defaultEditModeApplied = true;
-    }
-  }, [userPageEditMode, setCurrentPageEditMode]);
 
   return (
     <Container
@@ -115,6 +99,7 @@ export function FullEditor({
         content={content}
         canComment={canComment}
       />
+      <FloatingToc pageId={pageId} />
       <EmptyPageGetStarted pageId={pageId} editable={editable} />
     </Container>
   );

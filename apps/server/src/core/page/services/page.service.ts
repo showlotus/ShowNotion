@@ -914,6 +914,7 @@ export class PageService {
             'parentPageId',
             'spaceId',
             'deletedAt',
+            'updatedAt',
           ])
           .where('id', '=', childPageId)
           .where('deletedAt', 'is', null)
@@ -930,6 +931,7 @@ export class PageService {
                 'p.parentPageId',
                 'p.spaceId',
                 'p.deletedAt',
+                'p.updatedAt',
               ])
               .innerJoin('page_ancestors as pa', 'pa.parentPageId', 'p.id')
               .where('p.deletedAt', 'is', null),

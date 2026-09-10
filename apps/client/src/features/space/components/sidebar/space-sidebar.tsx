@@ -23,6 +23,7 @@ import {
   IconStarFilled,
   IconTemplate,
   IconTrash,
+  IconWorld,
 } from "@tabler/icons-react";import {
   useSpaceWatchStatusQuery,
   useWatchSpaceMutation,
@@ -47,7 +48,6 @@ import {
 } from "@/features/space/permissions/permissions.type.ts";
 import PageImportModal from "@/features/page/components/page-import-modal.tsx";
 import { useTranslation } from "react-i18next";
-import { SwitchSpace } from "./switch-space";
 import ExportModal from "@/components/common/export-modal";
 import {
   useFavoriteIds,
@@ -108,29 +108,6 @@ export function SpaceSidebar() {
         <div className={classes.section}>
           <TopMenu />
         </div>
-        <div
-          className={classes.section}
-          style={{
-            border: "none",
-            marginTop: 2,
-            marginBottom: 3,
-          }}
-        >
-          <Group
-            gap={4}
-            wrap="nowrap"
-            justify="space-between"
-            style={{ width: "100%" }}
-          >
-            <SwitchSpace
-              spaceName={space?.name}
-              spaceSlug={space?.slug}
-              spaceIcon={space?.logo}
-              isPublished={isBetaPublicSpaces() && space?.isPublished}
-            />
-          </Group>
-        </div>
-
         <div className={classes.section}>
           <div className={classes.menuItems}>
             <UnstyledButton
@@ -206,9 +183,20 @@ export function SpaceSidebar() {
 
         <div className={clsx(classes.section, classes.sectionPages)}>
           <Group className={classes.pagesHeader} justify="space-between">
-            <Text size="xs" fw={500} c="dimmed">
-              {t("Pages")}
-            </Text>
+            <Group gap={4} wrap="nowrap">
+              <Text size="sm" fw={500} c="dimmed" lineClamp={1}>
+                {space.name}
+              </Text>
+              {isBetaPublicSpaces() && space.isPublished && (
+                <Tooltip label={t("This space is public")}>
+                  <IconWorld
+                    size={14}
+                    aria-label={t("This space is public")}
+                    style={{ flexShrink: 0 }}
+                  />
+                </Tooltip>
+              )}
+            </Group>
 
             <Group gap="xs">
               <Tooltip label={sortLabel} withArrow position="right">
@@ -217,7 +205,6 @@ export function SpaceSidebar() {
                   size={18}
                   onClick={toggleSortMode}
                   aria-label={sortLabel}
-                  c={sortMode === "updatedAtDesc" ? undefined : "dimmed"}
                 >
                   {sortMode === "manual" ? <IconReorder /> : <IconClockDown />}
                 </ActionIcon>

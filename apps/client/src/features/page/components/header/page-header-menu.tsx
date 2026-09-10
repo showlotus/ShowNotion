@@ -37,11 +37,12 @@ import { Trans, useTranslation } from "react-i18next";
 import ExportModal from "@/components/common/export-modal";
 import { htmlToMarkdown } from "@docmost/editor-ext";
 import {
+  floatingTocAtom,
   pageEditorAtom,
   yjsConnectionStatusAtom,
 } from "@/features/editor/atoms/editor-atoms.ts";
+import { FLOATING_TOC_PANEL_ID } from "@/features/editor/components/table-of-contents/floating-toc";
 import { formattedDate } from "@/lib/time.ts";
-import { PageEditModeToggle } from "@/features/user/components/page-state-pref.tsx";
 import MovePageModal from "@/features/page/components/move-page-modal.tsx";
 import PageAttachmentsModal from "@/features/attachments/components/page-attachments-modal.tsx";
 import { useTimeAgo } from "@/hooks/use-time-ago.tsx";
@@ -67,7 +68,7 @@ interface PageHeaderMenuProps {
 export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
   const { t } = useTranslation();
   const commentsTriggerProps = useAsideTriggerProps("comments");
-  const tocTriggerProps = useAsideTriggerProps("toc");
+  const [floatingTocOpen, setFloatingTocOpen] = useAtom(floatingTocAtom);
   const { pageSlug } = useParams();
   const { data: page } = usePageQuery({
     pageId: extractPageSlugId(pageSlug),
@@ -103,8 +104,6 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
     <>
       <ConnectionWarning />
 
-      {!readOnly && !page?.isBase && <PageEditModeToggle size="xs" />}
-
       <PageShareModal readOnly={readOnly} />
 
       <Tooltip label={t("Comments")} openDelay={250} withArrow>
@@ -123,8 +122,17 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
           <ActionIcon
             variant="subtle"
             color="dark"
+            data-floating-toc-trigger
+            data-active={floatingTocOpen || undefined}
             aria-label={t("Table of contents")}
-            {...tocTriggerProps}
+            aria-expanded={floatingTocOpen}
+            aria-controls={FLOATING_TOC_PANEL_ID}
+            style={
+              floatingTocOpen
+                ? { backgroundColor: "var(--ai-hover)" }
+                : undefined
+            }
+            onClick={() => setFloatingTocOpen((open) => !open)}
           >
             <IconList size={20} stroke={2} />
           </ActionIcon>
@@ -283,7 +291,10 @@ function PageActionMenu({ readOnly }: PageActionMenuProps) {
           {!page?.isBase && <Menu.Divider />}
 
           {!page?.isBase && (
-            <Menu.Item leftSection={<IconArrowsHorizontal size={16} />}>
+            <Menu.Item
+              leftSection={<IconArrowsHorizontal size={16} />}
+              closeMenuOnClick={false}
+            >
               <Group wrap="nowrap">
                 <PageWidthToggle label={t("Full width")} />
               </Group>

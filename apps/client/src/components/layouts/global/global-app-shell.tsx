@@ -28,6 +28,10 @@ import { MAIN_CONTENT_ID, SkipToMain } from "@/components/ui/skip-to-main.tsx";
 // import { sidebarPeekAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { SidebarToggleOverlay } from "@/components/layouts/global/sidebar-toggle-overlay.tsx";
 
+// Notion 侧边栏宽度限制：最小 220，最大 400
+const SIDEBAR_MIN_WIDTH = 220;
+const SIDEBAR_MAX_WIDTH = 400;
+
 export default function GlobalAppShell({
   children,
 }: {
@@ -46,6 +50,12 @@ export default function GlobalAppShell({
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef(null);
 
+  // 兼容历史存储的超限宽度（旧上限为 600）
+  const clampedSidebarWidth = Math.min(
+    Math.max(sidebarWidth, SIDEBAR_MIN_WIDTH),
+    SIDEBAR_MAX_WIDTH,
+  );
+
   const startResizing = React.useCallback((mouseDownEvent) => {
     mouseDownEvent.preventDefault();
     setIsResizing(true);
@@ -61,12 +71,12 @@ export default function GlobalAppShell({
         const newWidth =
           mouseMoveEvent.clientX -
           sidebarRef.current.getBoundingClientRect().left;
-        if (newWidth < 220) {
-          setSidebarWidth(220);
+        if (newWidth < SIDEBAR_MIN_WIDTH) {
+          setSidebarWidth(SIDEBAR_MIN_WIDTH);
           return;
         }
-        if (newWidth > 600) {
-          setSidebarWidth(600);
+        if (newWidth > SIDEBAR_MAX_WIDTH) {
+          setSidebarWidth(SIDEBAR_MAX_WIDTH);
           return;
         }
         setSidebarWidth(newWidth);
@@ -102,7 +112,8 @@ export default function GlobalAppShell({
       // peek 悬浮已暂时停用，保留以备恢复
       // data-peek={isPeek ? "true" : undefined}
       navbar={{
-        width: isSpaceRoute ? sidebarWidth : 300,
+        // 所有路由统一使用可拖拽宽度（Notion 风格：全局记忆 + min/max 限制）
+        width: clampedSidebarWidth,
         breakpoint: "sm",
         collapsed: {
           mobile: !mobileOpened,
@@ -139,9 +150,8 @@ export default function GlobalAppShell({
                 : t("Main navigation")
         }
       >
-        {isSpaceRoute && (
-          <div className={classes.resizeHandle} onMouseDown={startResizing} />
-        )}
+        {/* 所有路由均可拖拽调宽 */}
+        <div className={classes.resizeHandle} onMouseDown={startResizing} />
         {isSpaceRoute && <SpaceSidebar />}
         {isSettingsRoute && <SettingsSidebar />}
         {isAiRoute && (

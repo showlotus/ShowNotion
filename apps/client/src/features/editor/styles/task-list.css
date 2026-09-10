@@ -10,9 +10,14 @@ ul[data-type="taskList"] {
         display: flex;
 
         > label {
-            padding-top: 0.2rem;
             flex: 0 0 auto;
-            margin-right: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 1.5em;
+            margin-right: 6px;
+            padding: 0;
             user-select: none;
         }
 
@@ -32,8 +37,31 @@ ul[data-type="taskList"] {
 }
 
 ul[data-type="taskList"] li > label input[type="checkbox"] {
-    width: 1em;
-    height: 1em;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid;
+    border-radius: 3px;
+    background-color: transparent;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 12px;
     cursor: pointer;
+
+    @mixin light {
+        border-color: #383836;
+    }
+
+    @mixin dark {
+        border-color: #e6e5e3;
+    }
+
+    &:checked {
+        border-color: var(--mantine-color-blue-6);
+        background-color: var(--mantine-color-blue-6);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' d='M2.5 6.2 5 8.7l4.5-5'/%3E%3C/svg%3E");
+    }
 }
 

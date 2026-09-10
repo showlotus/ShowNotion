@@ -16,6 +16,9 @@ export const showAiMenuAtom = atom(false);
 
 export const showLinkMenuAtom = atom(false);
 
+// Notion-style floating table of contents (right-edge tick rail + panel).
+export const floatingTocAtom = atom<boolean>(false);
+
 export type LightboxRequest = {
   src: string;
   type: "image" | "video";

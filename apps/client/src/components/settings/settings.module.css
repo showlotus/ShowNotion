@@ -1,14 +1,13 @@
 .navbar {
     height: 100%;
     width: 100%;
-    padding: var(--mantine-spacing-md);
+    padding: var(--mantine-spacing-sm) rem(8px);
     display: flex;
     flex-direction: column;
 }
 
 .title {
     padding-bottom: var(--mantine-spacing-sm);
-    border-bottom: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
 }
 
 .link {
@@ -17,41 +16,46 @@
     align-items: center;
     text-decoration: none;
     font-size: var(--mantine-font-size-sm);
-    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
-    padding-left: var(--mantine-spacing-xs) ;
-    min-height: 30px;
-    border-radius: var(--mantine-radius-sm);
+    /* 与主导航侧边栏同一套 Notion token */
+    color: var(--notion-text-muted);
+    padding-left: rem(8px);
+    min-height: rem(28px);
+    border-radius: rem(6px);
     font-weight: 500;
     user-select: none;
 
     @mixin hover {
-        background-color: light-dark(
-                var(--mantine-color-gray-1),
-                var(--mantine-color-dark-6)
-        );
-        color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+        background-color: var(--notion-hover);
+        color: var(--notion-text-strong);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--mantine-primary-color-filled);
+        outline-offset: 2px;
     }
 
     &[data-active] {
         &,
         & :hover {
-            background-color: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-6));
-            color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+            background-color: var(--notion-selected);
+            color: var(--notion-text-strong);
         }
     }
 }
 
 .linkIcon {
-    color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-2));
-    margin-right: var(--mantine-spacing-sm);
+    color: light-dark(#8e8b86, #ada9a3);
+    margin-right: rem(10px);
     width: rem(16px);
     height: rem(16px);
+    flex-shrink: 0;
 }
 
+/* Notion 分组标题：小号、弱色 */
 .linkHeader {
-    padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
-    font-size: var(--mantine-font-size-sm);
-    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
+    padding: var(--mantine-spacing-xs) rem(8px) rem(4px);
+    font-size: rem(12px);
+    color: var(--notion-text-muted);
     font-weight: 500;
     cursor: pointer;
     display: flex;

@@ -2,7 +2,10 @@
     height: 100%;
     min-height: calc(100dvh - var(--app-shell-header-height, 45px) - 96px);
     padding: 8px 0;
-    margin: 48px auto;
+    /* Notion (live 2026-09): the title sits 36px below the topbar — with
+     * the 16px main padding + 8px editor padding this margin lands the
+     * title top at 80px (44 + 36). */
+    margin: 56px auto 48px;
 
     @media print {
         padding: 0;
@@ -11,8 +14,20 @@
     }
 }
 
+/* The content column caps at Notion's 900px full-width measure plus the
+ * 96px gutters, centered. Non-fluid only: a same-specificity later-loaded
+ * module rule would otherwise override Mantine fluid's max-width: 100%. */
+.editor:not([data-fluid]) {
+    max-width: calc(900px + 12rem);
+}
+
 .byline {
-    padding-left: 3rem;
+    /* Aligns with the .ProseMirror 6rem content gutter (Notion 96px). */
+    padding-left: 6rem;
+
+    @media (max-width: $mantine-breakpoint-lg) {
+        padding-left: 3rem;
+    }
 
     @media (max-width: $mantine-breakpoint-sm) {
         padding-left: 1rem;

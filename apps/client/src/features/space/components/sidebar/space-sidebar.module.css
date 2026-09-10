@@ -1,22 +1,18 @@
 .navbar {
-    /*background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8));*/
     height: 100%;
     width: 100%;
-    padding: var(--mantine-spacing-md);
-    padding-top: 0;
+    padding: var(--mantine-spacing-sm) rem(8px);
     display: flex;
     flex-direction: column;
     user-select: none;
 }
 
+/* Notion 风格：分区用留白分组，不用强分割线。
+ * 行高亮块统一 8px 内缩、与容器内容区等宽（内部行自带 pad 0 8px 补偿），
+ * 因此分区不再用负边距外扩——否则顶部分区（TopMenu 触发器）会贴满整栏，
+ * 与其他行不一致。 */
 .section {
-    margin-left: calc(var(--mantine-spacing-md) * -1);
-    margin-right: calc(var(--mantine-spacing-md) * -1);
-    margin-bottom: var(--mantine-spacing-md);
-
-    &:not(:last-of-type) {
-        border-bottom: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
-    }
+    margin-bottom: var(--mantine-spacing-xs);
 }
 
 .sectionPages {
@@ -30,24 +26,25 @@
 }
 
 .menuItems {
-    padding-left: calc(var(--mantine-spacing-md) - var(--mantine-spacing-xs));
-    padding-right: calc(var(--mantine-spacing-md) - var(--mantine-spacing-xs));
-    padding-bottom: var(--mantine-spacing-md);
+    padding-bottom: var(--mantine-spacing-xs);
 }
 
+/* 与主导航侧边栏同一套 Notion token：弱色文字、悬停弱高亮、6px 圆角、32px 行高
+ * （与目录树页面行等高） */
 .menu {
     display: flex;
     align-items: center;
     width: 100%;
     font-size: var(--mantine-font-size-sm);
-    padding: rem(4px) var(--mantine-spacing-xs);
-    border-radius: var(--mantine-radius-sm);
+    padding: rem(4px) rem(8px);
+    min-height: rem(32px);
+    border-radius: rem(6px);
     font-weight: 500;
-    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+    color: var(--notion-text-muted);
 
     &:hover {
-        background-color: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-6));
-        color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+        background-color: var(--notion-hover);
+        color: var(--notion-text-strong);
     }
 }
 
@@ -58,45 +55,48 @@
 }
 
 .menuItemIcon {
-    margin-right: var(--mantine-spacing-sm);
-    color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-2));
+    margin-right: rem(10px);
+    color: light-dark(#8e8b86, #ada9a3);
+    flex-shrink: 0;
 }
 
 .pages {
-    padding-left: calc(var(--mantine-spacing-md) - rem(6px));
-    padding-right: calc(var(--mantine-spacing-md) - rem(6px));
     padding-bottom: var(--mantine-spacing-md);
 }
 
 .pagesHeader {
-    padding-left: calc(var(--mantine-spacing-md) + rem(2px));
-    padding-right: var(--mantine-spacing-md);
     margin-bottom: rem(5px);
+}
+
+/* 分组头小按钮（排序/空间菜单/新建）hover 色与行高亮统一为 Notion token。
+ * Mantine 把 --ai-hover 写在内联 style 上（varsResolver），变量覆盖无效，
+ * 只能直接压 hover 背景色；选择器优先级高于组件的 .m_xxx:hover 规则。 */
+.pagesHeader :global(.mantine-ActionIcon-root):hover {
+    background-color: var(--notion-hover);
 }
 
 .pageLink {
     display: block;
-    padding: rem(8px) var(--mantine-spacing-xs);
+    padding: rem(4px) rem(8px);
     text-decoration: none;
-    border-radius: var(--mantine-radius-sm);
-    font-size: var(--mantine-font-size-xs);
-    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
-    line-height: 1;
+    border-radius: rem(6px);
+    font-size: var(--mantine-font-size-sm);
+    color: var(--notion-text-muted);
+    line-height: 1.4;
     font-weight: 500;
 
     &:hover {
-        background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
-        color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+        background-color: var(--notion-hover);
+        color: var(--notion-text-strong);
     }
 }
 
 .activeButton {
-    background-color: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-6));
-    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+    background-color: var(--notion-selected);
+    color: var(--notion-text-strong);
 }
 
-/* 侧边栏底部工具区，与上方页面树分隔 */
+/* 底部工具区与上方页面树以留白分隔 */
 .bottomSection {
     padding-top: var(--mantine-spacing-xs);
-    border-top: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
 }
