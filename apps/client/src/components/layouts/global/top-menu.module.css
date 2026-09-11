@@ -16,6 +16,16 @@
   }
 }
 
+/* 名称与箭头区域：独立按钮，避免与图标按钮嵌套 */
+.triggerNameButton {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+  text-align: left;
+}
+
 /* 工作区名称占满剩余空间，超出省略 */
 .triggerName {
   flex: 1;

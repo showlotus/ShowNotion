@@ -215,6 +215,25 @@
     );
   }
 
+  /* 块选中（NodeSelection）时隐藏浏览器原生文本选区，高亮只由 halo 覆盖容器承担 */
+  &.ProseMirror-hideselection *::selection {
+    background-color: transparent;
+  }
+
+  &.ProseMirror-hideselection *::-moz-selection {
+    background-color: transparent;
+  }
+
+  /* 兜底：PM 的隐藏类会在编辑器失焦（按住把手、拖拽中）后被摘掉，而失焦时状态
+     仍是 NodeSelection。以 .ProseMirror-selectednode 标记为开关，不依赖焦点 */
+  &:has(.ProseMirror-selectednode) *::selection {
+    background-color: transparent;
+  }
+
+  &:has(.ProseMirror-selectednode) *::-moz-selection {
+    background-color: transparent;
+  }
+
   .comment-mark {
     background: rgba(255, 215, 0, 0.14);
     border-bottom: 2px solid rgb(166, 158, 12);

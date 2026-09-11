@@ -92,7 +92,7 @@ export default function Breadcrumb() {
           underline="never"
           fz="sm"
           key={node.id}
-          className={classes.truncatedText}
+          className={`${classes.breadcrumbLink} ${classes.truncatedText}`}
           aria-current={isCurrent ? "page" : undefined}
         >
           {getTitle(node, t)}
@@ -180,7 +180,7 @@ export default function Breadcrumb() {
   return (
     <nav aria-label={t("Breadcrumb")} className={classes.breadcrumbDiv}>
       {breadcrumbNodes && (
-        <Breadcrumbs className={classes.breadcrumbs}>
+        <Breadcrumbs className={classes.breadcrumbs} separatorMargin={0}>
           {isMobile ? getMobileBreadcrumbItems() : getBreadcrumbItems()}
         </Breadcrumbs>
       )}

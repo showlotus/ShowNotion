@@ -7,6 +7,7 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  MaxLength,
   Min,
 } from 'class-validator';
 
@@ -71,6 +72,11 @@ export class UpdateWorkspaceDto extends PartialType(CreateWorkspaceDto) {
   @IsOptional()
   @IsBoolean()
   allowPersonalSpaces: boolean;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  icon: string;
 
   @IsOptional()
   @IsString()

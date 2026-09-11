@@ -86,10 +86,6 @@ export async function uploadSpaceIcon(
   return uploadIcon(file, AvatarIconType.SPACE_ICON, spaceId);
 }
 
-export async function uploadWorkspaceIcon(file: File): Promise<IAttachment> {
-  return uploadIcon(file, AvatarIconType.WORKSPACE_ICON);
-}
-
 async function removeIcon(
   type: AvatarIconType,
   spaceId?: string,
@@ -109,8 +105,4 @@ export async function removeAvatar(): Promise<void> {
 
 export async function removeSpaceIcon(spaceId: string): Promise<void> {
   await removeIcon(AvatarIconType.SPACE_ICON, spaceId);
-}
-
-export async function removeWorkspaceIcon(): Promise<void> {
-  await removeIcon(AvatarIconType.WORKSPACE_ICON);
 }

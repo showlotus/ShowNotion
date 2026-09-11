@@ -1,27 +1,55 @@
-/* Ordered list type cycling based on nesting depth */
-ol,
-ol ol ol ol,
-ol ol ol ol ol ol ol,
-ol ol ol ol ol ol ol ol ol ol {
-  list-style-type: decimal;
+/* Ordered list numbers are drawn with a ::before box instead of the native
+ * marker, which right-aligns and slides with the digit count. The box mirrors
+ * Notion's gutter (measured live 2026-09): a 24px slot, number centered,
+ * ending 6px before the text. That puts every number's center 18px left of
+ * the text, the same axis as the bullet. */
+.ProseMirror ol {
+  list-style: none;
 }
 
-ol ol,
-ol ol ol ol ol,
-ol ol ol ol ol ol ol ol,
-ol ol ol ol ol ol ol ol ol ol ol {
-  list-style-type: lower-alpha;
+.ProseMirror ol > li > p:first-child::before {
+  display: inline-block;
+  inline-size: 24px;
+  margin-inline: -30px 6px;
+  text-align: center;
 }
 
-ol ol ol,
-ol ol ol ol ol ol,
-ol ol ol ol ol ol ol ol ol,
-ol ol ol ol ol ol ol ol ol ol ol ol {
-  list-style-type: lower-roman;
+/* Type cycling based on nesting depth, same 3-step cycle as Notion:
+ * decimal, lower-alpha, lower-roman, then repeating. counter(list-item)
+ * reads the native list-item counter, so <ol start> keeps working. */
+.ProseMirror ol > li > p:first-child::before,
+.ProseMirror ol ol ol ol > li > p:first-child::before,
+.ProseMirror ol ol ol ol ol ol ol > li > p:first-child::before,
+.ProseMirror ol ol ol ol ol ol ol ol ol ol > li > p:first-child::before {
+  content: counter(list-item) ".";
 }
 
-ol {
-  list-style-position: outside;
+.ProseMirror ol ol > li > p:first-child::before,
+.ProseMirror ol ol ol ol ol > li > p:first-child::before,
+.ProseMirror ol ol ol ol ol ol ol ol > li > p:first-child::before,
+.ProseMirror ol ol ol ol ol ol ol ol ol ol ol > li > p:first-child::before {
+  content: counter(list-item, lower-alpha) ".";
+}
+
+.ProseMirror ol ol ol > li > p:first-child::before,
+.ProseMirror ol ol ol ol ol ol > li > p:first-child::before,
+.ProseMirror ol ol ol ol ol ol ol ol ol > li > p:first-child::before,
+.ProseMirror ol ol ol ol ol ol ol ol ol ol ol ol > li > p:first-child::before {
+  content: counter(list-item, lower-roman) ".";
+}
+
+/* Footnotes keep their native decimal marker. */
+.ProseMirror ol.footnotes > li > p:first-child::before {
+  content: none;
+}
+
+/* Notion's first list level sits 30px from the text column (nested levels
+ * keep the 2rem step from core.css). Matches the marker box above: box left
+ * lands on the paragraph's text edge, center 12px right of it. Task lists
+ * are excluded so their own 0 padding keeps applying. */
+.ProseMirror ul:not([data-type="taskList"]):not(ul ul, ol ul),
+.ProseMirror ol:not(ul ol, ol ol) {
+  padding-inline-start: 30px;
 }
 
 /* Nested lists add no margin: Notion stacks list items at a uniform 30px

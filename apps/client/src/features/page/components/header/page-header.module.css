@@ -1,10 +1,11 @@
 .header {
-  /* Notion's topbar: 44px tall with 12px side padding (measured live
-   * 2026-09); the height token in core.css must stay in sync. */
+  /* Notion's topbar: 44px tall, breadcrumb pill flush at 12px from the left
+   * and the last action button 10px from the right (measured live 2026-09);
+   * the height token in core.css must stay in sync. */
   height: 44px;
   background-color: var(--mantine-color-body);
   padding-left: 12px;
-  padding-right: 12px;
+  padding-right: 10px;
   position: fixed;
   z-index: 99;
   top: var(--app-shell-header-offset, 0rem);

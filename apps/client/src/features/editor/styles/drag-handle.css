@@ -1,9 +1,38 @@
-/*.ProseMirror:not(.dragging) .ProseMirror-selectednode {
-  outline: none !important;
-  background-color: rgba(150, 170, 220, 0.2);
-  transition: background-color 0.2s;
-  box-shadow: none;
-}*/
+/* 压掉默认蓝色描边，选中高亮改由 .block-selection-halo 覆盖容器承担 */
+.ProseMirror :is(p, h1, h2, h3, h4, h5, h6, li, blockquote).ProseMirror-selectednode,
+.ProseMirror [data-type="details"].ProseMirror-selectednode,
+.ProseMirror .react-renderer.node-codeBlock.ProseMirror-selectednode,
+.ProseMirror .react-renderer.node-callout.ProseMirror-selectednode {
+  outline: none;
+}
+
+/* 块选中期间块内文字不可选中：Chrome 会忽略 editable 内容上的 user-select:none，
+   drag-handle 插件会同步给选中块挂 contenteditable=false，二者配合才生效 */
+.ProseMirror .ProseMirror-selectednode {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Notion 式选中高亮容器：几何由 drag-handle 插件计算（inset 2px 2px 1px / radius 4px） */
+.block-selection-halo {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 4px;
+  background-color: rgba(35, 131, 226, 0.14);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 1;
+}
+
+.block-selection-halo.active {
+  opacity: 1;
+}
+
+@media print {
+  .block-selection-halo {
+    display: none !important;
+  }
+}
 
 .drag-handle {
   position: fixed;
@@ -26,14 +55,19 @@
   }
 
   &:hover {
-    background-color: #0d0d0d10;
+    background-color: light-dark(#0d0d0d10, rgba(255, 255, 255, 0.055));
     transition: background-color 0.2s;
   }
 
   &:active {
-    background-color: #0d0d0d10;
+    background-color: light-dark(#0d0d0d10, rgba(255, 255, 255, 0.055));
     transition: background-color 0.2s;
     cursor: grabbing;
+  }
+
+  /* 点击把手选中块后的选中态：保持可见并带浅色底（对齐 Notion） */
+  &.selected {
+    background-color: light-dark(#0d0d0d10, rgba(255, 255, 255, 0.055));
   }
 
   &.hide {

@@ -37,6 +37,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import APP_ROUTE from "@/lib/app-route.ts";
 import useAuth from "@/features/auth/hooks/use-auth.ts";
 import { CustomAvatar } from "@/components/ui/custom-avatar.tsx";
+import WorkspaceIconPicker from "@/features/workspace/components/workspace-icon-picker.tsx";
 import { useTranslation } from "react-i18next";
 import { AvatarIconType } from "@/features/attachments/types/attachment.types.ts";
 import classes from "./top-menu.module.css";
@@ -76,6 +77,11 @@ export default function TopMenu() {
     navigate(getSpaceUrl(slug));
   };
 
+  const handleWorkspaceIconClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   if (!workspace) {
     return <></>;
   }
@@ -90,30 +96,25 @@ export default function TopMenu() {
       onChange={setMenuOpened}
     >
       <Menu.Target>
-        <UnstyledButton className={classes.trigger} aria-label={workspace?.name}>
-          <CustomAvatar
-            avatarUrl={workspace?.logo}
-            name={workspace?.name}
-            variant="filled"
-            size="sm"
-            type={AvatarIconType.WORKSPACE_ICON}
-          />
-          <Text fw={500} size="sm" lh={1} className={classes.triggerName} lineClamp={1}>
-            {workspace?.name}
-          </Text>
-          <IconChevronDown size={16} className={classes.triggerChevron} />
-        </UnstyledButton>
+        <div className={classes.trigger}>
+          <div onClick={handleWorkspaceIconClick}>
+            <WorkspaceIconPicker size={26} />
+          </div>
+          <UnstyledButton
+            className={classes.triggerNameButton}
+            aria-label={workspace?.name}
+          >
+            <Text fw={500} size="sm" lh={1} className={classes.triggerName} lineClamp={1}>
+              {workspace?.name}
+            </Text>
+            <IconChevronDown size={16} className={classes.triggerChevron} />
+          </UnstyledButton>
+        </div>
       </Menu.Target>
       <Menu.Dropdown>
         <Menu.Label>
           <Group gap="xs" wrap="nowrap">
-            <CustomAvatar
-              avatarUrl={workspace?.logo}
-              name={workspace?.name}
-              variant="filled"
-              size={22}
-              type={AvatarIconType.WORKSPACE_ICON}
-            />
+            <WorkspaceIconPicker size={22} emojiSize={14} />
             <Text size="sm" fw={600} lineClamp={1}>
               {workspace?.name}
             </Text>

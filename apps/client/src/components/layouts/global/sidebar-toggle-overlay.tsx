@@ -1,5 +1,5 @@
 import { Tooltip, UnstyledButton, ActionIcon } from "@mantine/core";
-import { IconLayoutSidebarRightExpand, IconLayoutSidebarRightCollapse } from "@tabler/icons-react";
+import { IconLayoutGrid, IconLayoutSidebarRightExpand, IconLayoutSidebarRightCollapse } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useTranslation } from "react-i18next";
 import { useAtomValue } from "jotai";
@@ -9,8 +9,6 @@ import {
 } from "./hooks/atoms/sidebar-atom.ts";
 import { useToggleSidebar } from "./hooks/hooks/use-toggle-sidebar.ts";
 import { currentUserAtom } from "@/features/user/atoms/current-user-atom.ts";
-import { CustomAvatar } from "@/components/ui/custom-avatar.tsx";
-import { AvatarIconType } from "@/features/attachments/types/attachment.types.ts";
 import classes from "./sidebar-toggle-overlay.module.css";
 
 // 顶部 Header 移除后侧边栏的开关入口：桌面端侧边栏收起时左上角常驻展开按钮，移动端为汉堡按钮
@@ -59,13 +57,13 @@ export function SidebarToggleOverlay() {
               setDesktopOpened(true);
             }}
           >
-            <CustomAvatar
-              avatarUrl={workspace?.logo}
-              name={workspace?.name ?? ""}
-              variant="filled"
-              size="sm"
-              type={AvatarIconType.WORKSPACE_ICON}
-            />
+            {workspace?.icon ? (
+              <span style={{ fontSize: 18, lineHeight: 1 }}>
+                {workspace.icon}
+              </span>
+            ) : (
+              <IconLayoutGrid size={18} />
+            )}
             <IconLayoutSidebarRightExpand className={classes.expandIcon} size={14} />
           </UnstyledButton>
         </Tooltip>

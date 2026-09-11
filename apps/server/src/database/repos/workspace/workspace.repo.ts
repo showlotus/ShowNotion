@@ -16,6 +16,7 @@ export class WorkspaceRepo {
     'id',
     'name',
     'description',
+    'icon',
     'logo',
     'hostname',
     'customDomain',

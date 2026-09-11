@@ -3,21 +3,26 @@
     min-height: 25px;
 }
 
-/* Notion's language label (top-right of a code block) is plain secondary
- * text that only gains a subtle surface on hover — no resting outline.
- * Specificity beats the global a11y input rule in styles/a11y-overrides.css
- * (.mantine-Input-input[data-variant="default"]) without touching it, so
- * other inputs keep their WCAG-compliant border. Focus keeps the blue
- * --input-bd-focus ring for keyboard users. */
+/* Language selector (top-right of a code block): a quiet chip on the block
+ * surface — subtle warm fill plus a hairline outline (light uses gray.6,
+ * matching the WCAG-driven input border in styles/a11y-overrides.css; dark
+ * uses the theme's pinned control outline). Hover deepens the fill; focus
+ * keeps the blue --input-bd-focus ring for keyboard users. */
 .menuGroup .selectInput[data-variant="default"] {
-    border-color: transparent;
-    background-color: transparent;
+    border-color: light-dark(
+        var(--mantine-color-gray-6),
+        var(--mantine-color-default-border)
+    );
+    background-color: light-dark(
+        rgba(33, 27, 23, 0.05),
+        rgba(255, 255, 255, 0.055)
+    );
     color: var(--mantine-color-dimmed);
 
     &:hover {
         background-color: light-dark(
-            rgba(33, 27, 23, 0.05),
-            rgba(255, 255, 255, 0.055)
+            rgba(33, 27, 23, 0.09),
+            rgba(255, 255, 255, 0.09)
         );
         color: var(--mantine-color-text);
     }
@@ -42,7 +47,9 @@
     justify-content: center;
 }
 
-.menuGroup {
+.menuGroup.menuGroup {
+    gap: 6px;
+
     @media print {
         display: none;
     }

@@ -6,12 +6,18 @@
 
   a {
     color: var(--mantine-color-default-color);
-    line-height: inherit;
+    line-height: 20px;
   }
 
   .mantine-Breadcrumbs-breadcrumb {
     min-width: 1px;
     overflow: hidden;
+  }
+
+  :global(.mantine-Breadcrumbs-separator) {
+    font-size: 13px;
+    color: var(--notion-border-strong);
+    line-height: inherit;
   }
 }
 
@@ -20,6 +26,21 @@
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 200px;
+}
+
+/* Breadcrumb links are pills like Notion's (measured live 2026-09):
+ * 2px/6px padding around a 20px line box, 6px radius, hover surface.
+ * Kept after .truncatedText so its tighter max-width wins for crumbs. */
+.breadcrumbLink {
+  padding: 2px 6px;
+  border-radius: var(--mantine-radius-sm);
+  /* Notion caps the label at 160px plus the 12px pill padding. */
+  max-width: 172px;
+  transition: background-color 0.1s ease-in-out;
+}
+
+.breadcrumbLink:hover {
+  background-color: var(--notion-hover);
 }
 
 .breadcrumbDiv {

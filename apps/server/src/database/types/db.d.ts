@@ -487,6 +487,7 @@ export interface Workspaces {
   enforceMfa: Generated<boolean | null>;
   enforceSso: Generated<boolean>;
   hostname: string | null;
+  icon: string | null;
   isScimEnabled: Generated<boolean>;
   id: Generated<string>;
   licenseKey: string | null;

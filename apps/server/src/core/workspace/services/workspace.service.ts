@@ -707,6 +707,7 @@ export class WorkspaceService {
     const columnChanges = diffAuditTrackedFields(
       [
         'name',
+        'icon',
         'logo',
         'enforceSso',
         'enforceMfa',

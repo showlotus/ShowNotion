@@ -4,6 +4,7 @@ export interface IWorkspace {
   id: string;
   name: string;
   description: string;
+  icon: string | null;
   logo: string;
   hostname: string;
   defaultSpaceId: string;
