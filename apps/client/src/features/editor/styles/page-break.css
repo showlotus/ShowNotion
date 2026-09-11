@@ -1,13 +1,13 @@
 .ProseMirror .page-break {
   position: relative;
-  margin: 1.5rem 0;
+  padding-block: 12px;
   border-top: 1px dashed var(--mantine-color-default-border);
   height: 0;
   user-select: none;
 }
 
 .ProseMirror[contenteditable="false"] .page-break {
-  margin: 0;
+  padding-block: 0;
   border: none;
   height: 0;
 }

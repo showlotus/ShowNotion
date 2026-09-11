@@ -12,6 +12,12 @@
     &.ProseMirror-selectednode {
       outline: none;
     }
+
+    /* 自定义 node view 不经 .react-renderer，单独承接块间距（与 Notion 的
+       图片块 8px 内边距一致，halo 取盒内缩 2px 即“图 ±6px”） */
+    &:not(.react-renderer) {
+      padding-block: 8px;
+    }
   }
 
   .attachment-placeholder {

@@ -180,7 +180,7 @@ export default function Breadcrumb() {
   return (
     <nav aria-label={t("Breadcrumb")} className={classes.breadcrumbDiv}>
       {breadcrumbNodes && (
-        <Breadcrumbs className={classes.breadcrumbs} separatorMargin={0}>
+        <Breadcrumbs className={classes.breadcrumbs} separatorMargin={2}>
           {isMobile ? getMobileBreadcrumbItems() : getBreadcrumbItems()}
         </Breadcrumbs>
       )}

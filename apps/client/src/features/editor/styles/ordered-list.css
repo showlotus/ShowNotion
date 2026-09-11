@@ -52,21 +52,15 @@
   padding-inline-start: 30px;
 }
 
-/* Nested lists add no margin: Notion stacks list items at a uniform 30px
- * pitch, and each nesting level steps in via the base list padding. Scoped
- * under .ProseMirror so it wins over the core .ProseMirror ul/ol margin. */
+/* Nested lists add no block spacing of their own: Notion stacks list items
+ * at a uniform 30px pitch (24px line + 3px + 3px li padding), so each
+ * nesting level steps in via the base list padding only. */
 .ProseMirror {
   ul ul,
   ul ol,
   ol ul,
   ol ol {
-    margin-top: 0;
-    margin-bottom: 0;
-  }
-
-  /* The first nested item sits 30px below its parent line (Notion's item
-   * pitch): 24px line + 2px + 2px li padding + a 2px top offset. */
-  ul:not([data-type="taskList"]) ul {
-    margin-top: 2px;
+    margin: 0;
+    padding-block: 0;
   }
 }

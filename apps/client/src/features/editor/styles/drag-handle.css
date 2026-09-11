@@ -1,8 +1,11 @@
 /* 压掉默认蓝色描边，选中高亮改由 .block-selection-halo 覆盖容器承担 */
 .ProseMirror :is(p, h1, h2, h3, h4, h5, h6, li, blockquote).ProseMirror-selectednode,
 .ProseMirror [data-type="details"].ProseMirror-selectednode,
+.ProseMirror hr.ProseMirror-selectednode,
+.ProseMirror .tableWrapper.ProseMirror-selectednode,
 .ProseMirror .react-renderer.node-codeBlock.ProseMirror-selectednode,
-.ProseMirror .react-renderer.node-callout.ProseMirror-selectednode {
+.ProseMirror .react-renderer.node-callout.ProseMirror-selectednode,
+.ProseMirror .react-renderer.node-image.ProseMirror-selectednode {
   outline: none;
 }
 
@@ -13,8 +16,9 @@
   user-select: none;
 }
 
-/* Notion 式选中高亮容器：几何由 drag-handle 插件计算（文本块上下各留 2px，
-   其余块 inset 2px 2px 1px；radius 4px） */
+/* Notion 式选中高亮容器：几何由 drag-handle 插件计算（纵向块盒内缩 2px，
+   横向左右各外扩 6px 留出文字间隙；列表项左缘取父级列表盒以包含符号；
+   radius 4px） */
 .block-selection-halo {
   position: absolute;
   pointer-events: none;

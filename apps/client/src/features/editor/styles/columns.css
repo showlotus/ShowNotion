@@ -1,7 +1,6 @@
 div[data-type="columns"] {
   display: flex;
-  margin: 0.75rem 0;
-  padding: 0.5em 0;
+  padding-block: 8px;
 }
 
 div[data-type="columns"] > div[data-type="column"] {

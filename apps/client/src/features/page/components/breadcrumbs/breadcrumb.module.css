@@ -30,12 +30,13 @@
 
 /* Breadcrumb links are pills like Notion's (measured live 2026-09):
  * 2px/6px padding around a 20px line box, 6px radius, hover surface.
- * Kept after .truncatedText so its tighter max-width wins for crumbs. */
+ * Kept after .truncatedText so the max-width override below wins. */
 .breadcrumbLink {
   padding: 2px 6px;
   border-radius: var(--mantine-radius-sm);
-  /* Notion caps the label at 160px plus the 12px pill padding. */
-  max-width: 172px;
+  /* No per-crumb cap: long titles use the header's free space and only
+   * ellipsize when the bar runs out (Notion caps at 160px). */
+  max-width: none;
   transition: background-color 0.1s ease-in-out;
 }
 

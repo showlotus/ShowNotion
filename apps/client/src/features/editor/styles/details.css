@@ -2,6 +2,7 @@
   [data-type="details"] {
     display: flex;
     align-items: flex-start;
+    padding-block: 8px;
     padding-inline-start: 2px;
     width: 100%;
 

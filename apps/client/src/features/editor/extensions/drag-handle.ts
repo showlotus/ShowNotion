@@ -207,26 +207,10 @@ const haloBlockTypes = new Set([
   "details",
   "codeBlock",
   "callout",
+  "horizontalRule",
+  "image",
+  "table",
 ]);
-
-// 文本类块：halo 以文字内容包围盒为基准上下对称留白；容器型块（代码块/
-// 标注/折叠块）沿用整块几何，避免把内部留白一并算进高亮；任务项的 content
-// range 会带上 checkbox 与无障碍隐藏元素、测量失真，一并回退整块几何
-const haloTextBlockTypes = new Set([
-  "paragraph",
-  "heading",
-  "listItem",
-  "blockquote",
-]);
-
-// 量取块内文字内容的包围盒；空块（只有占位换行）返回 null 以便回退整块几何
-function measureContentRect(node: HTMLElement): DOMRect | null {
-  const range = document.createRange();
-  range.selectNodeContents(node);
-  const contentRect = range.getBoundingClientRect();
-  if (contentRect.width === 0 && contentRect.height === 0) return null;
-  return contentRect;
-}
 
 // 取找到的 DOM 元素在文档中的锚点位置（元素内容起点），据此判断它代表的块
 function anchorPosAtDOM(view: EditorView, node: Element): number | null {
@@ -649,24 +633,14 @@ export function DragHandlePlugin(
           ? markerZone.getBoundingClientRect().left
           : rect.left;
 
+        // Notion 同款几何（2026-09 实测）：纵向取块盒内缩 2px；横向因文字盒
+        // 紧贴内容栏边缘，向左右各外扩 6px，让文字/元素距 halo 边 6px
         const containerRect = container.getBoundingClientRect();
-        const contentRect = haloTextBlockTypes.has(selection.node.type.name)
-          ? measureContentRect(nodeDOM)
-          : null;
-
-        // 文本块：以文字内容为基准上下各留 3px（正文 24px / 标题 38px），
-        // 选中时高亮不再紧贴文字；其余块沿用“inset 2px 2px 1px”的整块几何
-        if (contentRect) {
-          const haloPadY = 3;
-          halo.style.top = `${contentRect.top - containerRect.top - haloPadY}px`;
-          halo.style.height = `${Math.max(contentRect.height + haloPadY * 2, 0)}px`;
-        } else {
-          halo.style.top = `${rect.top - containerRect.top + 2}px`;
-          halo.style.height = `${Math.max(rect.height - 3, 0)}px`;
-        }
-        // 左右各外扩 1px：中文/emoji 字形紧贴内容盒子边缘，内缩会切掉首字笔画
-        halo.style.left = `${blockLeft - containerRect.left - 1}px`;
-        halo.style.width = `${Math.max(rect.right - blockLeft + 2, 0)}px`;
+        const haloPadX = 6;
+        halo.style.top = `${rect.top - containerRect.top + 2}px`;
+        halo.style.height = `${Math.max(rect.height - 4, 0)}px`;
+        halo.style.left = `${blockLeft - containerRect.left - haloPadX}px`;
+        halo.style.width = `${Math.max(rect.right - blockLeft + haloPadX * 2, 0)}px`;
         halo.classList.add("active");
 
         // 把手进入选中态：定位到选中块并保持可见
