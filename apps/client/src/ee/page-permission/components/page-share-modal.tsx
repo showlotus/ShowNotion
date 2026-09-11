@@ -57,7 +57,6 @@ export function PageShareModal({ readOnly }: PageShareModalProps) {
   return (
     <>
       <Button
-        style={{ border: "none" }}
         size="compact-sm"
         leftSection={
           isRestricted ? (
@@ -70,7 +69,8 @@ export function PageShareModal({ readOnly }: PageShareModalProps) {
             </Indicator>
           ) : null
         }
-        variant="default"
+        variant="subtle"
+        color="dark"
         onClick={() => {
           setActiveTab(isPubliclyShared ? "publish" : hasPagePermissions ? "access" : "publish");
           open();

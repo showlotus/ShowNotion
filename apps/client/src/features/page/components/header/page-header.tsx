@@ -44,7 +44,7 @@ export default function PageHeader({ readOnly }: Props) {
           <Breadcrumb />
 
           {showPublicBadge && (
-            <Tooltip label={t("Open public page")} openDelay={250} withArrow>
+            <Tooltip label={t("Open public page")} openDelay={250}>
               <Badge
                 component="a"
                 href={buildPublicSpaceUrl({

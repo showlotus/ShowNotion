@@ -99,6 +99,27 @@ export const theme = createTheme({
     Tooltip: Tooltip.extend({
       defaultProps: {
         events: { hover: true, focus: true, touch: false },
+        // Notion tooltips wrap at a 300px cap instead of running on one line.
+        multiline: true,
+        // Measured gap between target and chip (Mantine default: 5).
+        offset: 6,
+        // Notion fades the chip in over 0.05s ease-out (Mantine default: 100ms).
+        transitionProps: { duration: 50, timingFunction: "ease-out" },
+      },
+      // Notion's tooltip chip (measured live 2026-09): 12px/1.4 text on the
+      // dark accent surface in both color schemes, 6px radius, 5px 8px
+      // padding and a 300px cap for wrapped labels. The Mantine default
+      // radius (theme defaultRadius = sm = 6px) already matches.
+      styles: {
+        tooltip: {
+          padding: "5px 8px",
+          fontSize: "12px",
+          lineHeight: 1.4,
+          maxWidth: 300,
+          backgroundColor: "var(--notion-tooltip-bg)",
+          color: "var(--notion-tooltip-color)",
+          boxShadow: "var(--notion-tooltip-shadow)",
+        },
       },
     }),
     // Size badges to their content; fit-content collapses inside table cells.
@@ -143,6 +164,14 @@ export const mantineCssResolver: CSSVariablesResolver = (theme) => ({
   variables: {
     ...v8CssVariablesResolver(theme).variables,
     "--input-error-size": theme.fontSizes.sm,
+    // Notion tooltip chip (measured live 2026-09 from app.notion.com):
+    // identical in light and dark themes — a dark #2C2C2B surface
+    // (--c-bacAccPri) with #F0EFED text (--c-texInvPri), plus their hardcoded
+    // tooltip shadow (soft drop shadow + 1px inset highlight ring).
+    "--notion-tooltip-bg": "#2C2C2B",
+    "--notion-tooltip-color": "#F0EFED",
+    "--notion-tooltip-shadow":
+      "rgba(0, 0, 0, 0.08) 0px 4px 12px -2px, rgba(255, 255, 255, 0.05) 0px 0px 0px 1px inset",
     // Font rendering switch. Mantine v9 applies smoothing on body via
     // var(--mantine-webkit-font-smoothing), so a raw `html { ... }` rule
     // loses to the body rule (direct beats inheritance). "auto" = subpixel

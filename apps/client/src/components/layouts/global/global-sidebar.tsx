@@ -92,7 +92,7 @@ export default function GlobalSidebar() {
           <span>{t("Home")}</span>
         </Link>
         {aiChatEnabled && (
-          <Tooltip label={t("AI Chat")} position="bottom" withArrow>
+          <Tooltip label={t("AI Chat")} position="bottom">
             <Link
               className={classes.actionItem}
               data-active={active.startsWith("/ai") || undefined}
@@ -109,7 +109,6 @@ export default function GlobalSidebar() {
         <Tooltip
           label={`${t("Search")} ${platformModifierLabel} K`}
           position="bottom"
-          withArrow
         >
           <UnstyledButton
             className={`${classes.actionItem} ${classes.actionSearch}`}
@@ -129,7 +128,6 @@ export default function GlobalSidebar() {
                 key={item.label}
                 label={upgradeLabel}
                 position="right"
-                withArrow
               >
                 <UnstyledButton
                   className={classes.link}

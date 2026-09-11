@@ -654,18 +654,19 @@ export function DragHandlePlugin(
           ? measureContentRect(nodeDOM)
           : null;
 
-        // 文本块：以文字内容为基准上下各留 2px（标题 32px / 正文 22px），
+        // 文本块：以文字内容为基准上下各留 3px（正文 24px / 标题 38px），
         // 选中时高亮不再紧贴文字；其余块沿用“inset 2px 2px 1px”的整块几何
         if (contentRect) {
-          const haloPadY = 2;
+          const haloPadY = 3;
           halo.style.top = `${contentRect.top - containerRect.top - haloPadY}px`;
           halo.style.height = `${Math.max(contentRect.height + haloPadY * 2, 0)}px`;
         } else {
           halo.style.top = `${rect.top - containerRect.top + 2}px`;
           halo.style.height = `${Math.max(rect.height - 3, 0)}px`;
         }
-        halo.style.left = `${blockLeft - containerRect.left + 2}px`;
-        halo.style.width = `${Math.max(rect.right - blockLeft - 4, 0)}px`;
+        // 左右各外扩 1px：中文/emoji 字形紧贴内容盒子边缘，内缩会切掉首字笔画
+        halo.style.left = `${blockLeft - containerRect.left - 1}px`;
+        halo.style.width = `${Math.max(rect.right - blockLeft + 2, 0)}px`;
         halo.classList.add("active");
 
         // 把手进入选中态：定位到选中块并保持可见

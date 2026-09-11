@@ -199,7 +199,7 @@ export function SpaceSidebar() {
             </Group>
 
             <Group gap="xs">
-              <Tooltip label={sortLabel} withArrow position="right">
+              <Tooltip label={sortLabel} position="right">
                 <ActionIcon
                   variant="default"
                   size={18}
@@ -223,7 +223,7 @@ export function SpaceSidebar() {
                 SpaceCaslAction.Manage,
                 SpaceCaslSubject.Page,
               ) && (
-                <Tooltip label={t("Create page")} withArrow position="right">
+                <Tooltip label={t("Create page")} position="right">
                   <ActionIcon
                     variant="default"
                     size={18}
@@ -345,7 +345,7 @@ function SpaceMenu({
     <>
       <Menu width={200} shadow="md" withArrow>
         <Menu.Target>
-          <Tooltip label={t("Space menu")} withArrow position="top">
+          <Tooltip label={t("Space menu")} position="top">
             <ActionIcon
               variant="default"
               size={18}
@@ -389,7 +389,6 @@ function SpaceMenu({
                 label={upgradeLabel}
                 disabled={hasTemplates}
                 position="right"
-                withArrow
               >
                 <Menu.Item
                   onClick={hasTemplates ? openTemplatePicker : undefined}

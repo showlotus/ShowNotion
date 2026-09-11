@@ -82,8 +82,8 @@
  * #252525 (dark) / white (light) surface (--notion-popover-* tokens in
  * theme.ts). Menu items stay at the 6px interactive radius. Static class
  * selectors tie with Mantine's package rules but are imported later, so
- * these win the cascade without specificity hacks. Tooltip is standalone
- * Floating and deliberately untouched.
+ * these win the cascade without specificity hacks. Tooltips get Notion's
+ * own chip styling in theme.ts (Tooltip.extend) and render no arrow.
  */
 .mantine-Popover-dropdown,
 .mantine-Menu-dropdown,
@@ -101,7 +101,8 @@
 }
 
 /* Click-opened floating panels (Menu / Popover / HoverCard) drop the outer
- * pointer arrow to match Notion's flat sheets; Tooltip keeps its arrow. */
+ * pointer arrow to match Notion's flat sheets; Tooltips are arrow-less too
+ * (withArrow removed at the call sites). */
 .mantine-Menu-arrow,
 .mantine-Popover-arrow,
 .mantine-HoverCard-arrow {

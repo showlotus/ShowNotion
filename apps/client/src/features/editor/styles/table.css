@@ -216,9 +216,9 @@
   );
 }
 
-/* Immediate tooltip on the chevron — same style language as the rest of the
-   app (small, dark, rounded), unlike the native `title` tooltip which only
-   appears after a long delay. */
+/* Immediate tooltip on the chevron — borrows the Notion chip tokens from
+   theme.ts (12px/1.4, 5px 8px, 6px radius), unlike the native `title`
+   tooltip which only appears after a long delay. */
 .tableReadonlySortChevron::after {
   content: attr(data-tooltip);
   position: absolute;
@@ -227,10 +227,11 @@
      `overflow-y: auto` per spec). */
   top: calc(100% + 6px);
   right: 0;
-  padding: 4px 8px;
-  border-radius: 4px;
-  background: var(--mantine-color-dark-7);
-  color: var(--mantine-color-white);
+  padding: 5px 8px;
+  border-radius: var(--mantine-radius-sm);
+  background: var(--notion-tooltip-bg);
+  color: var(--notion-tooltip-color);
+  box-shadow: var(--notion-tooltip-shadow);
   font-size: 12px;
   font-weight: 400;
   line-height: 1.4;

@@ -171,7 +171,7 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
 
       <PageShareModal readOnly={readOnly} />
 
-      <Tooltip label={t("Comments")} openDelay={250} withArrow>
+      <Tooltip label={t("Comments")} openDelay={250}>
         <ActionIcon
           variant="subtle"
           color="dark"
@@ -185,7 +185,7 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
       </Tooltip>
 
       {!page?.isBase && (
-        <Tooltip label={t("Table of contents")} openDelay={250} withArrow>
+        <Tooltip label={t("Table of contents")} openDelay={250}>
           <ActionIcon
             variant="subtle"
             color="dark"
@@ -204,7 +204,7 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
         </Tooltip>
       )}
 
-      <Tooltip label={t("Details")} openDelay={250} withArrow>
+      <Tooltip label={t("Details")} openDelay={250}>
         <ActionIcon
           variant="subtle"
           color="dark"
@@ -627,7 +627,6 @@ function ConnectionWarning() {
     <Tooltip
       label={t("Real-time editor connection lost. Retrying...")}
       openDelay={250}
-      withArrow
     >
       <ThemeIcon
         variant="default"

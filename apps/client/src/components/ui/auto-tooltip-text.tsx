@@ -33,7 +33,6 @@ export function AutoTooltipText({
       label={label}
       disabled={!isTruncated || !label}
       multiline
-      withArrow
       withinPortal={false}
       {...tooltipProps}
     >

@@ -42,7 +42,7 @@ export function SidebarToggleOverlay() {
     <>
       {/* 仅在侧边栏收起时显示展开按钮，展开时避免悬浮按钮遮挡工作区名称 */}
       {!desktopOpened && (
-        <Tooltip label={t("Expand sidebar")} position="right" withArrow openDelay={300}>
+        <Tooltip label={t("Expand sidebar")} position="right" openDelay={300}>
           <UnstyledButton
             className={classes.expandButton}
             aria-label={t("Expand sidebar")}
