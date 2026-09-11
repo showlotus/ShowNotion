@@ -1,16 +1,18 @@
-/* 桌面端侧边栏收起时左上角常驻的展开按钮 */
+/* 桌面端侧边栏收起时左上角常驻的展开按钮：与页面顶栏（44px）垂直居中、左对齐 12px
+ * 默认透明仅显示图标，鼠标悬浮时才出现背景 */
 .expandButton {
   position: fixed;
-  top: 10px;
-  left: 10px;
+  top: 8px;
+  left: 12px;
   z-index: 150;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 6px 3px 3px;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
   border-radius: var(--mantine-radius-md);
-  background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
-  box-shadow: var(--mantine-shadow-sm);
+  color: var(--mantine-color-dimmed);
+  background-color: transparent;
   cursor: pointer;
 
   @mixin hover {
@@ -20,10 +22,6 @@
   @media (max-width: $mantine-breakpoint-sm) {
     display: none;
   }
-}
-
-.expandIcon {
-  color: var(--mantine-color-dimmed);
 }
 
 /* 移动端左上角汉堡按钮，用于打开抽屉式侧边栏 */

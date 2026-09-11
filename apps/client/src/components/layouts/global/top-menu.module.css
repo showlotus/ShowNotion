@@ -39,6 +39,25 @@
   color: var(--mantine-color-dimmed);
 }
 
+/* 收起侧边栏按钮：hover 或键盘聚焦时淡入，透明时保持占位避免名称与箭头跳动 */
+.collapseButton {
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.trigger:hover .collapseButton,
+.collapseButton:focus-visible {
+  opacity: 1;
+}
+
+/* 触屏设备没有 hover，收起按钮常显以保证可点击 */
+@media (hover: none) {
+  .collapseButton {
+    opacity: 1;
+  }
+}
+
 /* 侧边栏底部的个人账户菜单触发按钮（头像 + 名称 + 邮箱） */
 .userTrigger {
   width: 100%;

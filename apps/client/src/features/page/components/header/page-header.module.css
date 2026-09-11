@@ -17,6 +17,13 @@
     padding-right: var(--mantine-spacing-xs);
   }
 
+  /* 侧边栏收起时，为左上角固定的展开按钮让位（仅桌面端，移动端不显示该按钮） */
+  &[data-sidebar-collapsed] {
+    @media (min-width: calc($mantine-breakpoint-sm + 1px)) {
+      padding-left: 48px;
+    }
+  }
+
   @media print {
     display: none;
   }

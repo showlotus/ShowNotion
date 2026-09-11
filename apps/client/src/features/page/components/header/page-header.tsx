@@ -10,6 +10,8 @@ import { usePageQuery } from "@/features/page/queries/page-query.ts";
 import { extractPageSlugId } from "@/lib";
 import { buildPublicSpaceUrl } from "@/features/page/page.utils.ts";
 import { isBetaPublicSpaces } from "@/lib/config.ts";
+import { useAtom } from "jotai";
+import { desktopSidebarAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 
 interface Props {
   readOnly?: boolean;
@@ -17,6 +19,7 @@ interface Props {
 export default function PageHeader({ readOnly }: Props) {
   const { t } = useTranslation();
   const { spaceSlug, pageSlug } = useParams();
+  const [desktopOpened] = useAtom(desktopSidebarAtom);
   const { data: space } = useGetSpaceBySlugQuery(spaceSlug);
   const { data: page } = usePageQuery({
     pageId: extractPageSlugId(pageSlug),
@@ -31,7 +34,11 @@ export default function PageHeader({ readOnly }: Props) {
     page.permissions?.hasRestriction !== true;
 
   return (
-    <div className={classes.header} data-page-header="true">
+    <div
+      className={classes.header}
+      data-page-header="true"
+      data-sidebar-collapsed={!desktopOpened || undefined}
+    >
       <Group justify="space-between" h="100%" wrap="nowrap" className={classes.group}>
         <Group gap="xs" wrap="nowrap" style={{ minWidth: 0 }}>
           <Breadcrumb />

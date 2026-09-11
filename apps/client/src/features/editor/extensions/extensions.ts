@@ -116,6 +116,7 @@ import LinkView from "@/features/editor/components/link/link-view.tsx";
 import i18n from "@/i18n.ts";
 import { MarkdownClipboard } from "@/features/editor/extensions/markdown-clipboard.ts";
 import EmojiCommand from "./emoji-command";
+import EmojiDecoration from "./emoji-decoration";
 import { countWords } from "alfaaz";
 import AutoJoiner from "@/features/editor/extensions/autojoiner.ts";
 import GlobalDragHandle from "@/features/editor/extensions/drag-handle.ts";
@@ -249,6 +250,7 @@ export const mainExtensions = [
   Color,
   SlashCommand,
   EmojiCommand,
+  EmojiDecoration,
   Comment.configure({
     HTMLAttributes: {
       class: "comment-mark",

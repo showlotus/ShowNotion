@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  ActionIcon,
   Group,
   Menu,
   ScrollArea,
@@ -15,6 +16,7 @@ import {
   IconChevronDown,
   IconDeviceDesktop,
   IconLayoutGrid,
+  IconLayoutSidebarLeftCollapse,
   IconLogout,
   IconMoon,
   IconSearch,
@@ -33,6 +35,7 @@ import { useGetSpacesQuery } from "@/features/space/queries/space-query.ts";
 import CreatePersonalSpaceModal from "@/ee/personal-space/components/create-personal-space-modal";
 import { useAtom } from "jotai";
 import { currentUserAtom } from "@/features/user/atoms/current-user-atom.ts";
+import { desktopSidebarAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import APP_ROUTE from "@/lib/app-route.ts";
 import useAuth from "@/features/auth/hooks/use-auth.ts";
@@ -51,6 +54,7 @@ export default function TopMenu() {
   const navigate = useNavigate();
   const { spaceSlug: currentSpaceSlug } = useParams<{ spaceSlug: string }>();
   const [currentUser] = useAtom(currentUserAtom);
+  const [, setDesktopOpened] = useAtom(desktopSidebarAtom);
 
   const workspace = currentUser?.workspace;
 
@@ -82,6 +86,12 @@ export default function TopMenu() {
     e.stopPropagation();
   };
 
+  const handleCollapseSidebar = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDesktopOpened(false);
+  };
+
   if (!workspace) {
     return <></>;
   }
@@ -109,6 +119,16 @@ export default function TopMenu() {
             </Text>
             <IconChevronDown size={16} className={classes.triggerChevron} />
           </UnstyledButton>
+          <ActionIcon
+            className={classes.collapseButton}
+            variant="subtle"
+            color="gray"
+            size={22}
+            aria-label={t("Collapse sidebar")}
+            onClick={handleCollapseSidebar}
+          >
+            <IconLayoutSidebarLeftCollapse size={16} />
+          </ActionIcon>
         </div>
       </Menu.Target>
       <Menu.Dropdown>

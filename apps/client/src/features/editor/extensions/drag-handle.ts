@@ -209,6 +209,25 @@ const haloBlockTypes = new Set([
   "callout",
 ]);
 
+// 文本类块：halo 以文字内容包围盒为基准上下对称留白；容器型块（代码块/
+// 标注/折叠块）沿用整块几何，避免把内部留白一并算进高亮；任务项的 content
+// range 会带上 checkbox 与无障碍隐藏元素、测量失真，一并回退整块几何
+const haloTextBlockTypes = new Set([
+  "paragraph",
+  "heading",
+  "listItem",
+  "blockquote",
+]);
+
+// 量取块内文字内容的包围盒；空块（只有占位换行）返回 null 以便回退整块几何
+function measureContentRect(node: HTMLElement): DOMRect | null {
+  const range = document.createRange();
+  range.selectNodeContents(node);
+  const contentRect = range.getBoundingClientRect();
+  if (contentRect.width === 0 && contentRect.height === 0) return null;
+  return contentRect;
+}
+
 // 取找到的 DOM 元素在文档中的锚点位置（元素内容起点），据此判断它代表的块
 function anchorPosAtDOM(view: EditorView, node: Element): number | null {
   try {
@@ -631,12 +650,22 @@ export function DragHandlePlugin(
           : rect.left;
 
         const containerRect = container.getBoundingClientRect();
+        const contentRect = haloTextBlockTypes.has(selection.node.type.name)
+          ? measureContentRect(nodeDOM)
+          : null;
 
-        // 对齐 Notion：inset 2px 2px 1px，圆角与底色见 .block-selection-halo
-        halo.style.top = `${rect.top - containerRect.top + 2}px`;
+        // 文本块：以文字内容为基准上下各留 2px（标题 32px / 正文 22px），
+        // 选中时高亮不再紧贴文字；其余块沿用“inset 2px 2px 1px”的整块几何
+        if (contentRect) {
+          const haloPadY = 2;
+          halo.style.top = `${contentRect.top - containerRect.top - haloPadY}px`;
+          halo.style.height = `${Math.max(contentRect.height + haloPadY * 2, 0)}px`;
+        } else {
+          halo.style.top = `${rect.top - containerRect.top + 2}px`;
+          halo.style.height = `${Math.max(rect.height - 3, 0)}px`;
+        }
         halo.style.left = `${blockLeft - containerRect.left + 2}px`;
         halo.style.width = `${Math.max(rect.right - blockLeft - 4, 0)}px`;
-        halo.style.height = `${Math.max(rect.height - 3, 0)}px`;
         halo.classList.add("active");
 
         // 把手进入选中态：定位到选中块并保持可见

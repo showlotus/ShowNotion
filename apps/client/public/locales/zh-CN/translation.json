@@ -224,6 +224,8 @@
   "Your password": "您的密码",
   "Your password must be a minimum of 8 characters.": "您的密码必须至少包含8个字符。",
   "Sidebar toggle": "侧边栏切换",
+  "Collapse sidebar": "收起侧边栏",
+  "Expand sidebar": "展开侧边栏",
   "Comments": "评论",
   "404 page not found": "404 页面未找到",
   "Sorry, we can't find the page you are looking for.": "抱歉，我们无法找到你所需要的页面",

@@ -234,6 +234,13 @@
     background-color: transparent;
   }
 
+  /* emoji 独立字体栈（与 Notion 一致）：Chrome 按字体栈首字体度量绘制选区
+     高亮，emoji 段落让高亮自然撑高（24px 标题行 32px 而非 28px），选中时
+     上下不再紧贴文字 */
+  .editor-emoji {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  }
+
   .comment-mark {
     background: rgba(255, 215, 0, 0.14);
     border-bottom: 2px solid rgb(166, 158, 12);

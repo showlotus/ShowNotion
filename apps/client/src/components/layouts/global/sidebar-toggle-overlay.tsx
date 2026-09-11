@@ -1,14 +1,12 @@
 import { Tooltip, UnstyledButton, ActionIcon } from "@mantine/core";
-import { IconLayoutGrid, IconLayoutSidebarRightExpand, IconLayoutSidebarRightCollapse } from "@tabler/icons-react";
+import { IconLayoutSidebarLeftExpand } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useTranslation } from "react-i18next";
-import { useAtomValue } from "jotai";
 import {
   desktopSidebarAtom,
   mobileSidebarAtom,
 } from "./hooks/atoms/sidebar-atom.ts";
 import { useToggleSidebar } from "./hooks/hooks/use-toggle-sidebar.ts";
-import { currentUserAtom } from "@/features/user/atoms/current-user-atom.ts";
 import classes from "./sidebar-toggle-overlay.module.css";
 
 // 顶部 Header 移除后侧边栏的开关入口：桌面端侧边栏收起时左上角常驻展开按钮，移动端为汉堡按钮
@@ -18,8 +16,6 @@ export function SidebarToggleOverlay() {
   const [desktopOpened, setDesktopOpened] = useAtom(desktopSidebarAtom);
   const [mobileSidebarOpened] = useAtom(mobileSidebarAtom);
   const toggleMobileSidebar = useToggleSidebar(mobileSidebarAtom);
-  const currentUser = useAtomValue(currentUserAtom);
-  const workspace = currentUser?.workspace;
   // peek 悬浮已暂时停用，保留以备恢复
   // const [, setPeek] = useAtom(sidebarPeekAtom);
   // const edgeTimerRef = useRef<number | null>(null);
@@ -46,10 +42,10 @@ export function SidebarToggleOverlay() {
     <>
       {/* 仅在侧边栏收起时显示展开按钮，展开时避免悬浮按钮遮挡工作区名称 */}
       {!desktopOpened && (
-        <Tooltip label={t("Sidebar toggle")} position="right" withArrow openDelay={300}>
+        <Tooltip label={t("Expand sidebar")} position="right" withArrow openDelay={300}>
           <UnstyledButton
             className={classes.expandButton}
-            aria-label={t("Sidebar toggle")}
+            aria-label={t("Expand sidebar")}
             aria-expanded={desktopOpened}
             visibleFrom="sm"
             onClick={() => {
@@ -57,14 +53,7 @@ export function SidebarToggleOverlay() {
               setDesktopOpened(true);
             }}
           >
-            {workspace?.icon ? (
-              <span style={{ fontSize: 18, lineHeight: 1 }}>
-                {workspace.icon}
-              </span>
-            ) : (
-              <IconLayoutGrid size={18} />
-            )}
-            <IconLayoutSidebarRightExpand className={classes.expandIcon} size={14} />
+            <IconLayoutSidebarLeftExpand size={18} />
           </UnstyledButton>
         </Tooltip>
       )}
@@ -79,7 +68,7 @@ export function SidebarToggleOverlay() {
           aria-expanded={mobileSidebarOpened}
           onClick={toggleMobileSidebar}
         >
-          <IconLayoutSidebarRightCollapse size={20} />
+          <IconLayoutSidebarLeftExpand size={20} />
         </ActionIcon>
       )}
 

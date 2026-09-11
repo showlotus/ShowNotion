@@ -13,7 +13,8 @@
   user-select: none;
 }
 
-/* Notion 式选中高亮容器：几何由 drag-handle 插件计算（inset 2px 2px 1px / radius 4px） */
+/* Notion 式选中高亮容器：几何由 drag-handle 插件计算（文本块上下各留 2px，
+   其余块 inset 2px 2px 1px；radius 4px） */
 .block-selection-halo {
   position: absolute;
   pointer-events: none;
