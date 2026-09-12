@@ -8,9 +8,10 @@ import Download from "yet-another-react-lightbox/plugins/download";
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
 import Video from "yet-another-react-lightbox/plugins/video";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import i18n from "@/i18n.ts";
 import { useTranslation } from "react-i18next";
+import { getScrollContainer } from "@/hooks/use-scroll-container.ts";
 
 type LightboxViewProps = {
   editor: Editor;
@@ -112,8 +113,6 @@ export default function LightboxView({
 }: LightboxViewProps) {
   const { i18n: i18nInstance } = useTranslation();
 
-  const savedPageScrollRef = useRef(0);
-
   const selectedSlide = useMemo(
     () => getMedia(src, type),
     [src, type, i18nInstance.language]
@@ -125,6 +124,20 @@ export default function LightboxView({
 
   useEffect(() => {
     if (!open) setIsFullscreen(false);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const scroller = getScrollContainer();
+    if (!scroller) return;
+
+    const previousOverflow = scroller.style.overflow;
+    scroller.style.overflow = "hidden";
+
+    return () => {
+      scroller.style.overflow = previousOverflow;
+    };
   }, [open]);
 
   useEffect(() => {
@@ -164,6 +177,7 @@ export default function LightboxView({
       index={index}
       slides={slides}
       plugins={[Download, Fullscreen, Video, Zoom]}
+      noScroll={{ disabled: true }}
       styles={{
         container: { backgroundColor: "rgba(0, 0, 0, 0.8)" },
         icon: { width: 24, height: 24 },
@@ -175,12 +189,6 @@ export default function LightboxView({
       }}
       controller={{ closeOnBackdropClick: !isFullscreen }}
       on={{
-        entering: () => {
-          savedPageScrollRef.current = window.scrollY;
-        },
-        exiting: () => {
-          window.scrollTo(0, savedPageScrollRef.current);
-        },
         enterFullscreen: () => setIsFullscreen(true),
         exitFullscreen: () => setIsFullscreen(false),
       }}

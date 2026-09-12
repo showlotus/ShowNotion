@@ -15,7 +15,8 @@
 .rail {
   position: absolute;
   top: 0;
-  right: 15px;
+  /* 距窗口右缘 36px（= 内容区滚动条 15px + 21px），与 Notion 实测一致。 */
+  right: 36px;
   width: 56px;
   display: flex;
   flex-direction: column;
@@ -60,7 +61,8 @@
 .panel {
   position: fixed;
   top: calc(var(--page-header-height, 44px) + 120px);
-  right: 25px;
+  /* 与顶栏「详情/评论」面板右缘一致：滚动条 15px + 10px 视觉边距。 */
+  right: calc(var(--notion-scrollbar-size, 15px) + 10px);
   z-index: 142;
   width: 232px;
   max-height: calc(100dvh - var(--page-header-height, 44px) - 210px);
@@ -71,14 +73,20 @@
     var(--mantine-color-white),
     var(--mantine-color-dark-7)
   );
-  box-shadow: light-dark(
-    0 20px 24px 0 rgba(25, 25, 25, 0.05),
-    0 5px 8px 0 rgba(25, 25, 25, 0.027),
-    0 0 0 1px rgba(42, 28, 0, 0.07),
-    rgb(56, 56, 54) 0 0 0 1px,
-    rgba(25, 25, 25, 0.2) 0 14px 28px -6px,
-    rgba(25, 25, 25, 0.118) 0 2px 4px -1px
-  );
+
+  @mixin light {
+    box-shadow:
+      0 20px 24px 0 rgba(25, 25, 25, 0.05),
+      0 5px 8px 0 rgba(25, 25, 25, 0.027),
+      0 0 0 1px rgba(42, 28, 0, 0.07);
+  }
+
+  /* 深色复用浮层 token，避免与 --notion-popover-shadow 漂移；不能写成多参数
+   * light-dark()——postcss-light-dark 只按第一个逗号切分，会把多层阴影拆错。 */
+  @mixin dark {
+    box-shadow: var(--notion-popover-shadow);
+  }
+
   animation: tocPanelIn 200ms ease;
 }
 

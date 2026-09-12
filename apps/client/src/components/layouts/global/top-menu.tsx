@@ -102,6 +102,7 @@ export default function TopMenu() {
       width={280}
       position="bottom-start"
       shadow={"lg"}
+      floatingStrategy="fixed"
       opened={menuOpened}
       onChange={setMenuOpened}
     >
@@ -258,7 +259,7 @@ export function UserMenu() {
   }
 
   return (
-    <Menu width={250} position="top-start" shadow={"lg"}>
+    <Menu width={250} position="top-start" shadow={"lg"} floatingStrategy="fixed">
       <Menu.Target>
         <UnstyledButton className={classes.userTrigger} aria-label={user.name}>
           <CustomAvatar
@@ -296,7 +297,7 @@ export function UserMenu() {
           {t("My preferences")}
         </Menu.Item>
 
-        <Menu.Sub>
+        <Menu.Sub floatingStrategy="fixed">
           <Menu.Sub.Target>
             <Menu.Sub.Item leftSection={<IconBrightnessFilled size={16} />}>
               {t("Theme")}

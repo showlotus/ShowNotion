@@ -65,7 +65,7 @@ export const MediaGroup: FC<Props> = ({ editor, templateMode }) => {
   const { t } = useTranslation();
 
   return (
-    <Menu shadow="md" position="bottom-start" withArrow={false}>
+    <Menu shadow="md" position="bottom-start" withArrow={false} floatingStrategy="fixed">
       <Menu.Target>
         <Tooltip label={t("Insert media")} withArrow>
           <ActionIcon

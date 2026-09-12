@@ -5,6 +5,7 @@ import classes from "./table-of-contents.module.css";
 import clsx from "clsx";
 import { Box, Text, Title } from "@mantine/core";
 import { useTranslation } from "react-i18next";
+import { getScrollContainer } from "@/hooks/use-scroll-container.ts";
 
 type TableOfContentsProps = {
   editor: ReturnType<typeof useEditor>;
@@ -59,13 +60,24 @@ export const TableOfContents: FC<TableOfContentsProps> = (props) => {
 
     const { node } = view.domAtPos(position);
     const element = node as HTMLElement;
-    const scrollPosition =
-      element.getBoundingClientRect().top + window.scrollY - headerOffset;
+    const scroller = getScrollContainer();
 
-    window.scrollTo({
-      top: scrollPosition,
-      behavior: "smooth",
-    });
+    if (scroller) {
+      scroller.scrollTo({
+        top:
+          scroller.scrollTop +
+          element.getBoundingClientRect().top -
+          scroller.getBoundingClientRect().top -
+          headerOffset,
+        behavior: "smooth",
+      });
+    } else {
+      window.scrollTo({
+        top:
+          element.getBoundingClientRect().top + window.scrollY - headerOffset,
+        behavior: "smooth",
+      });
+    }
 
     const tr = view.state.tr;
     tr.setSelection(new TextSelection(tr.doc.resolve(position)));

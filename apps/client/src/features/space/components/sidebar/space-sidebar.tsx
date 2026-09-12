@@ -343,7 +343,7 @@ function SpaceMenu({
 
   return (
     <>
-      <Menu width={200} shadow="md" withArrow>
+      <Menu width={200} shadow="md" withArrow floatingStrategy="fixed">
         <Menu.Target>
           <Tooltip label={t("Space menu")} position="top">
             <ActionIcon

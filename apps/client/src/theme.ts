@@ -178,6 +178,11 @@ export const mantineCssResolver: CSSVariablesResolver = (theme) => ({
     // rendering (user preference, 2026-09); set "antialiased" to restore
     // Notion-style grayscale smoothing.
     "--mantine-webkit-font-smoothing": "auto",
+    // Notion forces a fixed 15px scrollbar (their injected rule sets
+    // `* { scrollbar-width: 15px }`); expose it so right-edge UI (floating
+    // TOC rail/panel, header actions, popover anchors) can offset by the
+    // gutter the content scrollbar now occupies.
+    "--notion-scrollbar-size": "15px",
   },
   light: {
     ...v8CssVariablesResolver(theme).light,
@@ -210,6 +215,9 @@ export const mantineCssResolver: CSSVariablesResolver = (theme) => ({
     "--notion-table-border": "#E6E5E3",
     "--notion-table-header-bg": "#F7F6F3",
     "--notion-popover-bg": "#FFFFFF",
+    // Bare RGB triplet of --notion-popover-bg, for consumers that need the
+    // channel values (e.g. emoji-mart's rgb(var(--rgb-background)) surface).
+    "--notion-popover-rgb": "255, 255, 255",
     "--notion-popover-shadow":
       "rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px 16px",
     "--mantine-color-dark-light-color": "#4a4845",
@@ -244,6 +252,11 @@ export const mantineCssResolver: CSSVariablesResolver = (theme) => ({
     // matching Button / Text usages.
     "--mantine-color-green-light-color": "#1B5E20",
     "--mantine-color-orange-light-color": "#a63508",
+    // Scrollbar: the dark counterpart of Notion's 20% white thumb — a 20%
+    // black bar on a transparent track, so it reads on light surfaces.
+    "--notion-scrollbar-thumb": "rgba(0, 0, 0, 0.2)",
+    "--notion-scrollbar-thumb-hover": "rgba(0, 0, 0, 0.32)",
+    "--notion-scrollbar-track": "transparent",
   },
   dark: {
     ...v8CssVariablesResolver(theme).dark,
@@ -262,10 +275,12 @@ export const mantineCssResolver: CSSVariablesResolver = (theme) => ({
     "--notion-selected": "rgba(255, 255, 255, 0.09)",
     // Notion hairlines, measured live 2026-09: sidebar seams paint
     // rgb(44,44,43) (their inset box-shadow line), control outlines
-    // rgb(56,56,54), popovers sit on #252525 with a ring + elevation
-    // shadow. --mantine-color-default-border pins Mantine's default
+    // rgb(56,56,54). --mantine-color-default-border pins Mantine's default
     // outlines to border-strong so the dark-4 divider swap above doesn't
-    // wash out input/card borders.
+    // wash out input/card borders. Note: the popover ring no longer reuses
+    // that opaque outline — on #191919 it read as a hard ring, so the
+    // elevation now comes from a low-alpha light hairline plus a soft black
+    // diffusion (see --notion-popover-shadow below).
     "--notion-border": "rgb(44, 44, 43)",
     "--notion-border-strong": "rgb(56, 56, 54)",
     "--mantine-color-default-border": "var(--notion-border-strong)",
@@ -275,8 +290,19 @@ export const mantineCssResolver: CSSVariablesResolver = (theme) => ({
     "--notion-table-border": "#383836",
     "--notion-table-header-bg": "rgba(255, 255, 255, 0.03)",
     "--notion-popover-bg": "rgb(37, 37, 37)",
+    "--notion-popover-rgb": "37, 37, 37",
+    // Dark elevation: a faint 8% white hairline for surface separation plus
+    // true-black diffusion. The shadow must be black, not the #191919 page
+    // color — otherwise it is a no-op on the dark canvas and only the ring
+    // shows.
     "--notion-popover-shadow":
-      "rgb(56, 56, 54) 0px 0px 0px 1px, rgba(25, 25, 25, 0.2) 0px 14px 28px -6px, rgba(25, 25, 25, 0.118) 0px 2px 4px -1px",
+      "rgba(255, 255, 255, 0.08) 0px 0px 0px 1px, rgba(0, 0, 0, 0.5) 0px 16px 40px -8px, rgba(0, 0, 0, 0.35) 0px 4px 12px -2px",
+    // Scrollbar: Notion's dark thumb is a 20% white bar on a transparent
+    // track (their injected `* { scrollbar-color: rgba(255,255,255,0.2)
+    // rgba(0,0,0,0) }`, measured live 2026-09).
+    "--notion-scrollbar-thumb": "rgba(255, 255, 255, 0.2)",
+    "--notion-scrollbar-thumb-hover": "rgba(255, 255, 255, 0.32)",
+    "--notion-scrollbar-track": "transparent",
     "--mantine-color-dark-light-color": "var(--mantine-color-gray-4)",
     "--mantine-color-dark-light-hover": "var(--mantine-color-default-hover)",
   },

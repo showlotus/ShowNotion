@@ -43,7 +43,7 @@ export const QuickInsertsGroup: FC<Props> = ({ editor }) => {
           <IconMoodSmile size={16} />
         </ActionIcon>
       </Tooltip>
-      <Menu shadow="md" position="bottom-start" withArrow={false}>
+      <Menu shadow="md" position="bottom-start" withArrow={false} floatingStrategy="fixed">
         <Menu.Target>
           <Tooltip label={t("Columns")} withArrow>
             <ActionIcon

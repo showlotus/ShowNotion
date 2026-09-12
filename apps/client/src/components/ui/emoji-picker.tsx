@@ -112,9 +112,9 @@ function EmojiPicker({
     <Popover
       opened={opened}
       onClose={handlers.close}
-      width={332}
       position="bottom"
       disabled={readOnly}
+      floatingStrategy="fixed"
       closeOnEscape={true}
     >
       <Popover.Target ref={setTarget}>
@@ -132,7 +132,18 @@ function EmojiPicker({
         </ActionIcon>
       </Popover.Target>
       <Suspense fallback={null}>
-        <Popover.Dropdown bg="000" style={{ border: "none" }} ref={setDropdown}>
+        <Popover.Dropdown
+          p={0}
+          ref={setDropdown}
+          style={
+            {
+              border: "none",
+              overflow: "hidden",
+              background: "var(--notion-popover-bg)",
+              "--rgb-background": "var(--notion-popover-rgb)",
+            } as React.CSSProperties
+          }
+        >
           <Picker
             onEmojiSelect={handleEmojiSelect}
             perLine={8}

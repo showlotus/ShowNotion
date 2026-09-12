@@ -117,6 +117,7 @@ export default function Breadcrumb() {
           position="bottom"
           withArrow
           shadow="xl"
+          floatingStrategy="fixed"
           key="hidden-nodes"
         >
           <Popover.Target>
@@ -152,6 +153,7 @@ export default function Breadcrumb() {
           position="bottom"
           withArrow
           shadow="xl"
+          floatingStrategy="fixed"
           key="mobile-hidden-nodes"
         >
           <Popover.Target>

@@ -7,7 +7,9 @@ import {
   TextSelection,
 } from "@tiptap/pm/state";
 import { Fragment, Slice, Node } from "@tiptap/pm/model";
+import { dropPoint } from "@tiptap/pm/transform";
 import { EditorView } from "@tiptap/pm/view";
+import { getScrollContainer } from "@/hooks/use-scroll-container.ts";
 
 export interface GlobalDragHandleOptions {
   /**
@@ -120,6 +122,16 @@ function nodeDOMAtCoords(
     ".node-drawio",
     ".node-excalidraw",
     "[data-youtube-video]",
+    // 折叠块/分栏的「首个子块」原本会向上解析到容器本体，导致把手
+    // 跳到容器 gutter（与同容器内后续子块位置不一致）；显式匹配直接
+    // 子块，让每个子块都命中自身
+    "[data-type='detailsContent'] > *",
+    "[data-type='column'] > *",
+    // 标注/折叠块本体：嵌套在引用块、列表项等容器内时父级检查不成立，
+    // 需显式匹配，否则把手会落到外层容器（钉在容器首行、点击选错块）
+    ".node-callout",
+    "[data-type='callout']",
+    "[data-type='details']",
     ...customParagraphSelectors,
     ...customSelectors,
     ...atomSelectors,
@@ -191,6 +203,39 @@ function listMarkerZone(node: Element): Element | null {
     : null;
 }
 
+// 左侧带装饰条/图标的容器（引用块色条、标注块图标）：内部子块的把手需
+// 让位到容器外缘左侧；嵌套时取最外层（Notion 实测）。折叠块与分栏不算
+// 装饰容器——折叠块子块、分栏子块都对齐各自块/列的外缘
+const DECORATION_CONTAINER_SELECTOR =
+  "blockquote, .react-renderer.node-callout";
+
+function decorationGutter(node: Element): Element | null {
+  let leftmost: Element | null = null;
+  let minLeft = Infinity;
+  for (
+    let el = node.closest(DECORATION_CONTAINER_SELECTOR);
+    el;
+    el = el.parentElement?.closest(DECORATION_CONTAINER_SELECTOR) ?? null
+  ) {
+    const left = absoluteRect(el).left;
+    if (left < minLeft) {
+      minLeft = left;
+      leftmost = el;
+    }
+  }
+  return leftmost;
+}
+
+// 列表项内的任意块（多段落的后续段落、分割线、图片等）统一对齐所属列表
+// 的符号 gutter；任务列表的复选框在 li 盒内，不适用
+function listOwnerZone(node: Element): Element | null {
+  const li = node.closest("li");
+  const list = li?.parentElement;
+  if (!list || !/^(UL|OL)$/.test(list.tagName)) return null;
+  if (list.matches('ul[data-type="taskList"]')) return null;
+  return list;
+}
+
 function calcNodePos(pos: number, view: EditorView) {
   const $pos = view.state.doc.resolve(pos);
   if ($pos.depth > 1) return $pos.before($pos.depth);
@@ -250,8 +295,18 @@ function blockTreeSelection(
   const anchorPos = anchorPosAtDOM(view, node) ?? rawPos;
   const $pos = doc.resolve(Math.min(anchorPos, doc.content.size));
 
+  // 命中引用块本体（色条/首行/内边距）时整体选中引用块
+  if (node.matches("blockquote")) {
+    return NodeSelection.create(doc, $pos.before($pos.depth));
+  }
+
   for (let d = $pos.depth; d > 0; d--) {
     const typeName = $pos.node(d).type.name;
+    // 引用块不作为子块的提升目标：引用内文本块停在自身（Notion 实测
+    // 引用内子块单独选中），容器（列表项/折叠块/标注）照常提升
+    if (typeName === "blockquote") {
+      break;
+    }
     // 命中容器（列表项/折叠块/引用/标注）时选中整棵子树
     if (blockContainerTypes.has(typeName)) {
       return NodeSelection.create(doc, $pos.before(d));
@@ -416,6 +471,7 @@ export function DragHandlePlugin(
     }
 
     view.dragging = { slice, move: event.ctrlKey };
+    view.dom.classList.add("handle-drag");
     handleDragInProgress = true;
   }
 
@@ -425,6 +481,75 @@ export function DragHandlePlugin(
   // 把手当前悬停的块：分割线仅 13px 高，按点击坐标反查会落到下方块，
   // 点击/拖拽以 mousemove 记录的目标块为准（对齐 Notion 的行为）
   let hoveredBlockElement: Element | null = null;
+
+  // 落点提示：Notion 同款 4px 半透明蓝线 + 拖拽经过容器的浅色高亮
+  let dropIndicatorElement: HTMLElement | null = null;
+  let dropHoverElement: HTMLElement | null = null;
+  let lastDropKey: string | null = null;
+
+  function hideDropFeedback(view: EditorView) {
+    dropIndicatorElement?.classList.remove("active");
+    dropHoverElement?.classList.remove("active");
+    lastDropKey = null;
+    view.dom.classList.remove("handle-drag");
+  }
+
+  // 按 Notion 实测几何更新落点提示（2026-09）：
+  // 线体吸附在落点前块的底边（bottom:-4px）或后块的顶边（top:-4px），
+  // 宽度取锚点块宽（嵌套列表自然缩进）；浅色高亮只画在插入点最近的
+  // 容器块（列表项/引用/折叠/标注）上，顶层插入不显示
+  function updateDropIndicator(view: EditorView, event: DragEvent) {
+    if (!handleDragInProgress || !view.dragging?.slice) return;
+
+    const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
+    if (!pos) return;
+
+    let target = pos.pos;
+    const point = dropPoint(view.state.doc, target, view.dragging.slice);
+    if (point != null) target = point;
+
+    const $pos = view.state.doc.resolve(target);
+    const before = $pos.nodeBefore;
+    const key = `${target}:${before ? "below" : "above"}`;
+    if (key === lastDropKey) return;
+    lastDropKey = key;
+
+    const container =
+      (view.dom.closest(".editor-container") as HTMLElement | null) ??
+      view.dom.parentElement;
+    if (!container || !dropIndicatorElement || !dropHoverElement) return;
+    const containerRect = container.getBoundingClientRect();
+
+    const anchorDOM = view.nodeDOM(before ? target - before.nodeSize : target);
+    if (anchorDOM instanceof HTMLElement) {
+      const rect = anchorDOM.getBoundingClientRect();
+      const lineTop = before ? rect.bottom : rect.top - 4;
+      dropIndicatorElement.style.left = `${rect.left - containerRect.left}px`;
+      dropIndicatorElement.style.top = `${lineTop - containerRect.top}px`;
+      dropIndicatorElement.style.width = `${rect.width}px`;
+      dropIndicatorElement.classList.add("active");
+    } else {
+      dropIndicatorElement.classList.remove("active");
+    }
+
+    let containerDOM: HTMLElement | null = null;
+    for (let d = $pos.depth; d > 0; d--) {
+      if (!blockContainerTypes.has($pos.node(d).type.name)) continue;
+      const dom = view.nodeDOM($pos.before(d));
+      if (dom instanceof HTMLElement) containerDOM = dom;
+      break;
+    }
+    if (containerDOM) {
+      const rect = containerDOM.getBoundingClientRect();
+      dropHoverElement.style.left = `${rect.left - containerRect.left + 2}px`;
+      dropHoverElement.style.top = `${rect.top - containerRect.top + 2}px`;
+      dropHoverElement.style.width = `${Math.max(rect.width - 4, 0)}px`;
+      dropHoverElement.style.height = `${Math.max(rect.height - 4, 0)}px`;
+      dropHoverElement.classList.add("active");
+    } else {
+      dropHoverElement.classList.remove("active");
+    }
+  }
 
   function hideDragHandle() {
     // 选中态由选区驱动，鼠标移开/滚动等触发源不隐藏
@@ -442,13 +567,27 @@ export function DragHandlePlugin(
 
   // 按 Notion 的 gutter 规则计算把手位置：把手右缘距块视觉左缘 dragHandleGap
   function computeHandlePosition(node: Element): { left: number; top: number } {
+    // 引用块/标注块内的子块：把手让位到容器外缘左侧（Notion 实测）
+    // 左侧装饰让位：引用色条/标注图标（最外层）与列表项所属列表的符号区
+    // 取最左缘，保证把手越过所有左侧装饰（Notion 实测）
+    let gutterLeft: number | null = null;
+    for (const zone of [decorationGutter(node), listOwnerZone(node)]) {
+      if (zone) {
+        const left = absoluteRect(zone).left;
+        gutterLeft = gutterLeft == null ? left : Math.min(gutterLeft, left);
+      }
+    }
+
     // 代码块：把手对齐块顶部行（Notion 实测块顶 +8px），而不是首行代码文本
     const codeBlock = codeBlockRenderer(node);
     if (codeBlock) {
       const surface = codeBlock.querySelector(".codeBlock") ?? codeBlock;
       const rect = absoluteRect(surface);
       return {
-        left: rect.left - options.dragHandleWidth - options.dragHandleGap,
+        left:
+          (gutterLeft ?? rect.left) -
+          options.dragHandleWidth -
+          options.dragHandleGap,
         top: rect.top + 8,
       };
     }
@@ -458,7 +597,10 @@ export function DragHandlePlugin(
       const rect = absoluteRect(node);
       const height = node.getBoundingClientRect().height;
       return {
-        left: rect.left - options.dragHandleWidth - options.dragHandleGap,
+        left:
+          (gutterLeft ?? rect.left) -
+          options.dragHandleWidth -
+          options.dragHandleGap,
         top: rect.top + (height - 24) / 2,
       };
     }
@@ -474,10 +616,10 @@ export function DragHandlePlugin(
     rect.top += (lineHeight - 24) / 2;
     rect.top += paddingTop;
 
-    // 列表项的符号在 li 盒子之外：以父级列表盒子左缘作为块的视觉左缘
-    const markerZone = listMarkerZone(node);
-    if (markerZone) {
-      rect.left = absoluteRect(markerZone).left;
+    // 符号区/装饰容器让位：列表项内任意块统一对齐列表 gutter（li 本体
+    // 由 listOwnerZone 自然覆盖原 markerZone 规则）
+    if (gutterLeft != null) {
+      rect.left = gutterLeft;
     }
     // Tables: clear the table's own row-drag handle so the two
     // grips don't stack on each other. `nodeDOMAtCoords` returns
@@ -553,11 +695,20 @@ export function DragHandlePlugin(
 
       function onDragHandleDrag(e: DragEvent) {
         hideDragHandle();
-        let scrollY = window.scrollY;
+        const scroller = getScrollContainer();
+        const scrollTop = scroller ? scroller.scrollTop : window.scrollY;
         if (e.clientY < options.scrollThreshold) {
-          window.scrollTo({ top: scrollY - 30, behavior: "smooth" });
+          if (scroller) {
+            scroller.scrollTo({ top: scrollTop - 30, behavior: "smooth" });
+          } else {
+            window.scrollTo({ top: scrollTop - 30, behavior: "smooth" });
+          }
         } else if (window.innerHeight - e.clientY < options.scrollThreshold) {
-          window.scrollTo({ top: scrollY + 30, behavior: "smooth" });
+          if (scroller) {
+            scroller.scrollTo({ top: scrollTop + 30, behavior: "smooth" });
+          } else {
+            window.scrollTo({ top: scrollTop + 30, behavior: "smooth" });
+          }
         }
       }
 
@@ -565,6 +716,7 @@ export function DragHandlePlugin(
 
       function onDragHandleDragEnd() {
         handleDragInProgress = false;
+        hideDropFeedback(view);
       }
 
       dragHandleElement.addEventListener("dragend", onDragHandleDragEnd);
@@ -703,6 +855,16 @@ export function DragHandlePlugin(
       selectionHaloElement.setAttribute("aria-hidden", "true");
       view?.dom?.parentElement?.appendChild(selectionHaloElement);
 
+      dropIndicatorElement = document.createElement("div");
+      dropIndicatorElement.classList.add("block-drop-indicator");
+      dropIndicatorElement.setAttribute("aria-hidden", "true");
+      view?.dom?.parentElement?.appendChild(dropIndicatorElement);
+
+      dropHoverElement = document.createElement("div");
+      dropHoverElement.classList.add("block-drop-hover");
+      dropHoverElement.setAttribute("aria-hidden", "true");
+      view?.dom?.parentElement?.appendChild(dropHoverElement);
+
       window.addEventListener("resize", onWindowResize);
       window.addEventListener("scroll", onWindowScroll, true);
       haloResizeObserver = new ResizeObserver(onWindowResize);
@@ -729,6 +891,10 @@ export function DragHandlePlugin(
           );
           setEditableLockElement(null);
           dragHandleElement = null;
+          dropIndicatorElement?.remove();
+          dropIndicatorElement = null;
+          dropHoverElement?.remove();
+          dropHoverElement = null;
           haloResizeObserver?.disconnect();
           haloResizeObserver = null;
           window.removeEventListener("resize", onWindowResize);
@@ -858,12 +1024,17 @@ export function DragHandlePlugin(
         mousewheel: () => {
           hideDragHandle();
         },
+        dragover: (view, event) => {
+          updateDropIndicator(view, event);
+          return false;
+        },
         // dragging class is used for CSS
         dragstart: (view) => {
           view.dom.classList.add("dragging");
         },
         drop: (view, event) => {
           view.dom.classList.remove("dragging");
+          hideDropFeedback(view);
           hideDragHandle();
           let droppedNode: Node | null = null;
           const dropPos = view.posAtCoords({
@@ -900,6 +1071,7 @@ export function DragHandlePlugin(
         },
         dragend: (view) => {
           view.dom.classList.remove("dragging");
+          hideDropFeedback(view);
         },
       },
     },
@@ -947,6 +1119,9 @@ export function DragHandlePlugin(
           const typeName = $from.node(depth).type.name;
           if (blockContainerTypes.has(typeName)) break;
           if (typeName !== "paragraph" && typeName !== "heading") break;
+          // 文本块的直接父级是引用块时停在自身：引用内子块单独选中
+          // （与把手选中规则一致），不提升到整个引用块
+          if ($from.node(depth - 1).type.name === "blockquote") break;
           depth -= 1;
         }
 

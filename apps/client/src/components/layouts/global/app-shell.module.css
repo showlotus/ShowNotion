@@ -4,6 +4,38 @@
   background-color: light-dark(#f9f8f7, var(--mantine-color-dark-8));
 }
 
+/* 页面滚动归主内容区所有（Notion 结构）：外壳锁定视口高度并裁切，
+ * AppShell.Main 内部滚动，于是滚动条位于内容区右缘（页面右侧），
+ * 而不是整页/body；固定侧边栏与页头不再随滚动条有无而抖动。 */
+.shell {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* 顶部让出固定 PageHeader：滚动区从 Header 下方开始，滚动条因此从
+ * Header 底部起画，不会像满高滚动区那样被 Header 截断（对齐 Notion）。
+ * 需覆盖 Mantine AppShell.Main 的 min-height:100dvh，否则下移后会溢出外壳。 */
+.main {
+  margin-top: var(--page-header-height, 44px);
+  height: calc(100dvh - var(--page-header-height, 44px));
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* 预留滚动条槽位：锁滚动（如图片预览）时内容宽度零位移。 */
+  scrollbar-gutter: stable;
+}
+
+/* 打印时恢复自然文档流，避免只打印首屏。 */
+@media print {
+  .shell,
+  .main {
+    margin-top: 0;
+    height: auto;
+    min-height: auto;
+    overflow: visible;
+  }
+}
+
 /* Notion paints a 1px hairline on the sidebar↔content seams (its dark
  * inset box-shadow line rgb(44,44,43); light is the warm-gray equivalent).
  * The AppShell's built-in borders stay off — these own the seam. */

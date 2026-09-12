@@ -104,10 +104,10 @@ function PageContent({ pageSlug }: { pageSlug: string | undefined }) {
         style={{
           display: "flex",
           flexDirection: "column",
-          // Height: see `.base-page-root` in core.css.
-          // Clear the fixed PageHeader (breadcrumb) plus a little extra so the
+          // Height: see `.base-page-root` in core.css. AppShell.Main already
+          // clears the fixed PageHeader, so only add a little extra so the
           // pinned column-header row isn't tucked half under it.
-          paddingTop: "calc(var(--page-header-height) + 6px)",
+          paddingTop: "6px",
         }}
       >
         <DocumentTitle

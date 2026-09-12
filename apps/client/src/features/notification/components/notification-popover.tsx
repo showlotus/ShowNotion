@@ -65,6 +65,7 @@ export function NotificationPopover({
     <Popover
       position="bottom-start"
       shadow="lg"
+      floatingStrategy="fixed"
       opened={opened}
       onChange={setOpened}
       withArrow

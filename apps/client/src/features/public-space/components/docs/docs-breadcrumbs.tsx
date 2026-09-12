@@ -68,7 +68,7 @@ export default function DocsBreadcrumbs() {
   }
   if (collapsed) {
     items.push(
-      <Menu shadow="md" position="bottom-start" key="hidden">
+      <Menu shadow="md" position="bottom-start" floatingStrategy="fixed" key="hidden">
         <Menu.Target>
           <button
             type="button"

@@ -366,9 +366,11 @@
 }
 
 /* Definite height so the inner .tableScrollport scrolls and the sticky table
- * header pins. Flow on print, else it emits a trailing blank page. */
+ * header pins. Flow on print, else it emits a trailing blank page. The
+ * AppShell.Main scroll container already clears the fixed PageHeader, so this
+ * no longer subtracts it (doing so would double-offset and overflow). */
 .base-page-root {
-  height: calc(100dvh - var(--app-shell-header-height, 45px));
+  height: 100%;
 }
 
 @media print {

@@ -5,7 +5,9 @@
   height: 44px;
   background-color: var(--mantine-color-body);
   padding-left: 12px;
-  padding-right: 10px;
+  /* 内容区滚动条占据右侧 15px，页头需再让出同等宽度，右侧按钮组才
+   * 不会压在滚动条上（保留原 10px 视觉边距）。 */
+  padding-right: calc(var(--notion-scrollbar-size, 15px) + 10px);
   position: fixed;
   z-index: 99;
   top: var(--app-shell-header-offset, 0rem);

@@ -2,6 +2,7 @@ import { useEditor } from "@tiptap/react";
 import { TextSelection } from "@tiptap/pm/state";
 import { useEffect, useRef, useState } from "react";
 import { HeadingLink, recalculateLinks } from "./table-of-contents";
+import { getScrollContainer } from "@/hooks/use-scroll-container.ts";
 
 export const useTocHeadings = (editor: ReturnType<typeof useEditor>) => {
   const [links, setLinks] = useState<HeadingLink[]>([]);
@@ -96,11 +97,14 @@ export const useTocHeadings = (editor: ReturnType<typeof useEditor>) => {
       frame = requestAnimationFrame(updateActive);
     };
 
+    const scroller = getScrollContainer();
+    scroller?.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("scroll", handleScroll, { passive: true });
     updateActive();
 
     return () => {
       cancelAnimationFrame(frame);
+      scroller?.removeEventListener("scroll", handleScroll);
       window.removeEventListener("scroll", handleScroll);
     };
   }, [headingDOMNodes, editor]);
@@ -111,15 +115,26 @@ export const useTocHeadings = (editor: ReturnType<typeof useEditor>) => {
 
     const { node } = view.domAtPos(position);
     const element = node as HTMLElement;
-    const scrollPosition =
-      element.getBoundingClientRect().top +
-      window.scrollY -
-      getHeaderOffset();
+    const scroller = getScrollContainer();
 
-    window.scrollTo({
-      top: scrollPosition,
-      behavior: "smooth",
-    });
+    if (scroller) {
+      scroller.scrollTo({
+        top:
+          scroller.scrollTop +
+          element.getBoundingClientRect().top -
+          scroller.getBoundingClientRect().top -
+          getHeaderOffset(),
+        behavior: "smooth",
+      });
+    } else {
+      window.scrollTo({
+        top:
+          element.getBoundingClientRect().top +
+          window.scrollY -
+          getHeaderOffset(),
+        behavior: "smooth",
+      });
+    }
 
     const tr = view.state.tr;
     tr.setSelection(new TextSelection(tr.doc.resolve(position)));

@@ -235,7 +235,7 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
             style={{
               position: "fixed",
               top: "var(--page-header-height, 44px)",
-              right: 25,
+              right: "calc(var(--notion-scrollbar-size, 15px) + 10px)",
               width: 0,
               height: 0,
               pointerEvents: "none",
@@ -377,6 +377,8 @@ function PageActionMenu({ readOnly }: PageActionMenuProps) {
         position="bottom-end"
         offset={20}
         width={230}
+        floatingStrategy="fixed"
+        hideDetached={false}
         withArrow
         arrowPosition="center"
         opened={actionMenuOpen}

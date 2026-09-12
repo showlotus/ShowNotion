@@ -60,7 +60,7 @@ export const MoreInsertsGroup: FC<Props> = ({ editor, templateMode }) => {
   };
 
   return (
-    <Menu shadow="md" position="bottom-start" withArrow={false} width={240}>
+    <Menu shadow="md" position="bottom-start" withArrow={false} width={240} floatingStrategy="fixed">
       <Menu.Target>
         <Tooltip label={t("More inserts")} withArrow>
           <ActionIcon

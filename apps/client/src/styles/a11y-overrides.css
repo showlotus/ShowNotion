@@ -115,3 +115,40 @@
 .mantine-active:active {
   transform: none;
 }
+
+/*
+ * Notion-style scrollbars (measured live 2026-09): a fixed 15px bar with a
+ * translucent thumb and a fully transparent track, i.e. their injected
+ * `* { scrollbar-width: 15px; scrollbar-color: rgba(255,255,255,0.2)
+ * rgba(0,0,0,0) }`. `scrollbar-width` can't express the 15px width (only
+ * auto/thin/none), and setting `::-webkit-scrollbar` opts Chromium into
+ * classic scrollbars, so the WebKit pseudo-elements below own the look; the
+ * standard properties are kept as a Firefox fallback. Rules that hide a
+ * scrollbar (scrollbar-width: none + display: none) are more specific and
+ * still win.
+ */
+* {
+  scrollbar-color: var(--notion-scrollbar-thumb) var(--notion-scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+  width: var(--notion-scrollbar-size, 15px);
+  height: var(--notion-scrollbar-size, 15px);
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--notion-scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--notion-scrollbar-thumb);
+  border-radius: 8px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--notion-scrollbar-thumb-hover);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}

@@ -1,4 +1,5 @@
 import { GridContainer } from "@/ee/base/components/grid/grid-container";
+import { getScrollContainer } from "@/hooks/use-scroll-container.ts";
 import { Table } from "@tanstack/react-table";
 import {
   IBase,
@@ -63,7 +64,7 @@ export function BaseTable({
       hasNextPage={hasNextPage}
       isFetchingNextPage={isFetchingNextPage}
       onFetchNextPage={onFetchNextPage}
-      scrollElement={embedded ? window : scrollportRef.current}
+      scrollElement={embedded ? getScrollContainer() : scrollportRef.current}
       aboveBand={aboveBand ?? null}
     />
   );

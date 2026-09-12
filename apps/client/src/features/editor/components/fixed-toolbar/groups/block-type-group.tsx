@@ -41,7 +41,7 @@ export const BlockTypeGroup: FC<Props> = ({ editor }) => {
   else if (state.isCodeBlock) label = t("Code block");
 
   return (
-    <Menu shadow="md" position="bottom-start" withArrow={false}>
+    <Menu shadow="md" position="bottom-start" withArrow={false} floatingStrategy="fixed">
       <Menu.Target>
         <Button
           variant="subtle"
