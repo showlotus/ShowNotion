@@ -8,7 +8,7 @@ import Download from "yet-another-react-lightbox/plugins/download";
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
 import Video from "yet-another-react-lightbox/plugins/video";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import i18n from "@/i18n.ts";
 import { useTranslation } from "react-i18next";
 
@@ -112,6 +112,8 @@ export default function LightboxView({
 }: LightboxViewProps) {
   const { i18n: i18nInstance } = useTranslation();
 
+  const savedPageScrollRef = useRef(0);
+
   const selectedSlide = useMemo(
     () => getMedia(src, type),
     [src, type, i18nInstance.language]
@@ -173,6 +175,12 @@ export default function LightboxView({
       }}
       controller={{ closeOnBackdropClick: !isFullscreen }}
       on={{
+        entering: () => {
+          savedPageScrollRef.current = window.scrollY;
+        },
+        exiting: () => {
+          window.scrollTo(0, savedPageScrollRef.current);
+        },
         enterFullscreen: () => setIsFullscreen(true),
         exitFullscreen: () => setIsFullscreen(false),
       }}

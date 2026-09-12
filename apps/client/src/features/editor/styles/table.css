@@ -27,10 +27,14 @@
 
     td,
     th {
-      border: 1px solid #ced4da;
+      /* 单元格对齐 Notion（2026-09 实测）：1px 暖灰网格线、7px 9px 内边距、
+         14px/20px 字级（行高随之约 35px） */
+      border: 1px solid var(--notion-table-border);
       box-sizing: border-box;
       min-width: 1em;
-      padding: 3px 5px;
+      padding: 7px 9px;
+      font-size: 14px;
+      line-height: 20px;
       position: relative;
       vertical-align: top;
 
@@ -49,10 +53,7 @@
     }
 
     th {
-      background-color: light-dark(
-        var(--mantine-color-gray-1),
-        var(--mantine-color-dark-5)
-      );
+      background-color: var(--notion-table-header-bg);
       font-weight: bold;
       text-align: start;
     }

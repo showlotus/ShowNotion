@@ -203,6 +203,12 @@ export const mantineCssResolver: CSSVariablesResolver = (theme) => ({
     // against a light-theme capture if they look off.
     "--notion-border": "rgba(55, 53, 47, 0.09)",
     "--notion-border-strong": "rgba(55, 53, 47, 0.16)",
+    // Notion simple-table tokens (measured live 2026-09): --c-borPri paints
+    // every cell's 1px grid line, --cd-tabHeaRowColBac the header row/column
+    // fill. Kept separate from --notion-border-strong because the light cell
+    // line #e6e5e3 is lighter than the control outline.
+    "--notion-table-border": "#E6E5E3",
+    "--notion-table-header-bg": "#F7F6F3",
     "--notion-popover-bg": "#FFFFFF",
     "--notion-popover-shadow":
       "rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px 16px",
@@ -263,6 +269,11 @@ export const mantineCssResolver: CSSVariablesResolver = (theme) => ({
     "--notion-border": "rgb(44, 44, 43)",
     "--notion-border-strong": "rgb(56, 56, 54)",
     "--mantine-color-default-border": "var(--notion-border-strong)",
+    // Simple-table equivalents of the light tokens above: --c-borPri dark is
+    // #383836 (same as the control outline) and --cd-tabHeaRowColBac is the
+    // 3% white header fill, composited over the #191919 page background.
+    "--notion-table-border": "#383836",
+    "--notion-table-header-bg": "rgba(255, 255, 255, 0.03)",
     "--notion-popover-bg": "rgb(37, 37, 37)",
     "--notion-popover-shadow":
       "rgb(56, 56, 54) 0px 0px 0px 1px, rgba(25, 25, 25, 0.2) 0px 14px 28px -6px, rgba(25, 25, 25, 0.118) 0px 2px 4px -1px",

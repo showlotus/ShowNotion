@@ -111,6 +111,15 @@ function nodeDOMAtCoords(
     // parent-check below skips it. Match the wrapper explicitly so the
     // handle shows up even with empty cells.
     ".tableWrapper",
+    // 独立叶子块（分割线、图片等媒体）：嵌套在列表项、引用等容器内时
+    // 父级检查不成立，需显式匹配才能让把手命中它们自身
+    "hr",
+    ".node-image",
+    ".node-video",
+    ".node-audio",
+    ".node-drawio",
+    ".node-excalidraw",
+    "[data-youtube-video]",
     ...customParagraphSelectors,
     ...customSelectors,
     ...atomSelectors,
@@ -230,6 +239,14 @@ function blockTreeSelection(
   options: GlobalDragHandleOptions,
 ): Selection {
   const doc = view.state.doc;
+
+  // 独立叶子块（分割线、图片等）：即使嵌套在列表项/引用等容器内，
+  // 也始终只选中自身，否则会被下方的容器提升规则选中整个容器
+  const leafBlock = doc.nodeAt(rawPos);
+  if (leafBlock?.isLeaf && leafBlock.isBlock) {
+    return NodeSelection.create(doc, rawPos);
+  }
+
   const anchorPos = anchorPosAtDOM(view, node) ?? rawPos;
   const $pos = doc.resolve(Math.min(anchorPos, doc.content.size));
 
@@ -308,14 +325,17 @@ export function DragHandlePlugin(
 
     if (!event.dataTransfer) return;
 
-    const node = nodeDOMAtCoords(
-      {
-        x: event.clientX + 50 + options.dragHandleWidth,
-        y: event.clientY,
-      },
-      options,
-      view,
-    );
+    const node =
+      hoveredBlockElement && view.dom.contains(hoveredBlockElement)
+        ? hoveredBlockElement
+        : nodeDOMAtCoords(
+            {
+              x: event.clientX + 50 + options.dragHandleWidth,
+              y: event.clientY,
+            },
+            options,
+            view,
+          );
 
     if (!(node instanceof Element)) return;
 
@@ -402,6 +422,9 @@ export function DragHandlePlugin(
   let dragHandleElement: HTMLElement | null = null;
   // 把手触发的拖拽进行中标记：仅用于 drop 后修正选区
   let handleDragInProgress = false;
+  // 把手当前悬停的块：分割线仅 13px 高，按点击坐标反查会落到下方块，
+  // 点击/拖拽以 mousemove 记录的目标块为准（对齐 Notion 的行为）
+  let hoveredBlockElement: Element | null = null;
 
   function hideDragHandle() {
     // 选中态由选区驱动，鼠标移开/滚动等触发源不隐藏
@@ -427,6 +450,16 @@ export function DragHandlePlugin(
       return {
         left: rect.left - options.dragHandleWidth - options.dragHandleGap,
         top: rect.top + 8,
+      };
+    }
+
+    // 分割线：24px 把手垂直居中于 13px 的线体（Notion 实测把手与线同轴）
+    if (node.matches("hr")) {
+      const rect = absoluteRect(node);
+      const height = node.getBoundingClientRect().height;
+      return {
+        left: rect.left - options.dragHandleWidth - options.dragHandleGap,
+        top: rect.top + (height - 24) / 2,
       };
     }
 
@@ -494,14 +527,17 @@ export function DragHandlePlugin(
       function onDragHandleClick(e: MouseEvent) {
         if (e.button !== 0) return;
 
-        const node = nodeDOMAtCoords(
-          {
-            x: e.clientX + 50 + options.dragHandleWidth,
-            y: e.clientY,
-          },
-          options,
-          view,
-        );
+        const node =
+          hoveredBlockElement && view.dom.contains(hoveredBlockElement)
+            ? hoveredBlockElement
+            : nodeDOMAtCoords(
+                {
+                  x: e.clientX + 50 + options.dragHandleWidth,
+                  y: e.clientY,
+                },
+                options,
+                view,
+              );
 
         if (!(node instanceof Element)) return;
 
@@ -713,6 +749,21 @@ export function DragHandlePlugin(
         mousedown: (view, event) => {
           if (event.button !== 0) return false;
 
+          // 图片：点击完全交给 ProseMirror 原生处理 —— PM 的双击识别在
+          // mousedown 里做连击判定（双击预览依赖它），任何拦截都会打断；
+          // 图片的 NodeSelection 由 filterTransaction 拦截，仅把手可选中
+          const hitPos = view.posAtCoords({
+            left: event.clientX,
+            top: event.clientY,
+          });
+          if (
+            hitPos &&
+            hitPos.inside > -1 &&
+            view.state.doc.nodeAt(hitPos.inside)?.type.name === "image"
+          ) {
+            return false;
+          }
+
           const selection = view.state.selection;
           if (
             !(selection instanceof NodeSelection) ||
@@ -766,9 +817,12 @@ export function DragHandlePlugin(
             node.matches(excludedTagList) ||
             notDragging
           ) {
+            hoveredBlockElement = null;
             hideDragHandle();
             return;
           }
+
+          hoveredBlockElement = node;
 
           const isCustomNode = isCustomNodeDOM(node, options);
 
@@ -848,6 +902,19 @@ export function DragHandlePlugin(
           view.dom.classList.remove("dragging");
         },
       },
+    },
+    // 拦截 ProseMirror 原生点击（pointer 来源）在图片上建立的 NodeSelection：
+    // 图片的选中只允许由行前把手触发，避免单击即选中并顶掉双击预览
+    filterTransaction: (tr) => {
+      if (
+        !tr.docChanged &&
+        tr.getMeta("pointer") &&
+        tr.selection instanceof NodeSelection &&
+        tr.selection.node.type.name === "image"
+      ) {
+        return false;
+      }
+      return true;
     },
     appendTransaction: (transactions, _oldState, newState) => {
       if (!handleDragInProgress) return null;

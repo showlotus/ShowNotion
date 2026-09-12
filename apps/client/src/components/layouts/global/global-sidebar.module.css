@@ -1,7 +1,9 @@
 .navbar {
     height: 100%;
     width: 100%;
-    padding: var(--mantine-spacing-sm) rem(8px);
+    /* 顶部 6px 对齐 Notion 工作区切换器：32px pill + 上边距 6px，
+     * 使工作区名称基线与页面顶栏（44px）的面包屑文字同线 */
+    padding: rem(6px) rem(8px) var(--mantine-spacing-sm);
     display: flex;
     flex-direction: column;
 }

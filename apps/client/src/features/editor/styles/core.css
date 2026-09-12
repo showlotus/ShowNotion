@@ -139,9 +139,22 @@
     cursor: pointer;
   }
 
+  /* 引用块对齐 Notion（2026-09 实测）：3px 色条只覆盖内容区高度
+     （Notion 单行引用块盒 40px、色条 24px，上下各留 8px），块盒上下
+     padding 保持 8px；伪元素用 border 绘制，保证打印时色条不丢失 */
   blockquote {
+    position: relative;
     margin: 0;
-    padding: 8px 22px;
+    padding: 8px 14px 8px 17px;
+  }
+
+  blockquote::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: 0;
+    width: 0;
     border-left: 3px solid currentColor;
   }
 
