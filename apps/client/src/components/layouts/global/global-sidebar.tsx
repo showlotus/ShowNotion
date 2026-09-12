@@ -120,45 +120,47 @@ export default function GlobalSidebar() {
         </Tooltip>
       </div>
 
-      <ScrollArea w="100%" style={{ flex: 1 }}>
-        <div className={classes.section}>
-          {mainNavItems.map((item) =>
-            item.disabled ? (
-              <Tooltip
-                key={item.label}
-                label={upgradeLabel}
-                position="right"
-              >
-                <UnstyledButton
-                  className={classes.link}
-                  data-disabled
-                  aria-disabled="true"
-                  tabIndex={-1}
-                >
-                  <item.icon className={classes.linkIcon} stroke={2} />
-                  <span>{t(item.label)}</span>
-                </UnstyledButton>
-              </Tooltip>
-            ) : (
-              <Link
-                key={item.label}
+      <div className={classes.section}>
+        {mainNavItems.map((item) =>
+          item.disabled ? (
+            <Tooltip
+              key={item.label}
+              label={upgradeLabel}
+              position="right"
+            >
+              <UnstyledButton
                 className={classes.link}
-                data-active={active === item.path || undefined}
-                aria-current={active === item.path ? "page" : undefined}
-                to={item.path}
-                onClick={handleNavClick}
+                data-disabled
+                aria-disabled="true"
+                tabIndex={-1}
               >
                 <item.icon className={classes.linkIcon} stroke={2} />
                 <span>{t(item.label)}</span>
-              </Link>
-            ),
-          )}
-        </div>
+              </UnstyledButton>
+            </Tooltip>
+          ) : (
+            <Link
+              key={item.label}
+              className={classes.link}
+              data-active={active === item.path || undefined}
+              aria-current={active === item.path ? "page" : undefined}
+              to={item.path}
+              onClick={handleNavClick}
+            >
+              <item.icon className={classes.linkIcon} stroke={2} />
+              <span>{t(item.label)}</span>
+            </Link>
+          ),
+        )}
+      </div>
 
+      <div className={classes.divider} aria-hidden="true" />
+
+      <ScrollArea w="100%" style={{ flex: 1 }}>
         <div className={classes.section}>
           <Text component="h2" className={classes.sectionHeader}>{t("Favorite spaces")}</Text>
           {!isFavoritesPending && sortedFavoriteSpaces.length === 0 ? (
-            <Text size="xs" c="dimmed" pl="xs" py={4}>
+            <Text size="xs" c="dimmed" pl={8} py={4}>
               {t("Favorite spaces appear here")}
             </Text>
           ) : (

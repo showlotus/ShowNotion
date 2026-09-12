@@ -68,9 +68,19 @@
 
 .pagesHeader {
     margin-bottom: rem(5px);
+    /* 分组标题与上方菜单图标同列 16px（navbar 8px + 此处 8px） */
+    padding-left: rem(8px);
 }
 
-/* 分组头小按钮（排序/空间菜单/新建）hover 色与行高亮统一为 Notion token。
+/* 功能区与页面区之间的 Notion 风格发丝分割线：负边距抵消 navbar 左右 8px，满宽贯穿 */
+.divider {
+    flex-shrink: 0;
+    height: 1px;
+    margin: 0 rem(-8px) var(--mantine-spacing-xs);
+    background-color: var(--notion-border);
+}
+
+/* 分组头小按钮（新建/空间菜单）hover 色与行高亮统一为 Notion token。
  * Mantine 把 --ai-hover 写在内联 style 上（varsResolver），变量覆盖无效，
  * 只能直接压 hover 背景色；选择器优先级高于组件的 .m_xxx:hover 规则。 */
 .pagesHeader :global(.mantine-ActionIcon-root):hover {

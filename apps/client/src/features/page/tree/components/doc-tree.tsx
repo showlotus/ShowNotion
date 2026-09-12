@@ -76,6 +76,10 @@ export type DocTreeProps<T extends object> = {
   readOnly?: boolean;
   disableDrag?: (node: TreeNode<T>) => boolean;
   disableDrop?: (node: TreeNode<T>) => boolean;
+  // Blocks sibling reordering around a node (reorder-above/below)
+  // while leaving structural drops (make-child) available. Used when
+  // a node's position is computed (e.g. auto-sorted top level).
+  disableReorder?: (node: TreeNode<T>) => boolean;
 
   getDragLabel: (node: TreeNode<T>) => string;
   uniqueContextId?: symbol;
@@ -144,6 +148,7 @@ function DocTreeInner<T extends object>(
     readOnly = false,
     disableDrag,
     disableDrop,
+    disableReorder,
     getDragLabel,
     uniqueContextId,
     emptyState,
@@ -561,6 +566,7 @@ function DocTreeInner<T extends object>(
                 readOnly={readOnly}
                 disableDrag={disableDrag}
                 disableDrop={disableDrop}
+                disableReorder={disableReorder}
                 getDragLabel={getDragLabel}
                 contextId={contextId}
                 registerRowElement={registerRowElement}

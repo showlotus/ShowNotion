@@ -47,6 +47,9 @@ type Props<T extends object> = {
   readOnly: boolean;
   disableDrag?: (node: TreeNode<T>) => boolean;
   disableDrop?: (node: TreeNode<T>) => boolean;
+  // Blocks sibling reordering around this node (reorder-above/below)
+  // while leaving structural drops (make-child) available.
+  disableReorder?: (node: TreeNode<T>) => boolean;
   getDragLabel: (node: TreeNode<T>) => string;
   contextId: symbol;
   registerRowElement: (id: string, el: HTMLElement | null) => void;
@@ -75,6 +78,7 @@ function DocTreeRowInner<T extends object>(props: Props<T>) {
     readOnly,
     disableDrag,
     disableDrop,
+    disableReorder,
     getDragLabel,
     contextId,
     registerRowElement,
@@ -179,6 +183,9 @@ function DocTreeRowInner<T extends object>(props: Props<T>) {
       // force users to drop into the folder via 'make-child' instead.
       const block: Instruction['type'][] = ['reparent'];
       if (isOpen && hasChildren) block.push('reorder-below');
+      if (disableReorder?.(node)) {
+        block.push('reorder-above', 'reorder-below');
+      }
 
       cleanups.push(
         dropTargetForElements({
@@ -281,6 +288,7 @@ function DocTreeRowInner<T extends object>(props: Props<T>) {
     readOnly,
     disableDrag,
     disableDrop,
+    disableReorder,
     contextId,
     indentPerLevel,
     getDragLabel,
@@ -384,6 +392,7 @@ function arePropsEqual<T extends object>(
   if (prev.onToggle !== next.onToggle) return false;
   if (prev.disableDrag !== next.disableDrag) return false;
   if (prev.disableDrop !== next.disableDrop) return false;
+  if (prev.disableReorder !== next.disableReorder) return false;
   if (prev.getDragLabel !== next.getDragLabel) return false;
   if (prev.registerRowElement !== next.registerRowElement) return false;
   if (prev.getRootData !== next.getRootData) return false;

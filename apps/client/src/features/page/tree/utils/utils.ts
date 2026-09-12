@@ -10,10 +10,12 @@ export function sortPositionKeys(keys: any[]) {
 }
 
 /**
- * Deep-sort every sibling group by updatedAt descending (last updated first).
- * Nodes without updatedAt sort last; ties keep their previous (stable) order.
+ * Sort only the top level by updatedAt descending (last updated first).
+ * Nested children keep their manual (position) order so they stay drag-
+ * sortable while the top level is auto-sorted. Nodes without updatedAt sort
+ * last; ties keep their previous (stable) order.
  */
-export function sortTreeByUpdatedAtDesc(
+export function sortRootsByUpdatedAtDesc(
   nodes: SpaceTreeNode[],
 ): SpaceTreeNode[] {
   const updatedAtMs = (node: SpaceTreeNode) => {
@@ -21,13 +23,7 @@ export function sortTreeByUpdatedAtDesc(
     return Number.isNaN(time) ? 0 : time;
   };
 
-  return nodes
-    .map((node) =>
-      node.children?.length
-        ? { ...node, children: sortTreeByUpdatedAtDesc(node.children) }
-        : node,
-    )
-    .sort((a, b) => updatedAtMs(b) - updatedAtMs(a));
+  return [...nodes].sort((a, b) => updatedAtMs(b) - updatedAtMs(a));
 }
 
 export function buildTree(pages: IPage[]): SpaceTreeNode[] {

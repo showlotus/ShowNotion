@@ -8,14 +8,14 @@ import {
 } from "@mantine/core";
 import {
   IconArrowDown,
-  IconClockDown,
+  IconArrowsSort,
+  IconCheck,
   IconDots,
   IconEye,
   IconEyeOff,
   IconFileExport,
   IconHome,
   IconPlus,
-  IconReorder,
   IconSearch,
   IconSettings,
   IconSparkles,
@@ -83,7 +83,6 @@ export function SpaceSidebar() {
   const spaceRules = space?.membership?.permissions;
   const spaceAbility = useSpaceAbility(spaceRules);
   const { handleCreate } = useTreeMutation(space?.id ?? "");
-  const { sortMode, toggleSortMode } = useSidebarTreeSort();
   const toggleAside = useToggleAside();
   const [workspace] = useAtom(workspaceAtom);
   const aiChatEnabled = workspace?.settings?.ai?.chat === true;
@@ -96,11 +95,6 @@ export function SpaceSidebar() {
   function handleCreatePage() {
     handleCreate(null);
   }
-
-  const sortLabel =
-    sortMode === "manual"
-      ? t("Sort by last updated")
-      : t("Sort by manual order");
 
   return (
     <>
@@ -181,11 +175,13 @@ export function SpaceSidebar() {
           </div>
         </div>
 
+        <div className={classes.divider} aria-hidden="true" />
+
         <div className={clsx(classes.section, classes.sectionPages)}>
           <Group className={classes.pagesHeader} justify="space-between">
             <Group gap={4} wrap="nowrap">
-              <Text size="sm" fw={500} c="dimmed" lineClamp={1}>
-                {space.name}
+              <Text size="xs" fw={500} c="dimmed">
+                {t("Pages")}
               </Text>
               {isBetaPublicSpaces() && space.isPublished && (
                 <Tooltip label={t("This space is public")}>
@@ -199,16 +195,22 @@ export function SpaceSidebar() {
             </Group>
 
             <Group gap="xs">
-              <Tooltip label={sortLabel} position="right">
-                <ActionIcon
-                  variant="default"
-                  size={18}
-                  onClick={toggleSortMode}
-                  aria-label={sortLabel}
-                >
-                  {sortMode === "manual" ? <IconReorder /> : <IconClockDown />}
-                </ActionIcon>
-              </Tooltip>
+              {spaceAbility.can(
+                SpaceCaslAction.Manage,
+                SpaceCaslSubject.Page,
+              ) && (
+                <Tooltip label={t("Create page")} position="top">
+                  <ActionIcon
+                    variant="subtle"
+                    color="gray"
+                    size={18}
+                    onClick={handleCreatePage}
+                    aria-label={t("Create page")}
+                  >
+                    <IconPlus />
+                  </ActionIcon>
+                </Tooltip>
+              )}
 
               <SpaceMenu
                 spaceId={space.id}
@@ -218,22 +220,6 @@ export function SpaceSidebar() {
                 )}
                 onSpaceSettings={openSettings}
               />
-
-              {spaceAbility.can(
-                SpaceCaslAction.Manage,
-                SpaceCaslSubject.Page,
-              ) && (
-                <Tooltip label={t("Create page")} position="right">
-                  <ActionIcon
-                    variant="default"
-                    size={18}
-                    onClick={handleCreatePage}
-                    aria-label={t("Create page")}
-                  >
-                    <IconPlus />
-                  </ActionIcon>
-                </Tooltip>
-              )}
             </Group>
           </Group>
 
@@ -313,6 +299,7 @@ function SpaceMenu({
   ] = useDisclosure(false);
   const hasTemplates = useHasFeature(Feature.TEMPLATES);
   const upgradeLabel = useUpgradeLabel();
+  const { sortMode, setSortMode } = useSidebarTreeSort();
 
   const { data: watchStatus } = useSpaceWatchStatusQuery(spaceId);
   const watchMutation = useWatchSpaceMutation();
@@ -347,7 +334,8 @@ function SpaceMenu({
         <Menu.Target>
           <Tooltip label={t("Space menu")} position="top">
             <ActionIcon
-              variant="default"
+              variant="subtle"
+              color="gray"
               size={18}
               aria-label={t("Space menu")}
             >
@@ -357,6 +345,36 @@ function SpaceMenu({
         </Menu.Target>
 
         <Menu.Dropdown>
+          <Menu.Sub floatingStrategy="fixed">
+            <Menu.Sub.Target>
+              <Menu.Sub.Item leftSection={<IconArrowsSort size={16} />}>
+                {t("Sort")}
+              </Menu.Sub.Item>
+            </Menu.Sub.Target>
+
+            <Menu.Sub.Dropdown>
+              <Menu.Item
+                onClick={() => setSortMode("manual")}
+                rightSection={
+                  sortMode === "manual" ? <IconCheck size={16} /> : null
+                }
+              >
+                {t("Manual")}
+              </Menu.Item>
+
+              <Menu.Item
+                onClick={() => setSortMode("updatedAtDesc")}
+                rightSection={
+                  sortMode === "updatedAtDesc" ? <IconCheck size={16} /> : null
+                }
+              >
+                {t("Last updated")}
+              </Menu.Item>
+            </Menu.Sub.Dropdown>
+          </Menu.Sub>
+
+          <Menu.Divider />
+
           <Menu.Item
             onClick={handleToggleFavorite}
             leftSection={

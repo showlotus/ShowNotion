@@ -12,6 +12,14 @@
     padding-bottom: var(--mantine-spacing-xs);
 }
 
+/* 导航区与收藏区之间的 Notion 风格发丝分割线：负边距抵消 navbar 左右 8px，满宽贯穿 */
+.divider {
+    flex-shrink: 0;
+    height: 1px;
+    margin: 0 rem(-8px) var(--mantine-spacing-xs);
+    background-color: var(--notion-border);
+}
+
 /* Notion 顶部横向图标操作行：主页(带文字) + 功能图标 + 搜索(靠右) */
 .actionRow {
     display: flex;
@@ -29,7 +37,7 @@
     font-size: var(--mantine-font-size-sm);
     color: var(--notion-text-muted);
     min-height: rem(28px);
-    padding: 0 rem(6px);
+    padding: 0 rem(8px);
     border-radius: rem(6px);
     font-weight: 500;
     user-select: none;

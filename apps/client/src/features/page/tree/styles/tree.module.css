@@ -125,6 +125,13 @@
     }
 }
 
+/* 行内容整体右移 8px（navbar 8 + 此处 8 = 16），让前导符与上方菜单图标
+ * 落在同一条 16px 导轨；行悬停/选中底色仍自 8px 起，保持与菜单行对齐。
+ * 只作用于 rowWrapper 的直接子层，避免内外两层 .node 叠加双倍偏移。 */
+.rowWrapper > .node {
+    padding-left: rem(8px);
+}
+
 .node[data-dragging="true"] {
     opacity: 0.4;
 }
@@ -180,7 +187,7 @@
 
 .dropLine {
     position: absolute;
-    left: var(--drop-line-indent, 0);
+    left: calc(var(--drop-line-indent, 0px) + rem(8px));
     right: 8px;
     height: 2px;
     background: light-dark(

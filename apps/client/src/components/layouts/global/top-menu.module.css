@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   gap: var(--mantine-spacing-xs);
-  padding: rem(3px) var(--mantine-spacing-xs);
+  padding: rem(3px) rem(8px);
   border-radius: var(--mantine-radius-sm);
   cursor: pointer;
   user-select: none;
@@ -14,6 +14,29 @@
   @mixin hover {
     background-color: var(--notion-hover);
   }
+}
+
+/* 工作区图标字形在过大的 ActionIcon 盒内居中，会相对同列图标右偏 4px：
+ * 左右负边距把盒子左移并抵消多出的宽度，使字形与文字都与同列图标对齐
+ * （触发器图标盒 26 对侧边栏导航图标 18） */
+.triggerIcon {
+  margin-inline-start: rem(-4px);
+  margin-inline-end: rem(-4px);
+}
+
+/* 浮层头部的「工作」与 Menu.Item 使用同一套规格：上下内边距对齐 item（6.67px），
+ * 图标槽位 16×16（配合 Group 的 gap=spacing-xs 即 10px，等价 item 的 leftSection） */
+.workspaceLabel {
+  padding-block: calc(var(--mantine-spacing-xs) / 1.5);
+}
+
+.workspaceLabelSection {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: rem(16px);
+  height: rem(16px);
+  flex-shrink: 0;
 }
 
 /* 名称与箭头区域：独立按钮，避免与图标按钮嵌套 */
@@ -64,7 +87,7 @@
   display: flex;
   align-items: center;
   gap: var(--mantine-spacing-xs);
-  padding: rem(6px) var(--mantine-spacing-xs);
+  padding: rem(6px) rem(8px);
   border-radius: var(--mantine-radius-sm);
   cursor: pointer;
   user-select: none;

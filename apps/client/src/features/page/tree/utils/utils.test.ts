@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { sortTreeByUpdatedAtDesc } from "./utils.ts";
+import { sortRootsByUpdatedAtDesc } from "./utils.ts";
 import { SpaceTreeNode } from "../types.ts";
 
 function node(
@@ -20,7 +20,7 @@ function node(
   };
 }
 
-describe("sortTreeByUpdatedAtDesc", () => {
+describe("sortRootsByUpdatedAtDesc", () => {
   it("orders siblings newest first", () => {
     const tree = [
       node("old", "2024-01-01T00:00:00Z"),
@@ -28,7 +28,7 @@ describe("sortTreeByUpdatedAtDesc", () => {
       node("mid", "2024-06-01T00:00:00Z"),
     ];
 
-    expect(sortTreeByUpdatedAtDesc(tree).map((n) => n.id)).toEqual([
+    expect(sortRootsByUpdatedAtDesc(tree).map((n) => n.id)).toEqual([
       "new",
       "mid",
       "old",
@@ -41,7 +41,7 @@ describe("sortTreeByUpdatedAtDesc", () => {
       node("dated", "2024-01-01T00:00:00Z"),
     ];
 
-    expect(sortTreeByUpdatedAtDesc(tree).map((n) => n.id)).toEqual([
+    expect(sortRootsByUpdatedAtDesc(tree).map((n) => n.id)).toEqual([
       "dated",
       "none",
     ]);
@@ -54,14 +54,14 @@ describe("sortTreeByUpdatedAtDesc", () => {
       node("third", "2024-01-01T00:00:00Z"),
     ];
 
-    expect(sortTreeByUpdatedAtDesc(tree).map((n) => n.id)).toEqual([
+    expect(sortRootsByUpdatedAtDesc(tree).map((n) => n.id)).toEqual([
       "first",
       "second",
       "third",
     ]);
   });
 
-  it("sorts every level of the tree", () => {
+  it("sorts only the top level, keeping nested children in manual order", () => {
     const tree = [
       node("root-a", "2024-01-01T00:00:00Z", [
         node("a-old", "2024-02-01T00:00:00Z"),
@@ -70,16 +70,16 @@ describe("sortTreeByUpdatedAtDesc", () => {
       node("root-b", "2025-01-01T00:00:00Z"),
     ];
 
-    const sorted = sortTreeByUpdatedAtDesc(tree);
+    const sorted = sortRootsByUpdatedAtDesc(tree);
     expect(sorted.map((n) => n.id)).toEqual(["root-b", "root-a"]);
-    expect(sorted[1].children.map((n) => n.id)).toEqual(["a-new", "a-old"]);
+    expect(sorted[1].children.map((n) => n.id)).toEqual(["a-old", "a-new"]);
   });
 
   it("does not mutate the input arrays", () => {
     const tree = [node("b", "2024-01-01T00:00:00Z"), node("a", "2025-01-01T00:00:00Z")];
     const original = [...tree];
 
-    sortTreeByUpdatedAtDesc(tree);
+    sortRootsByUpdatedAtDesc(tree);
 
     expect(tree).toEqual(original);
   });
@@ -90,7 +90,7 @@ describe("sortTreeByUpdatedAtDesc", () => {
       node("dated", "2024-01-01T00:00:00Z"),
     ];
 
-    expect(sortTreeByUpdatedAtDesc(tree).map((n) => n.id)).toEqual([
+    expect(sortRootsByUpdatedAtDesc(tree).map((n) => n.id)).toEqual([
       "dated",
       "bad",
     ]);

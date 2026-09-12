@@ -8,12 +8,14 @@ import useUserRole from "@/hooks/use-user-role.tsx";
 interface WorkspaceIconPickerProps {
   size?: number;
   emojiSize?: number;
+  iconSize?: number;
 }
 
 // 工作区 emoji 图标选择器：与页面树图标同源，为空时显示占位 Icon
 export default function WorkspaceIconPicker({
   size = 26,
   emojiSize = 16,
+  iconSize = Math.round(size * 0.7),
 }: WorkspaceIconPickerProps) {
   const [workspace, setWorkspace] = useAtom(workspaceAtom);
   const { isAdmin } = useUserRole();
@@ -40,7 +42,7 @@ export default function WorkspaceIconPicker({
               {workspace.icon}
             </span>
           ) : (
-            <IconLayoutGrid size={Math.round(size * 0.7)} />
+            <IconLayoutGrid size={iconSize} />
           )
         }
         readOnly={!isAdmin}

@@ -108,7 +108,7 @@ export default function TopMenu() {
     >
       <Menu.Target>
         <div className={classes.trigger}>
-          <div onClick={handleWorkspaceIconClick}>
+          <div className={classes.triggerIcon} onClick={handleWorkspaceIconClick}>
             <WorkspaceIconPicker size={26} />
           </div>
           <UnstyledButton
@@ -133,10 +133,17 @@ export default function TopMenu() {
         </div>
       </Menu.Target>
       <Menu.Dropdown>
-        <Menu.Label>
+        <Menu.Label className={classes.workspaceLabel}>
           <Group gap="xs" wrap="nowrap">
-            <WorkspaceIconPicker size={22} emojiSize={14} />
-            <Text size="sm" fw={600} lineClamp={1}>
+            <span className={classes.workspaceLabelSection}>
+              <WorkspaceIconPicker size={18} iconSize={16} emojiSize={16} />
+            </span>
+            <Text
+              size="sm"
+              fw={600}
+              lh="var(--mantine-line-height)"
+              lineClamp={1}
+            >
               {workspace?.name}
             </Text>
           </Group>

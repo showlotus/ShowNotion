@@ -17,7 +17,7 @@ import {
   buildTree,
   buildTreeWithChildren,
   mergeRootTrees,
-  sortTreeByUpdatedAtDesc,
+  sortRootsByUpdatedAtDesc,
   spaceRoots,
   updateSpaceRoots,
 } from "@/features/page/tree/utils/utils.ts";
@@ -186,7 +186,7 @@ export default function SpaceTree({ spaceId, readOnly }: SpaceTreeProps) {
   const filteredData = useMemo(() => {
     const roots = spaceRoots(data, spaceId);
     return sortMode === "updatedAtDesc"
-      ? sortTreeByUpdatedAtDesc(roots)
+      ? sortRootsByUpdatedAtDesc(roots)
       : roots;
   }, [data, spaceId, sortMode]);
 
@@ -200,7 +200,12 @@ export default function SpaceTree({ spaceId, readOnly }: SpaceTreeProps) {
     [readOnly],
   );
   const disableDragDrop = useCallback(
-    (n: SpaceTreeNode) => sortMode === "updatedAtDesc" || n.canEdit === false,
+    (n: SpaceTreeNode) => n.canEdit === false,
+    [],
+  );
+  const disableReorder = useCallback(
+    (n: SpaceTreeNode) =>
+      sortMode === "updatedAtDesc" && n.parentPageId == null,
     [sortMode],
   );
   const getDragLabel = useCallback(
@@ -226,6 +231,7 @@ export default function SpaceTree({ spaceId, readOnly }: SpaceTreeProps) {
           readOnly={readOnly}
           disableDrag={disableDragDrop}
           disableDrop={disableDragDrop}
+          disableReorder={disableReorder}
           getDragLabel={getDragLabel}
           aria-label={t("Pages")}
         />
