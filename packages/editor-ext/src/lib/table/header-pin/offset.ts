@@ -1,4 +1,4 @@
-// Pin-offset measurement and watcher used by the table header-pin controller.
+// Pin-offset measurement and watcher used by the base-embed sticky band.
 
 // Fallback app-bar height (px) when no fixed surface is mounted; matches global-app-shell.tsx.
 const APP_BAR_FALLBACK_HEIGHT = 45;

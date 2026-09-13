@@ -49,7 +49,6 @@ import {
   Mention,
   TableDndExtension,
   TableHandleCommandsExtension,
-  TableHeaderPin,
   TableReadonlySort,
   Subpages,
   Heading,
@@ -288,7 +287,6 @@ export const mainExtensions = [
   TableHeader,
   TableDndExtension,
   TableHandleCommandsExtension,
-  TableHeaderPin,
   TableReadonlySort,
   MathInline.configure({
     view: MathInlineView,

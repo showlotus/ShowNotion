@@ -12,6 +12,12 @@
 </div>
 <br />
 
+<div align="center">
+    <img src="./design/assets/showcase.png" alt="ShowNotion — a Notion-like collaborative wiki and documentation software" width="100%" />
+    <br />
+    <img src="./design/assets/showcase-dark.png" alt="ShowNotion — a Notion-like collaborative wiki and documentation software" width="100%" />
+</div>
+
 ## Local development (from scratch)
 
 ### Prerequisites
@@ -79,6 +85,82 @@ workspace and the admin account there.
 ```bash
 docker compose up -d db redis && pnpm install && pnpm --filter ./apps/server run migration:latest && pnpm dev
 ```
+
+## MCP server
+
+ShowNotion ships with a built-in MCP (Model Context Protocol) server, allowing AI clients
+(Claude Desktop, Claude Code, Cursor, opencode, ...) to search, read, and write wiki pages
+directly. The endpoint is `http://localhost:3000/mcp` (Streamable HTTP). When no auth token
+is configured, the endpoint is disabled entirely (404).
+
+### Configuration
+
+Set the following variables in `.env` (see `.env.example`):
+
+| Variable | Description |
+| --- | --- |
+| `MCP_AUTH_TOKEN` | Static Bearer token for MCP clients. Generate one with `openssl rand -hex 32`. Leave empty to disable the MCP endpoint |
+| `MCP_USER_EMAIL` | Email of the workspace user the tools act as. Its permissions define what the MCP tools can read and write |
+
+Restart the dev server after changing these variables (`.env` changes are not hot-reloaded).
+
+### Client setup
+
+Claude Code:
+
+```bash
+claude mcp add shownotion --transport http http://localhost:3000/mcp \
+  --header "Authorization: Bearer <your-token>"
+```
+
+Claude Desktop / Cursor (`mcpServers` in the MCP config):
+
+```json
+{
+  "mcpServers": {
+    "shownotion": {
+      "type": "remote",
+      "url": "http://localhost:3000/mcp",
+      "headers": { "Authorization": "Bearer <your-token>" }
+    }
+  }
+}
+```
+
+opencode (`mcp` section in `~/.config/opencode/opencode.json`):
+
+```json
+{
+  "mcp": {
+    "shownotion": {
+      "type": "remote",
+      "url": "http://localhost:3000/mcp",
+      "enabled": true,
+      "headers": { "Authorization": "Bearer <your-token>" }
+    }
+  }
+}
+```
+
+### Available tools
+
+| Tool | Description |
+| --- | --- |
+| `search` | Full-text search across pages the user can access |
+| `list_spaces` | List the spaces the user has access to |
+| `list_pages` | List recently updated pages, optionally scoped to a space |
+| `get_page` | Get a page (content converted to Markdown) |
+| `create_page` | Create a page with Markdown content, optionally under a parent page |
+| `update_page` | Update a page's title and/or replace its body with Markdown |
+| `move_page` | Move a page under a new parent, or to the space root |
+| `delete_page` | Move a page to trash (soft delete) |
+| `delete_pages` | Move multiple pages to trash |
+| `get_workspace` | Get the workspace name and basic info |
+| `list_groups` | List user groups in the workspace |
+
+All page tools accept a page ID, slug ID, page slug, path, or a full page URL
+(e.g. `http://localhost:3000/docs/{spaceSlug}/{pageSlug}`) — the slug ID is extracted
+automatically.
 
 ## License
 

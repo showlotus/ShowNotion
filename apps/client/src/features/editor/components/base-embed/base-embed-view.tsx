@@ -40,8 +40,7 @@ function applyExtension(wrapper: HTMLDivElement) {
   wrapper.style.setProperty("--embed-grid-pad-right", `${extendRight}px`);
   // Inline sticky band clears whatever fixed surface sits above the editor —
   // the page header AND the fixed formatting toolbar. `--editor-pin-offset`
-  // is the same offset the default ProseMirror table header-pin uses
-  // (published by pinOffsetWatcher); fall back to the page-header height.
+  // is published by pinOffsetWatcher; fall back to the page-header height.
   // Standalone leaves --sticky-band-top unset (resolves to the rule default
   // of 0).
   wrapper.style.setProperty(
@@ -86,8 +85,7 @@ export function BaseEmbedView({ node, editor, deleteNode }: NodeViewProps) {
   }, [isLoading, isError, pageId]);
 
   // Keep --editor-pin-offset published while the embed is mounted, so the
-  // sticky column header clears the fixed toolbar even when this document
-  // has no default ProseMirror table holding the watcher open.
+  // sticky column header clears the fixed toolbar.
   useEffect(() => {
     pinOffsetWatcher.acquire();
     return () => pinOffsetWatcher.release();

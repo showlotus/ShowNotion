@@ -85,7 +85,7 @@ export default function ReadonlyPageEditor({
   const extensions = useMemo(() => {
     const excludedExtensions = new Set([
       "uniqueID",
-      ...(printMode ? ["tableHeaderPin", "tableReadonlySort"] : []),
+      ...(printMode ? ["tableReadonlySort"] : []),
     ]);
     const filteredExtensions = mainExtensions.filter(
       (ext) => !excludedExtensions.has(ext.name),

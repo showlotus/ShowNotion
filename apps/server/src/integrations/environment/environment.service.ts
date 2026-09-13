@@ -397,4 +397,14 @@ export class EnvironmentService {
   getAllowedPrivateNetworks(): string {
     return this.configService.get<string>('ALLOWED_PRIVATE_NETWORKS', 'none');
   }
+
+  // MCP 端点的静态 Bearer token，未配置时 MCP 功能整体关闭
+  getMcpAuthToken(): string {
+    return this.configService.get<string>('MCP_AUTH_TOKEN');
+  }
+
+  // MCP 静态 token 映射的操作者用户邮箱
+  getMcpUserEmail(): string {
+    return this.configService.get<string>('MCP_USER_EMAIL');
+  }
 }
