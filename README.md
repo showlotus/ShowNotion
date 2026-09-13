@@ -5,9 +5,6 @@
         <br />
         Forked from <a href="https://github.com/docmost/docmost"><strong>Docmost</strong></a> (v0.95.0),
         evolving toward a Notion-like experience.
-        <br />
-        <a href="https://github.com/showlotus/ShowDoc"><strong>Repository</strong></a> |
-        <a href="https://docmost.com/docs"><strong>Upstream Documentation</strong></a>
     </p>
 </div>
 <br />
