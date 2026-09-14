@@ -65,6 +65,7 @@ export default function SharedPage() {
     <div>
       <DocumentTitle
         title={data?.page?.title || t("untitled")}
+        icon={data?.page?.icon}
         withAppName={false}
       >
         {!data?.share.searchIndexing && (

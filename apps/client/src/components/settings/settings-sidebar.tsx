@@ -250,7 +250,11 @@ export default function SettingsSidebar() {
                     cursor: "not-allowed",
                   }}
                 >
-                  <item.icon className={classes.linkIcon} stroke={2} />
+                  <item.icon
+                    size={18}
+                    className={classes.linkIcon}
+                    stroke={2}
+                  />
                   <span>{t(item.label)}</span>
                 </span>
               </Tooltip>
@@ -270,7 +274,11 @@ export default function SettingsSidebar() {
                 }
               }}
             >
-              <item.icon className={classes.linkIcon} stroke={2} />
+              <item.icon
+                size={18}
+                className={classes.linkIcon}
+                stroke={2}
+              />
               <span>{t(item.label)}</span>
             </Link>
           );

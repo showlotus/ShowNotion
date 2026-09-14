@@ -7,7 +7,7 @@ import { notifications } from "@mantine/notifications";
 import {
   IconArrowRight,
   IconCopy,
-  IconDotsVertical,
+  IconDots,
   IconFileExport,
   IconLink,
   IconStar,
@@ -144,7 +144,7 @@ export function NodeMenu({ node, canEdit }: NodeMenuProps) {
               e.stopPropagation();
             }}
           >
-            <IconDotsVertical
+            <IconDots
               style={{ width: rem(20), height: rem(20) }}
               stroke={2}
             />

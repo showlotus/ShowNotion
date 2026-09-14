@@ -79,79 +79,111 @@ export default function GlobalSidebar() {
         <TopMenu />
       </div>
 
-      {/* Notion 顶部图标操作行：主页(带文字) + AI 聊天 + 通知 + 搜索(靠右) */}
-      <div className={classes.actionRow}>
-        <Link
-          className={classes.actionItem}
-          data-active={active === "/home" || undefined}
-          aria-current={active === "/home" ? "page" : undefined}
-          to="/home"
-          onClick={handleNavClick}
-        >
-          <IconHome className={classes.actionIcon} stroke={1.8} />
-          <span>{t("Home")}</span>
-        </Link>
-        {aiChatEnabled && (
-          <Tooltip label={t("AI Chat")} position="bottom">
+      {/* Notion 顶部功能行：与文档侧边栏菜单行排版一致（图标 + 文字纵向行） */}
+      <div className={classes.section}>
+        <div className={classes.actionMenu}>
+          <Link
+            className={classes.actionMenuItem}
+            data-active={active === "/home" || undefined}
+            aria-current={active === "/home" ? "page" : undefined}
+            to="/home"
+            onClick={handleNavClick}
+          >
+            <span className={classes.actionMenuItemInner}>
+              <IconHome
+                size={18}
+                className={classes.actionMenuItemIcon}
+                stroke={2}
+              />
+              <span>{t("Home")}</span>
+            </span>
+          </Link>
+          {aiChatEnabled && (
             <Link
-              className={classes.actionItem}
+              className={classes.actionMenuItem}
               data-active={active.startsWith("/ai") || undefined}
               aria-current={active.startsWith("/ai") ? "page" : undefined}
-              aria-label={t("AI Chat")}
               to="/ai"
               onClick={handleNavClick}
             >
-              <IconSparkles className={classes.actionIcon} stroke={1.8} />
+              <span className={classes.actionMenuItemInner}>
+                <IconSparkles
+                  size={18}
+                  className={classes.actionMenuItemIcon}
+                  stroke={2}
+                />
+                <span>{t("AI Chat")}</span>
+              </span>
             </Link>
-          </Tooltip>
-        )}
-        <NotificationPopover variant="icon" />
-        <Tooltip
-          label={`${t("Search")} ${platformModifierLabel} K`}
-          position="bottom"
-        >
-          <UnstyledButton
-            className={`${classes.actionItem} ${classes.actionSearch}`}
-            onClick={searchSpotlight.open}
-            aria-label={t("Search")}
+          )}
+          <Tooltip
+            label={`${t("Search")} ${platformModifierLabel} K`}
+            position="right"
           >
-            <IconSearch className={classes.actionIcon} stroke={1.8} />
-          </UnstyledButton>
-        </Tooltip>
-      </div>
-
-      <div className={classes.section}>
-        {mainNavItems.map((item) =>
-          item.disabled ? (
-            <Tooltip
-              key={item.label}
-              label={upgradeLabel}
-              position="right"
+            <UnstyledButton
+              className={classes.actionMenuItem}
+              onClick={searchSpotlight.open}
+              aria-label={t("Search")}
             >
-              <UnstyledButton
-                className={classes.link}
-                data-disabled
-                aria-disabled="true"
-                tabIndex={-1}
+              <span className={classes.actionMenuItemInner}>
+                <IconSearch
+                  size={18}
+                  className={classes.actionMenuItemIcon}
+                  stroke={2}
+                />
+                <span>{t("Search")}</span>
+              </span>
+            </UnstyledButton>
+          </Tooltip>
+          <NotificationPopover
+            variant="row"
+            rowClassName={classes.notificationRow}
+            rowIconClassName={classes.notificationRowIcon}
+          />
+          {mainNavItems.map((item) =>
+            item.disabled ? (
+              <Tooltip
+                key={item.label}
+                label={upgradeLabel}
+                position="right"
               >
-                <item.icon className={classes.linkIcon} stroke={2} />
-                <span>{t(item.label)}</span>
-              </UnstyledButton>
-            </Tooltip>
-          ) : (
-            <Link
-              key={item.label}
-              className={classes.link}
-              data-active={active === item.path || undefined}
-              aria-current={active === item.path ? "page" : undefined}
-              to={item.path}
-              onClick={handleNavClick}
-            >
-              <item.icon className={classes.linkIcon} stroke={2} />
-              <span>{t(item.label)}</span>
-            </Link>
-          ),
-        )}
+                <UnstyledButton
+                  className={classes.actionMenuItem}
+                  data-disabled
+                  aria-disabled="true"
+                  tabIndex={-1}
+                >
+                  <span className={classes.actionMenuItemInner}>
+                    <item.icon
+                      size={18}
+                      className={classes.actionMenuItemIcon}
+                      stroke={2}
+                    />
+                    <span>{t(item.label)}</span>
+                  </span>
+                </UnstyledButton>
+              </Tooltip>
+            ) : (
+              <Link
+                key={item.label}
+                className={classes.actionMenuItem}
+                data-active={active === item.path || undefined}
+                aria-current={active === item.path ? "page" : undefined}
+                to={item.path}
+                onClick={handleNavClick}
+              >
+                <span className={classes.actionMenuItemInner}>
+                  <item.icon
+                    size={18}
+                    className={classes.actionMenuItemIcon}
+                    stroke={2}
+                  />
+                  <span>{t(item.label)}</span>
+                </span>
+              </Link>
+            ),
+          )}
+        </div>
       </div>
 
       <div className={classes.divider} aria-hidden="true" />
@@ -204,20 +236,28 @@ export default function GlobalSidebar() {
 
       <div className={classes.bottomSection}>
         <UnstyledButton
-          className={classes.link}
+          className={classes.actionMenuItem}
           onClick={openInvite}
         >
-          <IconUserPlus className={classes.linkIcon} stroke={2} />
+          <IconUserPlus
+            size={18}
+            className={classes.actionMenuItemIcon}
+            stroke={2}
+          />
           <span>{t("Invite People")}</span>
         </UnstyledButton>
         <Link
-          className={classes.link}
+          className={classes.actionMenuItem}
           data-active={active.startsWith("/settings") || undefined}
           aria-current={active.startsWith("/settings") ? "page" : undefined}
           to="/settings/account/profile"
           onClick={handleNavClick}
         >
-          <IconSettings className={classes.linkIcon} stroke={2} />
+          <IconSettings
+            size={18}
+            className={classes.actionMenuItemIcon}
+            stroke={2}
+          />
           <span>{t("Settings")}</span>
         </Link>
         <UserMenu />

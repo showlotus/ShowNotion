@@ -82,7 +82,7 @@ export function NotificationPopover({
             aria-expanded={opened}
             onClick={() => setOpened((o) => !o)}
           >
-            <IconBell className={rowIconClassName} size={20} stroke={2} />
+            <IconBell className={rowIconClassName} size={18} stroke={2} />
             <span>{t("Notifications")}</span>
             {unreadCount > 0 && (
               <Text span size="xs" c="dimmed" ml="auto" pr={8}>

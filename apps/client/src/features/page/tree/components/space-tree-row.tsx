@@ -180,8 +180,6 @@ export function SpaceTreeRow({
       <span className={classes.text}>{getPageTitle(node.name, node.isBase, t)}</span>
 
       <div className={classes.actions}>
-        <NodeMenu node={node} canEdit={canEdit} />
-
         {canEdit && (
           <CreateNode
             node={node}
@@ -191,6 +189,8 @@ export function SpaceTreeRow({
             onExpandTree={handleLoadChildren}
           />
         )}
+
+        <NodeMenu node={node} canEdit={canEdit} />
       </div>
     </Link>
   );

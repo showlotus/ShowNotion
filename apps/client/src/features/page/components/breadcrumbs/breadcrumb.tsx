@@ -14,6 +14,7 @@ import {
 import { IconCornerDownRightDouble, IconDots } from "@tabler/icons-react";
 import { Link, useParams } from "react-router-dom";
 import classes from "./breadcrumb.module.css";
+import BreadcrumbItemMenu from "./breadcrumb-item-menu.tsx";
 import { SpaceTreeNode } from "@/features/page/tree/types.ts";
 import { buildPageUrl, getPageTitle } from "@/features/page/page.utils.ts";
 import type { TFunction } from "i18next";
@@ -85,19 +86,19 @@ export default function Breadcrumb() {
 
   const renderAnchor = useCallback(
     (node: SpaceTreeNode, isCurrent = false) => (
-      <Tooltip label={getPageTitle(node.name, node.isBase, t)} key={node.id}>
+      <BreadcrumbItemMenu key={node.id} node={node}>
         <Anchor
           component={Link}
           to={buildPageUrl(spaceSlug, node.slugId, node.name)}
           underline="never"
           fz="sm"
-          key={node.id}
+          lh={1.2}
           className={`${classes.breadcrumbLink} ${classes.truncatedText}`}
           aria-current={isCurrent ? "page" : undefined}
         >
           {getTitle(node, t)}
         </Anchor>
-      </Tooltip>
+      </BreadcrumbItemMenu>
     ),
     [spaceSlug, t],
   );

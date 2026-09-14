@@ -158,7 +158,7 @@
     border-left: 3px solid currentColor;
   }
 
-  blockquote p {
+  blockquote > p {
     margin: 0;
     padding-block: 0;
   }

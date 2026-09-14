@@ -111,7 +111,8 @@ function PageContent({ pageSlug }: { pageSlug: string | undefined }) {
         }}
       >
         <DocumentTitle
-          title={`${page?.icon || ""}  ${getPageTitle(page?.title, page?.isBase, t)}`}
+          title={getPageTitle(page?.title, page?.isBase, t)}
+          icon={page?.icon}
           withAppName={false}
         />
         <MemoizedPageHeader readOnly={!canEdit} />
@@ -161,7 +162,8 @@ function PageContent({ pageSlug }: { pageSlug: string | undefined }) {
     page && (
       <div>
         <DocumentTitle
-          title={`${page?.icon || ""}  ${getPageTitle(page?.title, page?.isBase, t)}`}
+          title={getPageTitle(page?.title, page?.isBase, t)}
+          icon={page?.icon}
           withAppName={false}
         />
 

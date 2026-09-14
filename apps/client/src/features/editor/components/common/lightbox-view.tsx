@@ -8,7 +8,7 @@ import Download from "yet-another-react-lightbox/plugins/download";
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
 import Video from "yet-another-react-lightbox/plugins/video";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import i18n from "@/i18n.ts";
 import { useTranslation } from "react-i18next";
 import { getScrollContainer } from "@/hooks/use-scroll-container.ts";
@@ -121,10 +121,28 @@ export default function LightboxView({
   const [pageSlides, setPageSlides] = useState<Slide[]>([]);
   const [loadedMediaKey, setLoadedMediaKey] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const shouldRestoreFocus = useRef(false);
 
   useEffect(() => {
     if (!open) setIsFullscreen(false);
   }, [open]);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+
+    const active = document.activeElement;
+    if (active !== editor.view.dom) return;
+
+    shouldRestoreFocus.current = true;
+    (active as HTMLElement).blur();
+  }, [editor, open]);
+
+  useEffect(() => {
+    if (open || !shouldRestoreFocus.current) return;
+
+    shouldRestoreFocus.current = false;
+    editor.view.focus();
+  }, [editor, open]);
 
   useEffect(() => {
     if (!open) return;

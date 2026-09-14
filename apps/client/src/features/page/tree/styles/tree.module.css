@@ -49,7 +49,11 @@
 }
 
 .actionIcon {
-    color: light-dark(var(--mantine-color-dark-3), var(--mantine-color-gray-4));
+    /* The ActionIcon's color="gray" prop emits an inline color
+     * (var(--mantine-color-gray-text), dark = gray-4 #cfceca); !important is
+     * required to override that inline style and keep the default file icon
+     * in sync with the breadcrumb panel icon (--mantine-color-dimmed). */
+    color: var(--mantine-color-dimmed) !important;
 
     /* Hovering these buttons happens on top of the row's own hover surface
      * (--notion-hover). Painting the subtle hover background again would
@@ -58,6 +62,14 @@
     &:hover {
         background-color: transparent;
     }
+}
+
+/* The row action buttons no longer carry the .actionIcon class (they render
+ * bare Mantine ActionIcon classes + inline color), so pin the default file
+ * icon color structurally: the button's inline gray-text is inherited by the
+ * icon wrapper, and this !important wins over inheritance. */
+[role="treeitem"] :global(.mantine-ActionIcon-icon) {
+    color: var(--mantine-color-dimmed) !important;
 }
 
 .text {

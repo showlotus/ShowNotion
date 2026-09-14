@@ -59,6 +59,7 @@ export default function PublicSpacePage() {
     <div>
       <DocumentTitle
         title={data.page.title || data.space.name || t("untitled")}
+        icon={data.page.icon}
         withAppName={false}
       >
         {!data.searchIndexing && <meta name="robots" content="noindex" />}

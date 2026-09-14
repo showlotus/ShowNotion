@@ -96,6 +96,21 @@ export function SpaceSidebar() {
     handleCreate(null);
   }
 
+  // 树行右键：打开与行内「…」按钮一致的页面菜单。树行组件文件当前被
+  // EsafeNet 驱动加密无法编辑，故在包裹 SpaceTree 的容器上做事件委托，
+  // 程序化触发该行的菜单按钮（aria-haspopup="menu"，不依赖 i18n 文案）。
+  function handleTreeContextMenu(e: React.MouseEvent<HTMLDivElement>) {
+    const target = e.target as HTMLElement;
+    const row = target.closest<HTMLElement>("[data-row-id]");
+    if (!row) return;
+    const menuButton = row.querySelector<HTMLButtonElement>(
+      'button[aria-haspopup="menu"]',
+    );
+    if (!menuButton) return;
+    e.preventDefault();
+    menuButton.click();
+  }
+
   return (
     <>
       <div className={classes.navbar}>
@@ -137,6 +152,12 @@ export function SpaceSidebar() {
                 <span>{t("Search")}</span>
               </div>
             </UnstyledButton>
+
+            <NotificationPopover
+              variant="row"
+              rowClassName={classes.menu}
+              rowIconClassName={classes.menuItemIcon}
+            />
 
             <UnstyledButton className={classes.menu} onClick={openSettings}>
               <div className={classes.menuItemInner}>
@@ -223,7 +244,7 @@ export function SpaceSidebar() {
             </Group>
           </Group>
 
-          <div className={classes.pages}>
+          <div className={classes.pages} onContextMenu={handleTreeContextMenu}>
             <SpaceTree
               spaceId={space.id}
               readOnly={spaceAbility.cannot(
@@ -260,11 +281,6 @@ export function SpaceSidebar() {
               </div>
             </UnstyledButton>
           )}
-          <NotificationPopover
-            variant="row"
-            rowClassName={classes.menu}
-            rowIconClassName={classes.menuItemIcon}
-          />
         </div>
       </div>
 
