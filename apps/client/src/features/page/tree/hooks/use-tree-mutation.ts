@@ -10,14 +10,20 @@ import type { DropOp } from "@/features/page/tree/model/tree-model.types";
 import {
   spaceRoots,
   updateSpaceRoots,
+  sortPositionKeys,
 } from "@/features/page/tree/utils/utils.ts";
 import { dropOpToMovePayload } from "./drop-op-to-move-payload";
 import { SpaceTreeNode } from "@/features/page/tree/types.ts";
-import { IPage } from "@/features/page/types/page.types.ts";
+import {
+  IPage,
+  ISortChildrenResult,
+  SortChildrenBy,
+} from "@/features/page/types/page.types.ts";
 import {
   useCreatePageMutation,
   useRemovePageMutation,
   useMovePageMutation,
+  useSortChildrenMutation,
   useUpdatePageMutation,
   updateCacheOnMovePage,
 } from "@/features/page/queries/page-query.ts";
@@ -30,6 +36,10 @@ export type UseTreeMutation = {
   handleCreate: (parentId: string | null) => Promise<void>;
   handleRename: (id: string, name: string) => Promise<void>;
   handleDelete: (id: string) => Promise<void>;
+  handleSortChildren: (
+    parentId: string,
+    sortBy: SortChildrenBy,
+  ) => Promise<void>;
 };
 
 export function useTreeMutation(spaceId: string): UseTreeMutation {
@@ -43,6 +53,7 @@ export function useTreeMutation(spaceId: string): UseTreeMutation {
   const updatePageMutation = useUpdatePageMutation();
   const removePageMutation = useRemovePageMutation();
   const movePageMutation = useMovePageMutation();
+  const sortChildrenMutation = useSortChildrenMutation();
   const navigate = useNavigate();
   const { spaceSlug, pageSlug } = useParams();
   const emit = useQueryEmit();
@@ -264,7 +275,61 @@ export function useTreeMutation(spaceId: string): UseTreeMutation {
     [removePageMutation, setData, store, pageSlug, navigate, spaceSlug, emit, spaceId],
   );
 
-  return { handleMove, handleCreate, handleRename, handleDelete };
+  const handleSortChildren = useCallback(
+    async (parentId: string, sortBy: SortChildrenBy) => {
+      let result: ISortChildrenResult;
+      try {
+        result = await sortChildrenMutation.mutateAsync({
+          pageId: parentId,
+          sortBy,
+        });
+      } catch {
+        return;
+      }
+
+      const { updates } = result;
+      if (!updates.length) return;
+
+      setData((prev) =>
+        updateSpaceRoots(prev, spaceId, (roots) => {
+          let next = roots;
+          for (const update of updates) {
+            next = treeModel.update(
+              next,
+              update.id,
+              { position: update.position } as Partial<SpaceTreeNode>,
+            );
+          }
+
+          // 子页面未加载（父节点未展开）时跳过本地重排，展开时懒加载拉取新序
+          const parent = treeModel.find(next, parentId);
+          if (!parent?.children?.length) return next;
+
+          const sortedChildren = sortPositionKeys([...parent.children]);
+          return treeModel.update(next, parentId, {
+            children: sortedChildren,
+          } as Partial<SpaceTreeNode>);
+        }),
+      );
+
+      setTimeout(() => {
+        emit({
+          operation: "sortTreeNode",
+          spaceId,
+          payload: { parentId, updates },
+        });
+      }, 50);
+    },
+    [sortChildrenMutation, setData, spaceId, emit],
+  );
+
+  return {
+    handleMove,
+    handleCreate,
+    handleRename,
+    handleDelete,
+    handleSortChildren,
+  };
 }
 
 function isPageInNode(node: SpaceTreeNode, pageSlug: string): boolean {

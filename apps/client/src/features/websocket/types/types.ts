@@ -72,6 +72,18 @@ export type MoveTreeNodeEvent = {
   };
 };
 
+export type SortTreeNodeEvent = {
+  operation: "sortTreeNode";
+  spaceId: string;
+  payload: {
+    parentId: string;
+    updates: {
+      id: string;
+      position: string;
+    }[];
+  };
+};
+
 export type DeleteTreeNodeEvent = {
   operation: "deleteTreeNode";
   spaceId: string;
@@ -100,6 +112,7 @@ export type WebSocketEvent =
   | DeleteEvent
   | AddTreeNodeEvent
   | MoveTreeNodeEvent
+  | SortTreeNodeEvent
   | DeleteTreeNodeEvent
   | RefetchRootTreeNodeEvent
   | VerificationUpdatedEvent;

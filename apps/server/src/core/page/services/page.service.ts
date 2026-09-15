@@ -19,6 +19,7 @@ import { InjectKysely } from 'nestjs-kysely';
 import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
 import { generateJitteredKeyBetween } from 'fractional-indexing-jittered';
 import { MovePageDto } from '../dto/move-page.dto';
+import { SortChildrenBy, SortChildrenDto } from '../dto/sort-children.dto';
 import { generateSlugId } from '../../../common/helpers';
 import { getPageTitle } from '../../../common/helpers';
 import { dbOrTx, executeTx } from '@docmost/db/utils';
@@ -130,13 +131,16 @@ export class PageService {
       ydoc = createYdocFromJson(prosemirrorJson);
     }
 
+    const pagePosition = await this.nextPagePosition(
+      createPageDto.spaceId,
+      parentPageId,
+    );
+
     const page = await this.pageRepo.insertPage({
       slugId: generateSlugId(),
       title: createPageDto.title,
-      position: await this.nextPagePosition(
-        createPageDto.spaceId,
-        parentPageId,
-      ),
+      position: pagePosition,
+      manualPosition: pagePosition,
       icon: createPageDto.icon,
       parentPageId: parentPageId,
       spaceId: createPageDto.spaceId,
@@ -439,7 +443,11 @@ export class PageService {
           trx,
         );
         await this.pageRepo.updatePage(
-          { parentPageId: null, position: orphanPosition },
+          {
+            parentPageId: null,
+            position: orphanPosition,
+            manualPosition: orphanPosition,
+          },
           page.id,
           trx,
         );
@@ -448,7 +456,12 @@ export class PageService {
       // Update root page
       const nextPosition = await this.nextPagePosition(spaceId, null, trx);
       await this.pageRepo.updatePage(
-        { spaceId, parentPageId: null, position: nextPosition },
+        {
+          spaceId,
+          parentPageId: null,
+          position: nextPosition,
+          manualPosition: nextPosition,
+        },
         currentRootPage.id,
         trx,
       );
@@ -700,6 +713,8 @@ export class PageService {
           textContent: jsonToText(prosemirrorJson),
           ydoc: createYdocFromJson(prosemirrorJson),
           position: page.id === rootPage.id ? nextPosition : page.position,
+          manualPosition:
+            page.id === rootPage.id ? nextPosition : page.position,
           spaceId: spaceId,
           workspaceId: page.workspaceId,
           creatorId: authUser.id,
@@ -891,12 +906,95 @@ export class PageService {
       await this.pageRepo.updatePage(
         {
           position: dto.position,
+          manualPosition: dto.position,
           parentPageId: parentPageId,
         },
         dto.pageId,
         trx,
       );
     });
+  }
+
+  async sortChildrenPages(
+    dto: SortChildrenDto,
+    parentPage: Page,
+    user: User,
+  ): Promise<{ parentId: string; updates: { id: string; position: string }[] }> {
+    const children = await this.db
+      .selectFrom('pages')
+      .select(['id', 'position', 'manualPosition', 'updatedAt'])
+      .where('parentPageId', '=', dto.pageId)
+      .where('deletedAt', 'is', null)
+      .execute();
+
+    const editableChildren = await this.filterEditableChildren(
+      children,
+      parentPage.spaceId,
+      user.id,
+    );
+
+    if (editableChildren.length === 0) {
+      return { parentId: dto.pageId, updates: [] };
+    }
+
+    let updates: { id: string; position: string }[];
+
+    if (dto.sortBy === SortChildrenBy.Manual) {
+      // 恢复手动顺序；无备份的页面保持原位
+      updates = editableChildren
+        .filter((p) => p.manualPosition)
+        .map((p) => ({ id: p.id, position: p.manualPosition! }));
+    } else {
+      const sorted = [...editableChildren].sort((a, b) => {
+        const diff =
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        return diff !== 0 ? diff : a.id.localeCompare(b.id);
+      });
+      let prevKey: string | null = null;
+      updates = sorted.map((p) => {
+        const key = generateJitteredKeyBetween(prevKey, null);
+        prevKey = key;
+        return { id: p.id, position: key };
+      });
+    }
+
+    if (updates.length > 0) {
+      await executeTx(this.db, async (trx) => {
+        await this.pageRepo.lockPageHierarchySpaces([parentPage.spaceId], trx);
+
+        for (const update of updates) {
+          await this.pageRepo.updatePage(
+            { position: update.position },
+            update.id,
+            trx,
+          );
+        }
+      });
+    }
+
+    return { parentId: dto.pageId, updates };
+  }
+
+  private async filterEditableChildren<
+    T extends { id: string },
+  >(children: T[], spaceId: string, userId: string): Promise<T[]> {
+    const hasRestrictions =
+      await this.pagePermissionRepo.hasRestrictedPagesInSpace(spaceId);
+    if (!hasRestrictions) {
+      return children;
+    }
+
+    const accessiblePages =
+      await this.pagePermissionRepo.filterAccessiblePageIdsWithPermissions(
+        children.map((p) => p.id),
+        userId,
+      );
+
+    const editableIds = new Set(
+      accessiblePages.filter((p) => p.canEdit).map((p) => p.id),
+    );
+
+    return children.filter((p) => editableIds.has(p.id));
   }
 
   async getPageBreadCrumbs(childPageId: string) {

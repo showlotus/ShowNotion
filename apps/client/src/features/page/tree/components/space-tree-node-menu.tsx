@@ -6,6 +6,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import {
   IconArrowRight,
+  IconArrowsSort,
   IconCopy,
   IconDots,
   IconFileExport,
@@ -38,6 +39,7 @@ import {
   updateSpaceRoots,
 } from "@/features/page/tree/utils/utils.ts";
 import { useTreeMutation } from "@/features/page/tree/hooks/use-tree-mutation.ts";
+import { SortChildrenBy } from "@/features/page/types/page.types.ts";
 import type { SpaceTreeNode } from "@/features/page/tree/types.ts";
 import classes from "@/features/page/tree/styles/tree.module.css";
 
@@ -51,7 +53,7 @@ export function NodeMenu({ node, canEdit }: NodeMenuProps) {
   const clipboard = useClipboard({ timeout: 500 });
   const { spaceSlug } = useParams();
   const { openDeleteModal } = useDeletePageModal();
-  const { handleDelete } = useTreeMutation(node.spaceId);
+  const { handleDelete, handleSortChildren } = useTreeMutation(node.spaceId);
   const [data, setData] = useAtom(treeDataAtom);
   const emit = useQueryEmit();
   const [exportOpened, { open: openExportModal, close: closeExportModal }] =
@@ -152,6 +154,42 @@ export function NodeMenu({ node, canEdit }: NodeMenuProps) {
         </Menu.Target>
 
         <Menu.Dropdown>
+          {canEdit && (
+            <>
+              <Menu.Sub floatingStrategy="fixed">
+                <Menu.Sub.Target>
+                  <Menu.Sub.Item leftSection={<IconArrowsSort size={16} />}>
+                    {t("Sort")}
+                  </Menu.Sub.Item>
+                </Menu.Sub.Target>
+
+                <Menu.Sub.Dropdown>
+                  <Menu.Item
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleSortChildren(node.id, SortChildrenBy.Manual);
+                    }}
+                  >
+                    {t("Manual")}
+                  </Menu.Item>
+
+                  <Menu.Item
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleSortChildren(node.id, SortChildrenBy.UpdatedAtDesc);
+                    }}
+                  >
+                    {t("Last updated")}
+                  </Menu.Item>
+                </Menu.Sub.Dropdown>
+              </Menu.Sub>
+
+              <Menu.Divider />
+            </>
+          )}
+
           <Menu.Item
             leftSection={<IconLink size={16} />}
             onClick={(e) => {
@@ -180,16 +218,7 @@ export function NodeMenu({ node, canEdit }: NodeMenuProps) {
             {isFavorited ? t("Remove from favorites") : t("Add to favorites")}
           </Menu.Item>
 
-          <Menu.Item
-            leftSection={<IconFileExport size={16} />}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              openExportModal();
-            }}
-          >
-            {t("Export page")}
-          </Menu.Item>
+          <Menu.Divider />
 
           {canEdit && (
             <>
@@ -226,6 +255,23 @@ export function NodeMenu({ node, canEdit }: NodeMenuProps) {
                 {t("Copy to space")}
               </Menu.Item>
 
+              <Menu.Divider />
+            </>
+          )}
+
+          <Menu.Item
+            leftSection={<IconFileExport size={16} />}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              openExportModal();
+            }}
+          >
+            {t("Export page")}
+          </Menu.Item>
+
+          {canEdit && (
+            <>
               <Menu.Divider />
               <Menu.Item
                 c="red"

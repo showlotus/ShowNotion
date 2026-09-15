@@ -6,7 +6,7 @@ import { WebSocketEvent } from "@/features/websocket/types";
 import { SpaceTreeNode } from "@/features/page/tree/types.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { treeModel } from "@/features/page/tree/model/tree-model";
-import { updateSpaceRoots } from "@/features/page/tree/utils/utils.ts";
+import { updateSpaceRoots, sortPositionKeys } from "@/features/page/tree/utils/utils.ts";
 import localEmitter from "@/lib/local-emitter.ts";
 
 export const useTreeSocket = () => {
@@ -123,6 +123,27 @@ export const useTreeSocket = () => {
               }
 
               return next;
+            }),
+          );
+          break;
+        case "sortTreeNode":
+          setTreeData((prev) =>
+            updateSpaceRoots(prev, event.spaceId, (roots) => {
+              let next = roots;
+              for (const update of event.payload.updates) {
+                next = treeModel.update(next, update.id, {
+                  position: update.position,
+                } as Partial<SpaceTreeNode>);
+              }
+
+              // 父节点未加载时跳过重排，展开时懒加载拉取新序
+              const parent = treeModel.find(next, event.payload.parentId);
+              if (!parent?.children?.length) return next;
+
+              const sortedChildren = sortPositionKeys([...parent.children]);
+              return treeModel.update(next, event.payload.parentId, {
+                children: sortedChildren,
+              } as Partial<SpaceTreeNode>);
             }),
           );
           break;

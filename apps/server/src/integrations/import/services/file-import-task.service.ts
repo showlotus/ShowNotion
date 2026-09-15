@@ -531,6 +531,7 @@ export class FileImportTaskService {
               textContent: jsonToText(prosemirrorJson),
               ydoc: await this.importService.createYdoc(prosemirrorJson),
               position: page.position!,
+              manualPosition: page.position!,
               spaceId: fileTask.spaceId,
               workspaceId: fileTask.workspaceId,
               creatorId: fileTask.creatorId,

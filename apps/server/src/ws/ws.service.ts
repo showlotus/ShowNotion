@@ -197,6 +197,8 @@ export class WsService {
         return data.payload?.data?.id ?? null;
       case 'moveTreeNode':
         return data.payload?.id ?? null;
+      case 'sortTreeNode':
+        return data.payload?.parentId ?? null;
       case 'deleteTreeNode':
         return data.payload?.node?.id ?? null;
       case 'updateOne':

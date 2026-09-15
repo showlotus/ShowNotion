@@ -72,6 +72,24 @@ export interface ICopyPageToSpace {
   spaceId?: string;
 }
 
+export enum SortChildrenBy {
+  Manual = "manual",
+  UpdatedAtDesc = "updatedAtDesc",
+}
+
+export interface ISortChildren {
+  pageId: string;
+  sortBy: SortChildrenBy;
+}
+
+export interface ISortChildrenResult {
+  parentId: string;
+  updates: {
+    id: string;
+    position: string;
+  }[];
+}
+
 export interface SidebarPagesParams {
   spaceId?: string;
   pageId?: string;

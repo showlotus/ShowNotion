@@ -16,6 +16,7 @@ import { PageAccessService } from './page-access/page-access.service';
 import { CreatePageDto } from './dto/create-page.dto';
 import { UpdatePageDto } from './dto/update-page.dto';
 import { MovePageDto, MovePageToSpaceDto } from './dto/move-page.dto';
+import { SortChildrenDto } from './dto/sort-children.dto';
 import {
   DeletePageDto,
   PageHistoryIdDto,
@@ -743,6 +744,29 @@ export class PageController {
     }
 
     return this.pageService.movePage(dto, movedPage);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('sort-children')
+  @OAuthScope('write')
+  async sortChildrenPages(@Body() dto: SortChildrenDto, @AuthUser() user: User) {
+    const parentPage = await this.pageRepo.findById(dto.pageId);
+    if (!parentPage || parentPage.deletedAt) {
+      throw new NotFoundException('Parent page not found');
+    }
+
+    const ability = await this.spaceAbility.createForUser(
+      user,
+      parentPage.spaceId,
+    );
+
+    if (ability.cannot(SpaceCaslAction.Edit, SpaceCaslSubject.Page)) {
+      throw new ForbiddenException();
+    }
+
+    await this.pageAccessService.validateCanEdit(parentPage, user);
+
+    return this.pageService.sortChildrenPages(dto, parentPage, user);
   }
 
   @HttpCode(HttpStatus.OK)

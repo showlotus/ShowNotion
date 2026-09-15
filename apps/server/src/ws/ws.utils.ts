@@ -13,6 +13,7 @@ export const TREE_EVENTS = new Set([
   'updateOne',
   'addTreeNode',
   'moveTreeNode',
+  'sortTreeNode',
   'deleteTreeNode',
   'refetchRootTreeNodeEvent',
 ]);

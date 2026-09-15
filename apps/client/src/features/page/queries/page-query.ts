@@ -7,6 +7,7 @@ import {
   useQuery,
   UseQueryResult,
   keepPreviousData,
+  useQueryClient,
 } from "@tanstack/react-query";
 import {
   createPage,
@@ -15,6 +16,7 @@ import {
   getSidebarPages,
   updatePage,
   movePage,
+  sortChildrenPages,
   getPageBreadcrumbs,
   getRecentChanges,
   getCreatedByPages,
@@ -26,6 +28,8 @@ import {
   IMovePage,
   IPage,
   IPageInput,
+  ISortChildren,
+  ISortChildrenResult,
   SidebarPagesParams,
 } from "@/features/page/types/page.types";
 import { notifications } from "@mantine/notifications";
@@ -168,6 +172,23 @@ export function useDeletePageMutation() {
 export function useMovePageMutation() {
   return useMutation<void, Error, IMovePage>({
     mutationFn: (data) => movePage(data),
+  });
+}
+
+export function useSortChildrenMutation() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  return useMutation<ISortChildrenResult, Error, ISortChildren>({
+    mutationFn: (data) => sortChildrenPages(data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["sidebar-pages", { pageId: variables.pageId }],
+      });
+    },
+    onError: () => {
+      notifications.show({ message: t("Failed to sort pages"), color: "red" });
+    },
   });
 }
 

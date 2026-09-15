@@ -15,14 +15,26 @@ export function useSidebarTreeSort() {
 
   const setSortMode = useCallback(
     async (mode: SidebarTreeSortMode) => {
+      if (!user) return;
+      const prevUser = user;
+      setUser({
+        ...prevUser,
+        settings: {
+          ...prevUser.settings,
+          preferences: {
+            ...prevUser.settings?.preferences,
+            sidebarPageTreeSort: mode,
+          },
+        },
+      });
       try {
         const updatedUser = await updateUser({ sidebarPageTreeSort: mode });
         setUser(updatedUser);
       } catch {
-        // preference stays unchanged on failure; nothing to revert
+        setUser(prevUser);
       }
     },
-    [setUser],
+    [user, setUser],
   );
 
   const toggleSortMode = useCallback(

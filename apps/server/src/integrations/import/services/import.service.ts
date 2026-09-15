@@ -121,6 +121,7 @@ export class ImportService {
           textContent: jsonToText(prosemirrorJson),
           ydoc: await this.createYdoc(prosemirrorJson),
           position: pagePosition,
+          manualPosition: pagePosition,
           spaceId: spaceId,
           creatorId: userId,
           workspaceId: workspaceId,

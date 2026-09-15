@@ -6,6 +6,8 @@ import {
   IMovePageToSpace,
   IPage,
   IPageInput,
+  ISortChildren,
+  ISortChildrenResult,
   SidebarPagesParams,
 } from '@/features/page/types/page.types';
 import { QueryParams } from "@/lib/types";
@@ -55,6 +57,13 @@ export async function movePage(data: IMovePage): Promise<void> {
 
 export async function movePageToSpace(data: IMovePageToSpace): Promise<void> {
   await api.post<void>("/pages/move-to-space", data);
+}
+
+export async function sortChildrenPages(
+  data: ISortChildren,
+): Promise<ISortChildrenResult> {
+  const req = await api.post<ISortChildrenResult>("/pages/sort-children", data);
+  return req.data;
 }
 
 export async function duplicatePage(data: ICopyPageToSpace): Promise<IPage> {

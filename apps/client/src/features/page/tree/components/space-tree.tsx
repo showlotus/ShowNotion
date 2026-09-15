@@ -1,4 +1,4 @@
-import { useAtom } from "jotai";
+import { useAtom, useStore } from "jotai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -28,6 +28,7 @@ import { getPageBreadcrumbs } from "@/features/page/services/page-service.ts";
 import { IPage } from "@/features/page/types/page.types.ts";
 import { extractPageSlugId } from "@/lib";
 import { DocTree } from "./doc-tree";
+import type { DropOp } from "@/features/page/tree/model/tree-model.types";
 import { SpaceTreeRow } from "./space-tree-row";
 
 interface SpaceTreeProps {
@@ -39,8 +40,9 @@ export default function SpaceTree({ spaceId, readOnly }: SpaceTreeProps) {
   const { t } = useTranslation();
   const { pageSlug } = useParams();
   const [data, setData] = useAtom(treeDataAtom);
+  const store = useStore();
   const { handleMove } = useTreeMutation(spaceId);
-  const { sortMode } = useSidebarTreeSort();
+  const { sortMode, setSortMode } = useSidebarTreeSort();
   const {
     data: pagesData,
     hasNextPage,
@@ -203,10 +205,19 @@ export default function SpaceTree({ spaceId, readOnly }: SpaceTreeProps) {
     (n: SpaceTreeNode) => n.canEdit === false,
     [],
   );
-  const disableReorder = useCallback(
-    (n: SpaceTreeNode) =>
-      sortMode === "updatedAtDesc" && n.parentPageId == null,
-    [sortMode],
+  const handleTreeMove = useCallback(
+    async (sourceId: string, op: DropOp) => {
+      const target = treeModel.find(store.get(treeDataAtom), op.targetId);
+      if (
+        sortMode === "updatedAtDesc" &&
+        (op.kind === "reorder-before" || op.kind === "reorder-after") &&
+        target?.parentPageId == null
+      ) {
+        setSortMode("manual");
+      }
+      await handleMove(sourceId, op);
+    },
+    [store, sortMode, setSortMode, handleMove],
   );
   const getDragLabel = useCallback(
     (n: SpaceTreeNode) => getPageTitle(n.name, n.isBase, t),
@@ -226,12 +237,11 @@ export default function SpaceTree({ spaceId, readOnly }: SpaceTreeProps) {
           openIds={openIds}
           selectedId={currentPage?.id}
           renderRow={renderRow}
-          onMove={handleMove}
+          onMove={handleTreeMove}
           onToggle={handleToggle}
           readOnly={readOnly}
           disableDrag={disableDragDrop}
           disableDrop={disableDragDrop}
-          disableReorder={disableReorder}
           getDragLabel={getDragLabel}
           aria-label={t("Pages")}
         />
