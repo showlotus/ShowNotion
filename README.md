@@ -98,6 +98,8 @@ Set the following variables in `.env` (see `.env.example`):
 | --- | --- |
 | `MCP_AUTH_TOKEN` | Static Bearer token for MCP clients. Generate one with `openssl rand -hex 32`. Leave empty to disable the MCP endpoint |
 | `MCP_USER_EMAIL` | Email of the workspace user the tools act as. Its permissions define what the MCP tools can read and write |
+| `MCP_UPLOAD_INBOX` | Server-side staging directory the `upload_attachment` tool reads files from (default `/tmp/shownotion-mcp-inbox`) |
+| `MCP_UPLOAD_INBOX_HOST` | Host-side shared directory (bind-mounted to `MCP_UPLOAD_INBOX`), used only for delivery hints in the tool description, e.g. `~/shownotion/inbox` |
 
 Restart the dev server after changing these variables (`.env` changes are not hot-reloaded).
 
@@ -154,10 +156,17 @@ opencode (`mcp` section in `~/.config/opencode/opencode.json`):
 | `delete_pages` | Move multiple pages to trash |
 | `get_workspace` | Get the workspace name and basic info |
 | `list_groups` | List user groups in the workspace |
+| `upload_attachment` | Upload a file (e.g. an image) from the server inbox to a page as an attachment, returning a URL for embedding in Markdown |
 
 All page tools accept a page ID, slug ID, page slug, path, or a full page URL
 (e.g. `http://localhost:3000/docs/{spaceSlug}/{pageSlug}`) — the slug ID is extracted
-automatically.
+automatically. `upload_attachment` accepts the same formats for its `pageId` argument.
+
+To use `upload_attachment`, deliver the file to the inbox first: copy it into the shared
+host directory (`MCP_UPLOAD_INBOX_HOST`), or `docker cp <local-file> <container>:<MCP_UPLOAD_INBOX>/`.
+Then call the tool with a `filePath` relative to the inbox; the staged file is consumed
+(deleted) on success. Use the returned file URL to embed the attachment in Markdown —
+never inline base64 content.
 
 ## License
 
