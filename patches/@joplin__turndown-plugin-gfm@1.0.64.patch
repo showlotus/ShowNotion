@@ -1,0 +1,19 @@
+diff --git a/lib/turndown-plugin-gfm.cjs.js b/lib/turndown-plugin-gfm.cjs.js
+index d33922acd06d75b6918f57876f5cb207d73909b2..6cafa68037364889ae3cb827531f69d8c59eca53 100644
+--- a/lib/turndown-plugin-gfm.cjs.js
++++ b/lib/turndown-plugin-gfm.cjs.js
+@@ -205,6 +205,14 @@ function isFirstTbody (element) {
+   return (
+     element.nodeName === 'TBODY' && (
+       !previousSibling ||
++      /**
++       * Reason: Tiptap emits <colgroup> (column widths) as the first child of
++       * <table>, right before <tbody>. Without skipping it here, the first
++       * all-<th> row is not detected as the heading row and an empty header is
++       * emitted. A colgroup carries no text, so a preceding one is equivalent
++       * to no previous sibling.
++       */
++      previousSibling.nodeName === 'COLGROUP' ||
+       (
+         previousSibling.nodeName === 'THEAD' &&
+         /^\s*$/i.test(previousSibling.textContent)

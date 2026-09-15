@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Readable } from 'stream';
+import * as path from 'path';
 import { StorageService } from '../../../integrations/storage/storage.service';
 import { MultipartFile } from '@fastify/multipart';
 import {
@@ -13,6 +14,7 @@ import {
   prepareFile,
   validateFileType,
 } from '../attachment.utils';
+import { getMimeType, sanitizeFileName } from '../../../common/helpers';
 import { v4 as uuid4, v7 as uuid7 } from 'uuid';
 import { AttachmentRepo } from '@docmost/db/repos/attachment/attachment.repo';
 import { AttachmentType, validImageExtensions } from '../attachment.constants';
@@ -138,6 +140,65 @@ export class AttachmentService {
     }
 
     return attachment;
+  }
+
+  async uploadFileFromBuffer(opts: {
+    buffer: Buffer;
+    fileName: string;
+    pageId: string;
+    userId: string;
+    spaceId: string;
+    workspaceId: string;
+  }) {
+    const { buffer, pageId, userId, spaceId, workspaceId } = opts;
+
+    const fileName = sanitizeFileName(opts.fileName).slice(0, 255);
+    const preparedFile: PreparedFile = {
+      fileName,
+      fileSize: buffer.length,
+      fileExtension: path.extname(fileName).toLowerCase(),
+      mimeType: getMimeType(fileName),
+      buffer,
+    };
+
+    const attachmentId = uuid7();
+    const filePath = `${getAttachmentFolderPath(AttachmentType.File, workspaceId)}/${attachmentId}/${preparedFile.fileName}`;
+
+    await this.uploadToDrive(filePath, buffer);
+
+    try {
+      const attachment = await this.saveAttachment({
+        attachmentId,
+        preparedFile,
+        filePath,
+        type: AttachmentType.File,
+        userId,
+        spaceId,
+        workspaceId,
+        pageId,
+      });
+
+      if (['.pdf', '.docx', '.txt'].includes(attachment.fileExt.toLowerCase())) {
+        await this.attachmentQueue.add(
+          QueueJob.ATTACHMENT_INDEX_CONTENT,
+          {
+            attachmentId: attachmentId,
+          },
+          {
+            attempts: 2,
+            backoff: {
+              type: 'exponential',
+              delay: 10000,
+            },
+          },
+        );
+      }
+
+      return attachment;
+    } catch (err) {
+      await this.deleteRedundantFile(filePath);
+      throw err;
+    }
   }
 
   async uploadImage(

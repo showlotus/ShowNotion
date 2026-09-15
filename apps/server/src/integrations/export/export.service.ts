@@ -93,11 +93,7 @@ export class ExportService {
     }
 
     if (format === ExportFormat.Markdown) {
-      const newPageHtml = pageHtml.replace(
-        /<colgroup[^>]*>[\s\S]*?<\/colgroup>/gim,
-        '',
-      );
-      return htmlToMarkdown(newPageHtml);
+      return htmlToMarkdown(pageHtml);
     }
 
     return;

@@ -7,6 +7,8 @@ import { SearchModule } from '../../core/search/search.module';
 import { SpaceModule } from '../../core/space/space.module';
 import { WorkspaceModule } from '../../core/workspace/workspace.module';
 import { GroupModule } from '../../core/group/group.module';
+import { AttachmentModule } from '../../core/attachment/attachment.module';
+import { EnvironmentModule } from '../environment/environment.module';
 
 @Module({
   // CaslModule、PageAccessModule、repo 层均为全局模块，无需重复导入
@@ -16,6 +18,8 @@ import { GroupModule } from '../../core/group/group.module';
     SpaceModule,
     WorkspaceModule,
     GroupModule,
+    AttachmentModule,
+    EnvironmentModule,
   ],
   controllers: [McpController],
   providers: [McpAuthGuard, McpServerFactory],

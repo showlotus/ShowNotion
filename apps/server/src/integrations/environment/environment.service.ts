@@ -407,4 +407,17 @@ export class EnvironmentService {
   getMcpUserEmail(): string {
     return this.configService.get<string>('MCP_USER_EMAIL');
   }
+
+  // MCP 上传工具的文件暂存目录，容器与原生部署共用同一默认值
+  getMcpUploadInbox(): string {
+    return (
+      this.configService.get<string>('MCP_UPLOAD_INBOX') ||
+      '/tmp/shownotion-mcp-inbox'
+    );
+  }
+
+  // 宿主侧共享目录路径（bind mount 到暂存目录），仅用于工具提示文案
+  getMcpUploadInboxHost(): string {
+    return this.configService.get<string>('MCP_UPLOAD_INBOX_HOST') || '';
+  }
 }

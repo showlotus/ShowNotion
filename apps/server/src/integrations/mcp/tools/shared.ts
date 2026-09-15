@@ -14,6 +14,18 @@ import {
 import {
   PageAccessService,
 } from '../../../core/page/page-access/page-access.service';
+import {
+  AttachmentService,
+} from '../../../core/attachment/services/attachment.service';
+import {
+  EnvironmentService,
+} from '../../../integrations/environment/environment.service';
+import {
+  DomainService,
+} from '../../../integrations/environment/domain.service';
+import {
+  IAuditService,
+} from '../../../integrations/audit/audit.service';
 import SpaceAbilityFactory from '../../../core/casl/abilities/space-ability.factory';
 import WorkspaceAbilityFactory from '../../../core/casl/abilities/workspace-ability.factory';
 import { User, Workspace } from '@docmost/db/types/entity.types';
@@ -29,6 +41,10 @@ export interface McpToolServices {
   workspaceService: WorkspaceService;
   groupService: GroupService;
   pageAccessService: PageAccessService;
+  attachmentService: AttachmentService;
+  environmentService: EnvironmentService;
+  domainService: DomainService;
+  auditService: IAuditService;
   spaceAbility: SpaceAbilityFactory;
   workspaceAbility: WorkspaceAbilityFactory;
 }
