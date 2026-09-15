@@ -161,11 +161,16 @@ automatically.
 
 ## License
 
-Docmost core is licensed under the open-source AGPL 3.0 license. Enterprise features
-(`apps/server/src/ee`, `apps/client/src/ee`, `packages/ee`) are licensed under the Docmost
-Enterprise license defined in `packages/ee/License`.
+This repository contains code under two licenses:
 
-This fork keeps the AGPL 3.0 license and upstream copyright notices intact.
+- Code derived from Docmost is licensed under the AGPL 3.0 license (see [LICENSE](LICENSE)).
+- Original code of this fork is licensed under the MIT License (see [LICENSE-MIT](LICENSE-MIT)).
+
+Enterprise features (`apps/server/src/ee`, `apps/client/src/ee`, `packages/ee`)
+are licensed under the Docmost Enterprise license defined in `packages/ee/LICENSE`.
+
+Upstream Docmost copyright notices and the AGPL 3.0 terms for Docmost-derived
+code are retained.
 
 ## Contributing
 
