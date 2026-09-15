@@ -15,7 +15,7 @@ import {
   IconQuote,
   IconTypography,
 } from "@tabler/icons-react";
-import { Popover, Button, ScrollArea, Tooltip } from "@mantine/core";
+import { Menu, Button, ScrollArea, Tooltip } from "@mantine/core";
 import type { Editor } from "@tiptap/react";
 import { useEditorState } from "@tiptap/react";
 import { useTranslation } from "react-i18next";
@@ -156,8 +156,14 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
   };
 
   return (
-    <Popover opened={isOpen} onChange={setIsOpen} withArrow>
-      <Popover.Target>
+    <Menu
+      shadow="md"
+      position="bottom-start"
+      withArrow={false}
+      opened={isOpen}
+      onChange={setIsOpen}
+    >
+      <Menu.Target>
         <Tooltip
           label={t("Turn into")}
           withArrow
@@ -170,6 +176,7 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
             style={{ border: "none", height: "34px" }}
             radius="0"
             rightSection={<IconChevronDown size={16} />}
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => setIsOpen(!isOpen)}
             aria-label={t("Turn into")}
             aria-haspopup="menu"
@@ -178,33 +185,27 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
             {t(activeItem?.name)}
           </Button>
         </Tooltip>
-      </Popover.Target>
+      </Menu.Target>
 
-      <Popover.Dropdown>
+      <Menu.Dropdown>
         <ScrollArea.Autosize type="scroll" mah={400}>
-          <Button.Group orientation="vertical">
-            {items.map((item, index) => (
-              <Button
-                key={index}
-                variant="default"
-                leftSection={<item.icon size={16} />}
-                rightSection={
-                  activeItem.name === item.name && <IconCheck size={16} />
-                }
-                justify="left"
-                fullWidth
-                onClick={() => {
-                  if (isEditorReady(editor)) item.command();
-                  setIsOpen(false);
-                }}
-                style={{ border: "none" }}
-              >
-                {t(item.name)}
-              </Button>
-            ))}
-          </Button.Group>
+          {items.map((item, index) => (
+            <Menu.Item
+              key={index}
+              leftSection={<item.icon size={16} />}
+              rightSection={
+                activeItem.name === item.name ? <IconCheck size={16} /> : null
+              }
+              onClick={() => {
+                if (isEditorReady(editor)) item.command();
+                setIsOpen(false);
+              }}
+            >
+              {t(item.name)}
+            </Menu.Item>
+          ))}
         </ScrollArea.Autosize>
-      </Popover.Dropdown>
-    </Popover>
+      </Menu.Dropdown>
+    </Menu>
   );
 };

@@ -28,11 +28,22 @@
   }
 }
 
-.colorSwatch:focus-visible {
+/* Notion-style swatch cell: 30px hit area (2px padding) wrapping a 26px
+ * 6px-radius swatch. Focus ring lands on the swatch; hover tints it with a
+ * light-dark overlay, mirroring Notion's hover layer. */
+.colorSwatchCell:focus-visible .colorSwatch {
   outline: none;
   box-shadow: 0 0 0 2px var(--mantine-color-blue-6);
   position: relative;
   z-index: 1;
+}
+
+.colorSwatchCell:hover .colorSwatch::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: light-dark(rgba(0, 0, 0, 0.06), rgba(255, 255, 255, 0.18));
 }
 
 .removeColor:focus-visible {
@@ -62,4 +73,28 @@
     var(--mantine-color-gray-3),
     var(--mantine-color-dark-3)
   );
+}
+
+/* Color panel "Remove color" button reads as a menu item: 6px interactive
+ * radius, no border, and the app-wide selected surface on hover. */
+.menuLikeButton {
+  border: none;
+  border-radius: var(--mantine-radius-sm);
+}
+
+.menuLikeButton:hover {
+  background-color: var(--notion-selected);
+}
+/* Toolbar buttons read as menu items: hover with the app-wide selected
+ * surface (--notion-selected) instead of Mantine's default-hover gray,
+ * which sits only ~2/255 above the toolbar background in dark mode. */
+/* Uniform interactive face: every toolbar button carries the 6px radius
+ * (theme "buttons / menu items" scale) so the --notion-selected hover
+ * surface is consistently rounded — previously only the comment button
+ * (radius="6px") showed rounded hover while the rest were square. */
+.bubbleMenu button[data-variant="default"] {
+  border-radius: var(--mantine-radius-sm) !important;
+}
+.bubbleMenu button[data-variant="default"]:hover {
+  background-color: var(--notion-selected);
 }

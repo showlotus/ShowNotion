@@ -114,7 +114,7 @@ const HIGHLIGHT_COLORS: BubbleColorMenuItem[] = [
   },
 ];
 
-const COLOR_GRID_COLS = 5;
+const COLOR_GRID_COLS = 6;
 
 function focusSwatch(grid: "text" | "highlight", index: number) {
   const el = document.querySelector<HTMLElement>(
@@ -212,13 +212,7 @@ export const ColorSelector: FC<ColorSelectorProps> = ({
   );
 
   return (
-    <Popover
-      width={220}
-      opened={isOpen}
-      onChange={setIsOpen}
-      trapFocus
-      withArrow
-    >
+    <Popover width={204} opened={isOpen} onChange={setIsOpen} trapFocus>
       <Popover.Target>
         <Tooltip label={t("Text color")} withArrow withinPortal={false}>
           <Button
@@ -243,13 +237,13 @@ export const ColorSelector: FC<ColorSelectorProps> = ({
         </Tooltip>
       </Popover.Target>
 
-      <Popover.Dropdown onMouseDown={(e) => e.preventDefault()}>
-        <Stack gap="md" p="2px">
-          <Box>
-            <Text size="sm" fw={600} mb="xs">
+      <Popover.Dropdown p={8} onMouseDown={(e) => e.preventDefault()}>
+        <Stack gap={8}>
+          <Box style={{ padding: 4 }}>
+            <Text size="xs" fw={600} c="dimmed" mb={4}>
               {t("Text color")}
             </Text>
-            <SimpleGrid cols={5} spacing="xs">
+            <SimpleGrid cols={6} spacing={0}>
               {TEXT_COLORS.map(({ name, color }, index) => {
                 const applyTextColor = () => {
                   if (!isEditorReady(editor)) return;
@@ -272,7 +266,7 @@ export const ColorSelector: FC<ColorSelectorProps> = ({
                       data-autofocus={index === 0 ? true : undefined}
                       data-color-grid="text"
                       data-color-index={index}
-                      className={classes.colorSwatch}
+                      className={classes.colorSwatchCell}
                       aria-label={t(name)}
                       aria-pressed={!!editorState[`text_${color}`]}
                       onClick={applyTextColor}
@@ -285,23 +279,36 @@ export const ColorSelector: FC<ColorSelectorProps> = ({
                         handleColorKeyNav(e, index, "text");
                       }}
                       style={{
-                        width: rem(28),
-                        height: rem(28),
+                        height: rem(30),
+                        padding: rem(2),
                         borderRadius: rem(6),
-                        border: editorState[`text_${color}`]
-                          ? "2px solid var(--mantine-color-gray-8)"
-                          : "1px solid var(--mantine-color-gray-4)",
                         cursor: "pointer",
-                        position: "relative",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        fontSize: rem(16),
-                        fontWeight: 600,
-                        color: color || "var(--mantine-color-gray-8)",
                       }}
                     >
-                      A
+                      <Box
+                        className={classes.colorSwatch}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: rem(6),
+                          border: editorState[`text_${color}`]
+                            ? "2px solid var(--mantine-color-gray-8)"
+                            : "1px solid var(--mantine-color-gray-4)",
+                          position: "relative",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: rem(16),
+                          fontWeight: 600,
+                          color: color || "var(--mantine-color-gray-8)",
+                          pointerEvents: "none",
+                        }}
+                      >
+                        A
+                      </Box>
                     </Box>
                   </Tooltip>
                 );
@@ -309,11 +316,11 @@ export const ColorSelector: FC<ColorSelectorProps> = ({
             </SimpleGrid>
           </Box>
 
-          <Box>
-            <Text size="sm" fw={600} mb="xs">
+          <Box style={{ padding: 4 }}>
+            <Text size="xs" fw={600} c="dimmed" mb={4}>
               {t("Highlight color")}
             </Text>
-            <SimpleGrid cols={5} spacing="xs">
+            <SimpleGrid cols={6} spacing={0}>
               {HIGHLIGHT_COLORS.map(({ name, color }, index) => {
                 const applyHighlight = () => {
                   if (!isEditorReady(editor)) return;
@@ -338,7 +345,7 @@ export const ColorSelector: FC<ColorSelectorProps> = ({
                       tabIndex={0}
                       data-color-grid="highlight"
                       data-color-index={index}
-                      className={classes.colorSwatch}
+                      className={classes.colorSwatchCell}
                       aria-label={t(name)}
                       aria-pressed={!!editorState[`highlight_${color}`]}
                       onClick={applyHighlight}
@@ -351,29 +358,42 @@ export const ColorSelector: FC<ColorSelectorProps> = ({
                         handleColorKeyNav(e, index, "highlight");
                       }}
                       style={{
-                        width: rem(28),
-                        height: rem(28),
-                        borderRadius: rem(4),
-                        backgroundColor: color || "var(--mantine-color-gray-2)",
-                        border: "1px solid var(--mantine-color-gray-4)",
+                        height: rem(30),
+                        padding: rem(2),
+                        borderRadius: rem(6),
                         cursor: "pointer",
-                        position: "relative",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        fontSize: rem(16),
-                        fontWeight: 600,
-                        color: "var(--mantine-color-gray-8)",
                       }}
                     >
-                      {editorState[`highlight_${color}`] ? (
-                        <IconCheck
-                          size={16}
-                          color="var(--mantine-color-green-7)"
-                        />
-                      ) : (
-                        "A"
-                      )}
+                      <Box
+                        className={classes.colorSwatch}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: rem(6),
+                          backgroundColor: color || "var(--mantine-color-gray-2)",
+                          border: "1px solid var(--mantine-color-gray-4)",
+                          position: "relative",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: rem(16),
+                          fontWeight: 600,
+                          color: "var(--mantine-color-gray-8)",
+                          pointerEvents: "none",
+                        }}
+                      >
+                        {editorState[`highlight_${color}`] ? (
+                          <IconCheck
+                            size={16}
+                            color="var(--mantine-color-green-7)"
+                          />
+                        ) : (
+                          "A"
+                        )}
+                      </Box>
                     </Box>
                   </Tooltip>
                 );
@@ -383,9 +403,11 @@ export const ColorSelector: FC<ColorSelectorProps> = ({
 
           <Button
             variant="default"
+            size="sm"
             fullWidth
+            style={{ height: 30 }}
             data-color-grid="remove"
-            className={classes.removeColor}
+            className={clsx(classes.removeColor, classes.menuLikeButton)}
             onClick={() => {
               if (isEditorReady(editor)) {
                 editor.commands.unsetColor();

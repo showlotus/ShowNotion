@@ -266,7 +266,7 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
         <LinkSelector />
 
         {!templateMode && (
-          <Tooltip label={t(commentItem.name)} withArrow withinPortal={false}>
+          <Tooltip label={t(commentItem.name)} withArrow>
             <ActionIcon
               variant="default"
               size="lg"
