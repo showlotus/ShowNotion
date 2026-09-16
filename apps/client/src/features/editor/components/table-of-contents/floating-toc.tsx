@@ -1,3 +1,4 @@
+import type { Editor } from "@tiptap/react";
 import { Text } from "@mantine/core";
 import { useAtom, useAtomValue } from "jotai";
 import React, { useEffect, useRef, useState } from "react";
@@ -17,9 +18,19 @@ export const FLOATING_TOC_PANEL_ID = "floating-toc-panel";
 const OPEN_DELAY = 150;
 const CLOSE_DELAY = 200;
 
-export function FloatingToc({ pageId }: { pageId?: string }) {
+type FloatingTocProps = {
+  pageId?: string;
+  /** Editor override for public surfaces; defaults to the workspace editor. */
+  editor?: Editor | null;
+};
+
+export function FloatingToc({
+  pageId,
+  editor: injectedEditor,
+}: FloatingTocProps) {
   const { t } = useTranslation();
-  const editor = useAtomValue(pageEditorAtom);
+  const fallbackEditor = useAtomValue(pageEditorAtom);
+  const editor = injectedEditor ?? fallbackEditor;
   const [{ isAsideOpen }] = useAtom(asideStateAtom);
   const actionMenuOpen = useAtomValue(pageActionMenuOpenAtom);
   const [pinned, setPinned] = useAtom(floatingTocAtom);

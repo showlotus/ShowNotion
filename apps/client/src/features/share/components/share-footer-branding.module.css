@@ -1,0 +1,23 @@
+.footer {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 40px;
+}
+
+.branding {
+  font-size: 13px;
+  color: var(--mantine-color-dimmed);
+  text-decoration: none;
+  transition: color 120ms ease;
+
+  &:hover {
+    color: var(--mantine-color-text);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mantine-color-blue-6);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}

@@ -1,4 +1,4 @@
-import { Tooltip, UnstyledButton, ActionIcon } from "@mantine/core";
+import { Tooltip, ActionIcon } from "@mantine/core";
 import { IconLayoutSidebarLeftExpand } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useTranslation } from "react-i18next";
@@ -43,8 +43,13 @@ export function SidebarToggleOverlay() {
       {/* 仅在侧边栏收起时显示展开按钮，展开时避免悬浮按钮遮挡工作区名称 */}
       {!desktopOpened && (
         <Tooltip label={t("Expand sidebar")} position="right" openDelay={300}>
-          <UnstyledButton
+          {/* 与页头其他 Icon（⋯/评论/目录）同源：ActionIcon subtle dark，
+           * hover 背景与图标色自动一致 */}
+          <ActionIcon
             className={classes.expandButton}
+            variant="subtle"
+            color="dark"
+            size={28}
             aria-label={t("Expand sidebar")}
             aria-expanded={desktopOpened}
             visibleFrom="sm"
@@ -53,8 +58,8 @@ export function SidebarToggleOverlay() {
               setDesktopOpened(true);
             }}
           >
-            <IconLayoutSidebarLeftExpand size={18} />
-          </UnstyledButton>
+            <IconLayoutSidebarLeftExpand size={20} />
+          </ActionIcon>
         </Tooltip>
       )}
 

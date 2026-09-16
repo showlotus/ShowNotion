@@ -1,0 +1,66 @@
+/* Shell chrome mirrors the workspace app shell (app-shell.module.css) so a
+ * shared page reads exactly like the editor it was written in. */
+
+.navbar {
+  /* Notion's light shell background #f9f8f7 (measured live); dark stays at
+   * dark-8 (#202020). */
+  background-color: light-dark(#f9f8f7, var(--mantine-color-dark-8));
+
+  /* Same inset as the workspace sidebar (space-sidebar.module.css): 8px
+   * gutters keep row hover blocks off the shell seams. */
+  padding: rem(6px) rem(8px) var(--mantine-spacing-sm);
+  border-right: 1px solid var(--notion-border);
+}
+
+/* Page scrolling belongs to the main column: the shell locks the viewport
+ * height and the main area scrolls under the fixed page header, so the
+ * scrollbar sits at the page's right edge (workspace parity). */
+.shell {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.main {
+  margin-top: var(--page-header-height, 44px);
+  height: calc(100dvh - var(--page-header-height, 44px));
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Reserve the scrollbar slot so locking scroll never shifts content. */
+  scrollbar-gutter: stable;
+}
+
+.resizeHandle {
+  width: 3px;
+  cursor: col-resize;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+
+  &:hover,
+  &:active {
+    width: 5px;
+    background: light-dark(
+      var(--mantine-color-gray-4),
+      var(--mantine-color-dark-5)
+    );
+  }
+}
+
+/* Printing restores natural document flow and drops the chrome. */
+@media print {
+  .shell,
+  .main {
+    margin-top: 0;
+    height: auto;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .navbar,
+  .resizeHandle {
+    display: none !important;
+  }
+}

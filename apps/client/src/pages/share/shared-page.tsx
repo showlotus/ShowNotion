@@ -1,18 +1,20 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useSharePageQuery } from "@/features/share/queries/share-query.ts";
-import { Skeleton, Stack } from "@mantine/core";
+import { Skeleton, Stack, Container } from "@mantine/core";
 import React, { useEffect } from "react";
 import ReadonlyPageEditor from "@/features/editor/readonly-page-editor.tsx";
+import { FloatingToc } from "@/features/editor/components/table-of-contents/floating-toc.tsx";
 import { extractPageSlugId } from "@/lib";
 import { Error404 } from "@/components/ui/error-404.tsx";
 import { useAtomValue } from "jotai";
+import { readOnlyEditorAtom } from "@/features/editor/atoms/editor-atoms.ts";
 import { sharedTreeDataAtom } from "@/features/share/atoms/shared-page-atom.ts";
 import { isPageInTree } from "@/features/share/utils.ts";
 import { DocumentTitle } from "@/components/ui/document-title.tsx";
-import DocsBreadcrumbs from "@/features/public-space/components/docs/docs-breadcrumbs.tsx";
-import DocsPageNav from "@/features/public-space/components/docs/docs-page-nav.tsx";
-import DocsFooterBranding from "@/features/public-space/components/docs/docs-footer-branding.tsx";
+import editorClasses from "@/features/editor/styles/editor.module.css";
+import SharePageHeader from "@/features/share/components/share-page-header.tsx";
+import ShareFooterBranding from "@/features/share/components/share-footer-branding.tsx";
 
 export default function SharedPage() {
   const { t } = useTranslation();
@@ -25,11 +27,11 @@ export default function SharedPage() {
   });
 
   const sharedTreeData = useAtomValue(sharedTreeDataAtom);
+  const readOnlyEditor = useAtomValue(readOnlyEditorAtom);
 
   useEffect(() => {
     if (shareId && data) {
       if (data.share.key !== shareId) {
-
         // Check if the current page is part of the active sharing tree (sidebar) - If we are part of it, we will not redirect, keeping the sidebar visible.
         const isPartOfTree =
           sharedTreeData && isPageInTree(sharedTreeData, data.page.slugId);
@@ -62,7 +64,7 @@ export default function SharedPage() {
   }
 
   return (
-    <div>
+    <>
       <DocumentTitle
         title={data?.page?.title || t("untitled")}
         icon={data?.page?.icon}
@@ -73,21 +75,32 @@ export default function SharedPage() {
         )}
       </DocumentTitle>
 
-      <DocsBreadcrumbs />
+      <SharePageHeader pageTitle={data.page.title || undefined} />
 
-      <ReadonlyPageEditor
-        key={data.page.id}
-        title={data.page.title}
-        content={data.page.content}
-        pageId={data.page.id}
-        shareId={data.share.id}
-        trailingSpace={false}
-      />
+      {/* Same column model as the workspace editor: Container 900 + .editor
+          gutters, so a shared page measures exactly like the editor page. */}
+      <Container
+        size={900}
+        className={editorClasses.editor}
+        style={{ display: "flex", flexDirection: "column" }}
+      >
+        <ReadonlyPageEditor
+          key={data.page.id}
+          title={data.page.title}
+          content={data.page.content}
+          pageId={data.page.id}
+          shareId={data.share.id}
+          trailingSpace={false}
+        />
+      </Container>
 
-      <DocsPageNav />
+      {/* Same floating TOC as the editor page: tick rail when collapsed,
+          temporary panel on hover, pinned via the header toggle. */}
+      {readOnlyEditor && (
+        <FloatingToc pageId={data.page.id} editor={readOnlyEditor} />
+      )}
 
-      {/* No tree query without a shareId, so the shell can't own branding here. */}
-      {!shareId && <DocsFooterBranding refSource="public-share" />}
-    </div>
+      <ShareFooterBranding />
+    </>
   );
 }

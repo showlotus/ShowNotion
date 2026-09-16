@@ -1,23 +1,10 @@
 /* 桌面端侧边栏收起时左上角常驻的展开按钮：与页面顶栏（44px）垂直居中、左对齐 12px
- * 默认透明仅显示图标，鼠标悬浮时才出现背景 */
+ * 背景色与图标色由 ActionIcon（subtle dark）接管，与页头其他 Icon hover 一致 */
 .expandButton {
   position: fixed;
   top: 8px;
   left: 12px;
   z-index: 150;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--mantine-radius-md);
-  color: var(--mantine-color-dimmed);
-  background-color: transparent;
-  cursor: pointer;
-
-  @mixin hover {
-    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-5));
-  }
 
   @media (max-width: $mantine-breakpoint-sm) {
     display: none;

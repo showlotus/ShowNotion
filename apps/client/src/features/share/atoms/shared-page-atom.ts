@@ -8,3 +8,5 @@ export const sharedPageTreeAtom = atom<ISharedPageTree | null>(
 export const sharedTreeDataAtom = atom<SharedPageTreeNode[] | null>(
   null as SharedPageTreeNode[] | null,
 );
+export const sharedOpenTreeNodesAtom = atom<Record<string, boolean>>({});
+export const sharedHasSidebarAtom = atom<boolean>(false);
