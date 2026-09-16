@@ -301,7 +301,8 @@ export function useTreeMutation(spaceId: string): UseTreeMutation {
             );
           }
 
-          // 子页面未加载（父节点未展开）时跳过本地重排，展开时懒加载拉取新序
+          // When child pages aren't loaded yet (parent node collapsed), skip the local
+          // reorder; the new order is lazily fetched when the node expands
           const parent = treeModel.find(next, parentId);
           if (!parent?.children?.length) return next;
 

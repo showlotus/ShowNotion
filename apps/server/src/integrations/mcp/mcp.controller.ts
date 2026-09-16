@@ -23,7 +23,8 @@ export class McpController {
 
   constructor(private readonly mcpServerFactory: McpServerFactory) {}
 
-  // 处理 MCP Streamable HTTP 请求：stateless 模式，每个请求使用独立的 server 与 transport
+  // Handle MCP Streamable HTTP requests: stateless mode, each request uses its own
+  // server and transport
   @All()
   @SkipTransform()
   @HttpCode(HttpStatus.OK)
@@ -38,7 +39,7 @@ export class McpController {
       sessionIdGenerator: undefined,
     });
 
-    // 响应结束后清理本次请求的会话资源
+    // Clean up this request's session resources once the response ends
     reply.raw.on('close', () => {
       transport.close();
       server.close();
@@ -46,7 +47,8 @@ export class McpController {
 
     try {
       await server.connect(transport);
-      // Fastify 已解析的 body 直接交给 transport，避免重复读取请求流
+      // Hand Fastify's parsed body directly to the transport to avoid re-reading
+      // the request stream
       await transport.handleRequest(request.raw, reply.raw, request.body);
     } catch (err) {
       this.logger.error(

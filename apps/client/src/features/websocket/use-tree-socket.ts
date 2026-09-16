@@ -136,7 +136,8 @@ export const useTreeSocket = () => {
                 } as Partial<SpaceTreeNode>);
               }
 
-              // 父节点未加载时跳过重排，展开时懒加载拉取新序
+              // Skip the reorder when the parent node isn't loaded; the new order is
+              // lazily fetched when it expands
               const parent = treeModel.find(next, event.payload.parentId);
               if (!parent?.children?.length) return next;
 

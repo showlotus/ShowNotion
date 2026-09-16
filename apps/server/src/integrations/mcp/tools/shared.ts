@@ -33,7 +33,7 @@ import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { getPageTitle } from '../../../common/helpers';
 import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
 
-// MCP 工具可用的服务集合，由 McpServerFactory 注入
+// Services available to MCP tools, injected by McpServerFactory
 export interface McpToolServices {
   pageService: PageService;
   searchService: SearchService;
@@ -49,13 +49,13 @@ export interface McpToolServices {
   workspaceAbility: WorkspaceAbilityFactory;
 }
 
-// MCP 工具执行上下文：静态 token 解析出的操作者身份
+// Execution context for MCP tools: the operator identity resolved from the static token
 export interface McpToolContext {
   user: User;
   workspace: Workspace;
 }
 
-// list_pages 等列表工具的公共分页参数
+// Common pagination parameters for list tools like list_pages
 export const paginationShape = {
   limit: z
     .number()
@@ -67,7 +67,8 @@ export const paginationShape = {
   cursor: z.string().optional().describe('Pagination cursor from a previous call'),
 };
 
-// 构造完整的 PaginationOptions（补齐类型必填但可空的字段）
+// Build a complete PaginationOptions (filling in fields that are required by the
+// type but nullable)
 export function toPaginationOptions(
   limit?: number,
   cursor?: string,
@@ -75,7 +76,8 @@ export function toPaginationOptions(
   return { limit: limit ?? 20, cursor, query: undefined, adminView: undefined };
 }
 
-// 统一包装工具执行：捕获异常并转为 MCP 错误结果，避免中断客户端会话
+// Uniformly wrap tool execution: catch exceptions and convert them to MCP error
+// results, avoiding interruption of the client session
 export async function runTool(
   fn: () => Promise<unknown>,
 ): Promise<CallToolResult> {
@@ -98,7 +100,7 @@ export async function runTool(
   }
 }
 
-// 裁剪 page 字段，只保留对 LLM 有意义的信息以节省 token
+// Trim the page fields, keeping only what's meaningful to the LLM to save tokens
 export function trimPage(page: Partial<Page>) {
   return {
     id: page.id,

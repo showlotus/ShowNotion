@@ -12,7 +12,7 @@ import {
   WorkspaceCaslSubject,
 } from '../../../core/casl/interfaces/workspace-ability.type';
 
-// 注册工作区相关的 MCP 工具（工作区信息、用户组列表）
+// Register the workspace-related MCP tools (workspace info, user group list)
 export function registerWorkspaceTools(
   server: McpServer,
   ctx: McpToolContext,
@@ -21,7 +21,7 @@ export function registerWorkspaceTools(
   const { user, workspace } = ctx;
   const { workspaceService, groupService, workspaceAbility } = services;
 
-  // 获取当前工作区基本信息
+  // Get the current workspace's basic info
   server.registerTool(
     'get_workspace',
     {
@@ -40,7 +40,7 @@ export function registerWorkspaceTools(
       }),
   );
 
-  // 列出工作区内的用户组（要求工作区组读取权限）
+  // List user groups in the workspace (requires workspace group read permission)
   server.registerTool(
     'list_groups',
     {

@@ -940,7 +940,7 @@ export class PageService {
     let updates: { id: string; position: string }[];
 
     if (dto.sortBy === SortChildrenBy.Manual) {
-      // 恢复手动顺序；无备份的页面保持原位
+      // Restore the manual order; pages without a backup keep their original position
       updates = editableChildren
         .filter((p) => p.manualPosition)
         .map((p) => ({ id: p.id, position: p.manualPosition! }));

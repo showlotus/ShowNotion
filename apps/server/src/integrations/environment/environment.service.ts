@@ -398,17 +398,18 @@ export class EnvironmentService {
     return this.configService.get<string>('ALLOWED_PRIVATE_NETWORKS', 'none');
   }
 
-  // MCP 端点的静态 Bearer token，未配置时 MCP 功能整体关闭
+  // Static Bearer token for the MCP endpoint; when unset the whole MCP feature is off
   getMcpAuthToken(): string {
     return this.configService.get<string>('MCP_AUTH_TOKEN');
   }
 
-  // MCP 静态 token 映射的操作者用户邮箱
+  // Operator user email the MCP static token maps to
   getMcpUserEmail(): string {
     return this.configService.get<string>('MCP_USER_EMAIL');
   }
 
-  // MCP 上传工具的文件暂存目录，容器与原生部署共用同一默认值
+  // Staging directory for the MCP upload tool; container and native deployments
+  // share the same default
   getMcpUploadInbox(): string {
     return (
       this.configService.get<string>('MCP_UPLOAD_INBOX') ||
@@ -416,7 +417,8 @@ export class EnvironmentService {
     );
   }
 
-  // 宿主侧共享目录路径（bind mount 到暂存目录），仅用于工具提示文案
+  // Host-side shared directory path (bind-mounted to the staging directory), used
+  // only in tool hint text
   getMcpUploadInboxHost(): string {
     return this.configService.get<string>('MCP_UPLOAD_INBOX_HOST') || '';
   }

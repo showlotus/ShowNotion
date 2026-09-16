@@ -18,7 +18,7 @@ export interface GlobalDragHandleOptions {
   dragHandleWidth: number;
 
   /**
-   * 把手与块视觉左缘的间距
+   * Gap between the handle and the block's visual left edge
    */
   dragHandleGap: number;
 
@@ -65,8 +65,8 @@ function absoluteRect(node: Element) {
   };
 }
 
-// 代码块渲染为 .react-renderer.node-codeBlock > .codeBlock（工具行 + pre），
-// 命中内部任意元素时统一归一到渲染器外层
+// Code blocks render as .react-renderer.node-codeBlock > .codeBlock (toolbar + pre);
+// when any inner element is hit, normalize it to the renderer's outer wrapper
 function codeBlockRenderer(node: Element): Element | null {
   return node.closest(".react-renderer.node-codeBlock");
 }
@@ -113,8 +113,9 @@ function nodeDOMAtCoords(
     // parent-check below skips it. Match the wrapper explicitly so the
     // handle shows up even with empty cells.
     ".tableWrapper",
-    // 独立叶子块（分割线、图片等媒体）：嵌套在列表项、引用等容器内时
-    // 父级检查不成立，需显式匹配才能让把手命中它们自身
+    // Standalone leaf blocks (horizontal rule, images and other media): when nested
+    // inside containers like list items or blockquotes the parent check fails,
+    // so match them explicitly to let the handle hit the blocks themselves
     "hr",
     ".node-image",
     ".node-video",
@@ -122,13 +123,16 @@ function nodeDOMAtCoords(
     ".node-drawio",
     ".node-excalidraw",
     "[data-youtube-video]",
-    // 折叠块/分栏的「首个子块」原本会向上解析到容器本体，导致把手
-    // 跳到容器 gutter（与同容器内后续子块位置不一致）；显式匹配直接
-    // 子块，让每个子块都命中自身
+    // The "first child block" of toggle/column blocks would otherwise resolve up
+    // to the container itself, making the handle jump to the container gutter
+    // (inconsistent with later sibling blocks in the same container); matching
+    // direct children explicitly lets each child hit itself
     "[data-type='detailsContent'] > *",
     "[data-type='column'] > *",
-    // 标注/折叠块本体：嵌套在引用块、列表项等容器内时父级检查不成立，
-    // 需显式匹配，否则把手会落到外层容器（钉在容器首行、点击选错块）
+    // Callout/toggle blocks themselves: when nested inside blockquotes, list items
+    // and other containers the parent check fails, so match them explicitly,
+    // otherwise the handle falls to the outer container (pinned to the container's
+    // first line, clicking selects the wrong block)
     ".node-callout",
     "[data-type='callout']",
     "[data-type='details']",
@@ -138,8 +142,9 @@ function nodeDOMAtCoords(
   ].join(", ");
   const elements = document.elementsFromPoint(coords.x, coords.y);
 
-  // 代码块：工具行/内边距/代码正文任一位置命中，都归一到代码块自身，
-  // 否则会命中外层 details 等祖先容器导致把手跳位
+  // Code block: hits on the toolbar/padding/code body all normalize to the code
+  // block itself, otherwise ancestors like the outer details get hit and the
+  // handle jumps
   const codeBlockHit = elements.find(
     (elem) =>
       elem.closest(".ProseMirror") === view.dom && !!codeBlockRenderer(elem),
@@ -170,7 +175,8 @@ function nodePosAtDOM(
   view: EditorView,
   options: GlobalDragHandleOptions,
 ) {
-  // 代码块用内部 pre 做坐标探测，避免落在顶部工具行上解析不到节点
+  // Probe coordinates against the code block's inner pre so hits on the top
+  // toolbar still resolve to a node
   const probe = codeBlockRenderer(node)?.querySelector("pre") ?? node;
   const boundingRect = probe.getBoundingClientRect();
 
@@ -196,16 +202,19 @@ function isCustomNodeDOM(
   return false;
 }
 
-// 列表项的符号绘制在 li 盒子之外的父级列表缩进区内，返回该 li 所属的列表元素
+// A list item's marker is drawn in the parent list's indent area outside the li
+// box; return the list element that owns the li
 function listMarkerZone(node: Element): Element | null {
   return node.matches("ul:not([data-type=taskList]) li, ol li")
     ? node.parentElement
     : null;
 }
 
-// 左侧带装饰条/图标的容器（引用块色条、标注块图标）：内部子块的把手需
-// 让位到容器外缘左侧；嵌套时取最外层（Notion 实测）。折叠块与分栏不算
-// 装饰容器——折叠块子块、分栏子块都对齐各自块/列的外缘
+// Containers with a left decoration bar/icon (blockquote bar, callout icon): the
+// handle of inner child blocks must yield to the left of the container's outer
+// edge; take the outermost one when nested (per Notion). Toggles and columns are
+// not decoration containers — toggle/column children align to their own
+// block/column edge
 const DECORATION_CONTAINER_SELECTOR =
   "blockquote, .react-renderer.node-callout";
 
@@ -226,8 +235,9 @@ function decorationGutter(node: Element): Element | null {
   return leftmost;
 }
 
-// 列表项内的任意块（多段落的后续段落、分割线、图片等）统一对齐所属列表
-// 的符号 gutter；任务列表的复选框在 li 盒内，不适用
+// Any block inside a list item (subsequent paragraphs of a multi-paragraph item,
+// horizontal rules, images, etc.) aligns to the owning list's marker gutter;
+// not applicable to task lists since their checkboxes live inside the li box
 function listOwnerZone(node: Element): Element | null {
   const li = node.closest("li");
   const list = li?.parentElement;
@@ -242,7 +252,8 @@ function calcNodePos(pos: number, view: EditorView) {
   return pos;
 }
 
-// 可整体选中的容器节点：命中时选中整个容器，其下方所有子块随之一起选中
+// Container nodes selectable as a whole: hitting one selects the entire
+// container, with all child blocks below selected along with it
 const blockContainerTypes = new Set([
   "listItem",
   "taskItem",
@@ -251,7 +262,8 @@ const blockContainerTypes = new Set([
   "callout",
 ]);
 
-// 选中高亮覆盖层支持的块类型：高亮绘制在独立的 halo 容器上，不作用在块元素本身
+// Block types supported by the selection halo: the highlight is drawn on a
+// separate halo layer, not on the block element itself
 const haloBlockTypes = new Set([
   "paragraph",
   "heading",
@@ -266,7 +278,8 @@ const haloBlockTypes = new Set([
   "table",
 ]);
 
-// 取找到的 DOM 元素在文档中的锚点位置（元素内容起点），据此判断它代表的块
+// Resolve the anchor position (start of the element's content) of the found DOM
+// element in the document, used to determine which block it represents
 function anchorPosAtDOM(view: EditorView, node: Element): number | null {
   try {
     const pos = view.posAtDOM(node, 0);
@@ -276,7 +289,8 @@ function anchorPosAtDOM(view: EditorView, node: Element): number | null {
   }
 }
 
-// 计算块选择：优先取最近的容器节点整棵子树，否则回退到单节点选择规则
+// Compute the block selection: prefer the nearest container node's whole subtree,
+// otherwise fall back to the single-node selection rules
 function blockTreeSelection(
   view: EditorView,
   node: Element,
@@ -285,8 +299,9 @@ function blockTreeSelection(
 ): Selection {
   const doc = view.state.doc;
 
-  // 独立叶子块（分割线、图片等）：即使嵌套在列表项/引用等容器内，
-  // 也始终只选中自身，否则会被下方的容器提升规则选中整个容器
+  // Standalone leaf blocks (horizontal rule, images, etc.): always select only
+  // themselves even when nested inside list items/blockquotes, otherwise the
+  // container promotion rules below would select the whole container
   const leafBlock = doc.nodeAt(rawPos);
   if (leafBlock?.isLeaf && leafBlock.isBlock) {
     return NodeSelection.create(doc, rawPos);
@@ -295,23 +310,25 @@ function blockTreeSelection(
   const anchorPos = anchorPosAtDOM(view, node) ?? rawPos;
   const $pos = doc.resolve(Math.min(anchorPos, doc.content.size));
 
-  // 命中引用块本体（色条/首行/内边距）时整体选中引用块
+  // Hitting the blockquote itself (bar/first line/padding) selects the whole quote
   if (node.matches("blockquote")) {
     return NodeSelection.create(doc, $pos.before($pos.depth));
   }
 
   for (let d = $pos.depth; d > 0; d--) {
     const typeName = $pos.node(d).type.name;
-    // 引用块不作为子块的提升目标：引用内文本块停在自身（Notion 实测
-    // 引用内子块单独选中），容器（列表项/折叠块/标注）照常提升
+    // Never promote to a blockquote: text blocks inside a quote stay on themselves
+    // (per Notion, quote children select individually), while containers
+    // (list items/toggles/callouts) still promote as usual
     if (typeName === "blockquote") {
       break;
     }
-    // 命中容器（列表项/折叠块/引用/标注）时选中整棵子树
+    // Hitting a container (list item/toggle/blockquote/callout) selects the whole subtree
     if (blockContainerTypes.has(typeName)) {
       return NodeSelection.create(doc, $pos.before(d));
     }
-    // 段落/标题这类文本块继续向上找容器；遇到代码块等独立块则停下，选中它自身
+    // Text blocks like paragraphs/headings keep walking up for a container; stop at
+    // standalone blocks like code blocks and select them themselves
     if (typeName !== "paragraph" && typeName !== "heading") {
       break;
     }
@@ -320,7 +337,8 @@ function blockTreeSelection(
   return singleNodeSelection(view, node, calcNodePos(anchorPos, view), options);
 }
 
-// 计算单节点选择：自定义节点选中整体，表格选中整表，内联节点提升到父块
+// Compute the single-node selection: custom nodes select as a whole, tables
+// promote to the whole table, inline nodes promote to the parent block
 function singleNodeSelection(
   view: EditorView,
   node: Element,
@@ -476,13 +494,15 @@ export function DragHandlePlugin(
   }
 
   let dragHandleElement: HTMLElement | null = null;
-  // 把手触发的拖拽进行中标记：仅用于 drop 后修正选区
+  // Flag for drags initiated by the handle: only used to fix the selection after drop
   let handleDragInProgress = false;
-  // 把手当前悬停的块：分割线仅 13px 高，按点击坐标反查会落到下方块，
-  // 点击/拖拽以 mousemove 记录的目标块为准（对齐 Notion 的行为）
+  // The block the handle is currently hovering: a horizontal rule is only 13px
+  // tall, so reverse-looking-up by click coords would land on the block below;
+  // clicks and drags trust the block recorded by mousemove (matching Notion)
   let hoveredBlockElement: Element | null = null;
 
-  // 落点提示：Notion 同款 4px 半透明蓝线 + 拖拽经过容器的浅色高亮
+  // Drop feedback: Notion-style 4px translucent blue line + light highlight on the
+  // container being dragged over
   let dropIndicatorElement: HTMLElement | null = null;
   let dropHoverElement: HTMLElement | null = null;
   let lastDropKey: string | null = null;
@@ -494,10 +514,12 @@ export function DragHandlePlugin(
     view.dom.classList.remove("handle-drag");
   }
 
-  // 按 Notion 实测几何更新落点提示（2026-09）：
-  // 线体吸附在落点前块的底边（bottom:-4px）或后块的顶边（top:-4px），
-  // 宽度取锚点块宽（嵌套列表自然缩进）；浅色高亮只画在插入点最近的
-  // 容器块（列表项/引用/折叠/标注）上，顶层插入不显示
+  // Update drop feedback per Notion's measured geometry (2026-09):
+  // the line snaps to the bottom edge of the block before the drop point
+  // (bottom:-4px) or the top edge of the block after it (top:-4px), with the
+  // anchor block's width (nested lists indent naturally); the light highlight is
+  // drawn only on the container block (list item/quote/toggle/callout) nearest
+  // the insertion point, and top-level inserts show none
   function updateDropIndicator(view: EditorView, event: DragEvent) {
     if (!handleDragInProgress || !view.dragging?.slice) return;
 
@@ -552,7 +574,8 @@ export function DragHandlePlugin(
   }
 
   function hideDragHandle() {
-    // 选中态由选区驱动，鼠标移开/滚动等触发源不隐藏
+    // The selected state is selection-driven; mouse-out/scroll and other triggers
+    // don't hide it
     if (dragHandleElement?.classList.contains("selected")) return;
     if (dragHandleElement) {
       dragHandleElement.classList.add("hide");
@@ -565,11 +588,13 @@ export function DragHandlePlugin(
     }
   }
 
-  // 按 Notion 的 gutter 规则计算把手位置：把手右缘距块视觉左缘 dragHandleGap
+  // Compute the handle position per Notion's gutter rules: the handle's right edge
+  // sits dragHandleGap away from the block's visual left edge
   function computeHandlePosition(node: Element): { left: number; top: number } {
-    // 引用块/标注块内的子块：把手让位到容器外缘左侧（Notion 实测）
-    // 左侧装饰让位：引用色条/标注图标（最外层）与列表项所属列表的符号区
-    // 取最左缘，保证把手越过所有左侧装饰（Notion 实测）
+    // Child blocks inside quotes/callouts: the handle yields to the left of the
+    // container's outer edge (per Notion). Left-decoration yielding: take the
+    // leftmost of the quote bar/callout icon (outermost) and the owning list's
+    // marker zone, so the handle clears all left decorations (per Notion)
     let gutterLeft: number | null = null;
     for (const zone of [decorationGutter(node), listOwnerZone(node)]) {
       if (zone) {
@@ -578,7 +603,8 @@ export function DragHandlePlugin(
       }
     }
 
-    // 代码块：把手对齐块顶部行（Notion 实测块顶 +8px），而不是首行代码文本
+    // Code block: align the handle with the block's top row (block top +8px per
+    // Notion), not the first line of code text
     const codeBlock = codeBlockRenderer(node);
     if (codeBlock) {
       const surface = codeBlock.querySelector(".codeBlock") ?? codeBlock;
@@ -592,7 +618,8 @@ export function DragHandlePlugin(
       };
     }
 
-    // 分割线：24px 把手垂直居中于 13px 的线体（Notion 实测把手与线同轴）
+    // Horizontal rule: center the 24px handle vertically on the 13px rule
+    // (handle and line share an axis per Notion)
     if (node.matches("hr")) {
       const rect = absoluteRect(node);
       const height = node.getBoundingClientRect().height;
@@ -616,8 +643,9 @@ export function DragHandlePlugin(
     rect.top += (lineHeight - 24) / 2;
     rect.top += paddingTop;
 
-    // 符号区/装饰容器让位：列表项内任意块统一对齐列表 gutter（li 本体
-    // 由 listOwnerZone 自然覆盖原 markerZone 规则）
+    // Marker zone/decoration container yielding: any block inside a list item
+    // aligns to the list gutter (the li itself is naturally covered by
+    // listOwnerZone, which supersedes the old markerZone rule)
     if (gutterLeft != null) {
       rect.left = gutterLeft;
     }
@@ -665,7 +693,8 @@ export function DragHandlePlugin(
 
       dragHandleElement.addEventListener("dragstart", onDragHandleDragStart);
 
-      // 点击把手选中 hover 块的整棵子树；拖拽结束后浏览器不会再触发 click，两者互不干扰
+      // Clicking the handle selects the hovered block's whole subtree; the browser
+      // doesn't fire click after a drag ends, so the two never interfere
       function onDragHandleClick(e: MouseEvent) {
         if (e.button !== 0) return;
 
@@ -731,7 +760,8 @@ export function DragHandlePlugin(
         hideHandleOnEditorOut,
       );
 
-      // 选中高亮覆盖容器：独立 DOM 层，几何对齐 Notion 的 notion-selectable-halo
+      // Selection highlight overlay: a separate DOM layer, geometry aligned with
+      // Notion's notion-selectable-halo
       let selectionHaloElement: HTMLElement | null = null;
       let haloResizeObserver: ResizeObserver | null = null;
 
@@ -746,8 +776,9 @@ export function DragHandlePlugin(
         }
       }
 
-      // 选中块的文字锁定：Chrome 会忽略 editable 内容上的 user-select:none，
-      // 需在块选中期间给块挂 contenteditable=false（PM 忽略该属性变化），取消选中时还原
+      // Text locking for selected blocks: Chrome ignores user-select:none on
+      // editable content, so set contenteditable=false on the block while selected
+      // (PM ignores the attribute change) and restore it on deselection
       let editableLockElement: HTMLElement | null = null;
       let editableLockPrevValue: string | null = null;
 
@@ -808,21 +839,23 @@ export function DragHandlePlugin(
         }
 
         const rect = nodeDOM.getBoundingClientRect();
-        // 选中块被隐藏（如折叠内容收起）时不显示高亮
+        // Don't show the halo when the selected block is hidden (e.g. collapsed content)
         if (rect.width === 0 && rect.height === 0) {
           hideSelectionHalo();
           hideSelectedDragHandle();
           return;
         }
 
-        // 列表项的符号在 li 盒子之外，块视觉左缘取父级列表盒子，保证符号被包进高亮
+        // A list item's marker sits outside the li box, so take the parent list box
+        // as the block's visual left edge to keep the marker inside the highlight
         const markerZone = listMarkerZone(nodeDOM);
         const blockLeft = markerZone
           ? markerZone.getBoundingClientRect().left
           : rect.left;
 
-        // Notion 同款几何（2026-09 实测）：纵向取块盒内缩 2px；横向因文字盒
-        // 紧贴内容栏边缘，向左右各外扩 6px，让文字/元素距 halo 边 6px
+        // Notion-style geometry (measured 2026-09): inset 2px vertically; since the
+        // text box hugs the content column edge, expand 6px on each side so
+        // text/elements sit 6px away from the halo edge
         const containerRect = container.getBoundingClientRect();
         const haloPadX = 6;
         halo.style.top = `${rect.top - containerRect.top + 2}px`;
@@ -831,7 +864,8 @@ export function DragHandlePlugin(
         halo.style.width = `${Math.max(rect.right - blockLeft + haloPadX * 2, 0)}px`;
         halo.classList.add("active");
 
-        // 把手进入选中态：定位到选中块并保持可见
+        // Put the handle into its selected state: position it on the selected block
+        // and keep it visible
         if (dragHandleElement) {
           const pos = computeHandlePosition(nodeDOM);
           dragHandleElement.style.left = `${pos.left}px`;
@@ -843,7 +877,8 @@ export function DragHandlePlugin(
 
       const onWindowResize = () => updateSelectionHalo();
 
-      // 选中把手是 fixed 定位，滚动时需要跟随选中块重新定位（halo 为 absolute 天然跟随）
+      // The selected handle is fixed-positioned, so reposition it onto the selected
+      // block while scrolling (the absolute halo follows naturally)
       const onWindowScroll = () => {
         if (dragHandleElement?.classList.contains("selected")) {
           updateSelectionHalo();
@@ -910,14 +945,16 @@ export function DragHandlePlugin(
     },
     props: {
       handleDOMEvents: {
-        // 选中块被锁成 contenteditable=false 后浏览器无法就地下光标：
-        // 在选中块内按下鼠标时手动把光标落到点击位置并退出块选中
+        // Once a selected block is locked with contenteditable=false, the browser
+        // can't place a caret inside it: on mousedown inside the selected block,
+        // manually drop the caret at the click position and exit block selection
         mousedown: (view, event) => {
           if (event.button !== 0) return false;
 
-          // 图片：点击完全交给 ProseMirror 原生处理 —— PM 的双击识别在
-          // mousedown 里做连击判定（双击预览依赖它），任何拦截都会打断；
-          // 图片的 NodeSelection 由 filterTransaction 拦截，仅把手可选中
+          // Images: leave clicks entirely to ProseMirror — PM detects double clicks
+          // during mousedown (double-click preview depends on it) and any
+          // interception would break it; image NodeSelection is blocked in
+          // filterTransaction, only the handle may select them
           const hitPos = view.posAtCoords({
             left: event.clientX,
             top: event.clientY,
@@ -959,7 +996,8 @@ export function DragHandlePlugin(
             return;
           }
 
-          // 块处于选中态时把手固定在选中块上，跟随选区而非鼠标
+          // While a block is selected, pin the handle to the selected block,
+          // following the selection rather than the mouse
           if (dragHandleElement?.classList.contains("selected")) {
             return;
           }
@@ -1075,8 +1113,9 @@ export function DragHandlePlugin(
         },
       },
     },
-    // 拦截 ProseMirror 原生点击（pointer 来源）在图片上建立的 NodeSelection：
-    // 图片的选中只允许由行前把手触发，避免单击即选中并顶掉双击预览
+    // Block the NodeSelection ProseMirror's native clicks (pointer source) create
+    // on images: image selection is only allowed via the row handle, preventing a
+    // single click from selecting it and crowding out the double-click preview
     filterTransaction: (tr) => {
       if (
         !tr.docChanged &&
@@ -1096,11 +1135,13 @@ export function DragHandlePlugin(
       );
 
       if (isDrop) {
-        // drop 已发生，复位交互标记（取消拖拽的场景由把手 dragend 兜底）
+        // The drop happened; reset the interaction flag (cancelled drags fall back
+        // to the handle's dragend)
         handleDragInProgress = false;
 
-        // ProseMirror 在部分落点会把选区设成跨拖入内容的 TextSelection（可见，
-        // 块内文字会显示为被选中），这里统一改回块的 NodeSelection
+        // At some drop targets ProseMirror sets a TextSelection spanning the dropped
+        // content (visually, the block's text appears selected); normalize back to
+        // the block's NodeSelection here
         const selection = newState.selection;
         if (!(selection instanceof TextSelection) || selection.empty) return null;
 
@@ -1108,19 +1149,21 @@ export function DragHandlePlugin(
         const $to = selection.$to;
         if ($from.depth < 1 || $to.depth < 1) return null;
 
-        // 同时包含首尾的最深公共祖先
+        // Deepest common ancestor containing both endpoints
         let depth = Math.min($from.depth, $to.depth);
         while (depth > 0 && $from.node(depth) !== $to.node(depth)) {
           depth -= 1;
         }
 
-        // 复用块树规则：容器（列表项等）即目标；段落/标题继续向上；独立块或顶层块即目标
+        // Reuse the block-tree rules: containers (list items etc.) are the target;
+        // paragraphs/headings walk up; standalone or top-level blocks are the target
         while (depth > 1) {
           const typeName = $from.node(depth).type.name;
           if (blockContainerTypes.has(typeName)) break;
           if (typeName !== "paragraph" && typeName !== "heading") break;
-          // 文本块的直接父级是引用块时停在自身：引用内子块单独选中
-          // （与把手选中规则一致），不提升到整个引用块
+          // Stop at the text block itself when its direct parent is a blockquote:
+          // quote children select individually (consistent with the handle
+          // selection rules) rather than promoting to the whole quote
           if ($from.node(depth - 1).type.name === "blockquote") break;
           depth -= 1;
         }
@@ -1131,7 +1174,7 @@ export function DragHandlePlugin(
         const targetNode = newState.doc.resolve(target).nodeAfter;
         if (!targetNode || !NodeSelection.isSelectable(targetNode)) return null;
 
-        // 防御：选区必须完整落在目标块内
+        // Guard: the selection must fall entirely within the target block
         if (
           selection.from < target ||
           selection.to > target + targetNode.nodeSize

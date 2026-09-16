@@ -3,13 +3,15 @@ import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { Node as ProseMirrorNode } from "@tiptap/pm/model";
 
-// 匹配单个 emoji：基础图形字符，可带变体选择符、零宽连接序列与肤色修饰符
+// Match a single emoji: a base pictographic character, optionally with variation
+// selectors, zero-width joiner sequences, and skin-tone modifiers
 const emojiRegex =
   /\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*/gu;
 
-// 扫描文档内所有 emoji 字符，为其生成独立字体栈的 inline 装饰。
-// Notion 会给 emoji 包裹 Apple Color Emoji 字体栈，Chrome 据此把选区
-// 高亮撑高（24px 标题行 32px 而非 28px）；此处复刻同一行为
+// Scan the document for all emoji characters and give each an inline decoration
+// with a dedicated font stack. Notion wraps emoji in an Apple Color Emoji font
+// stack, which Chrome uses to stretch selection highlights taller (a 24px
+// heading line becomes 32px instead of 28px); replicate the same behavior here.
 function buildEmojiDecorations(doc: ProseMirrorNode): DecorationSet {
   const decorations: Decoration[] = [];
 
@@ -40,7 +42,8 @@ export const EmojiDecoration = Extension.create({
         key: pluginKey,
         state: {
           init: (_, { doc }) => buildEmojiDecorations(doc),
-          // 仅文档变化时重建，其余事务只做装饰位置映射，避免每次选区/光标的开销
+          // Rebuild only when the document changes; other transactions just map
+          // decoration positions, avoiding per-selection/cursor overhead
           apply: (tr, oldSet) =>
             tr.docChanged
               ? buildEmojiDecorations(tr.doc)

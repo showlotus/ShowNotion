@@ -13,10 +13,11 @@ import {
 import { normalizePageId } from './page-tools';
 import { AuditEvent, AuditResource } from '../../../common/events/audit-events';
 
-// inbox 暂存文件保留时长，超时未消费的文件在下次工具调用时清理
+// How long staged files stay in the inbox; unconsumed files are cleaned up on the next tool call
 const INBOX_TTL_MS = 24 * 60 * 60 * 1000;
 
-// 清理 inbox 顶层超时未消费的暂存文件，失败不影响上传主流程
+// Clean up timed-out unconsumed staged files at the top level of the inbox;
+// failures don't affect the main upload flow
 async function cleanupExpiredInboxFiles(inbox: string): Promise<void> {
   try {
     const entries = await fs.readdir(inbox, { withFileTypes: true });
@@ -33,11 +34,11 @@ async function cleanupExpiredInboxFiles(inbox: string): Promise<void> {
         }),
     );
   } catch {
-    // 忽略清理失败
+    // Ignore cleanup failures
   }
 }
 
-// 注册附件相关的 MCP 工具（上传文件到指定页面）
+// Register the attachment-related MCP tools (upload a file to a given page)
 export function registerAttachmentTools(
   server: McpServer,
   ctx: McpToolContext,
@@ -55,7 +56,8 @@ export function registerAttachmentTools(
 
   const inbox = environmentService.getMcpUploadInbox();
   const hostInbox = environmentService.getMcpUploadInboxHost();
-  // 优先按宿主共享目录引导投递；未配置时回退到 cp / docker cp 判断
+  // Prefer guiding delivery via the host shared directory; fall back to cp / docker cp
+  // detection when not configured
   const deliveryHint = hostInbox
     ? `Deliver files first: cp <local-file> ${hostInbox}/ (or drop it into that folder), it is shared with ${inbox} in the server`
     : existsSync('/.dockerenv')
@@ -65,7 +67,8 @@ export function registerAttachmentTools(
     ? `into the shared upload folder (${hostInbox})`
     : `into the server inbox ${inbox}`;
 
-  // 从 inbox 暂存目录读取文件并上传到指定页面，返回可直接嵌入 Markdown 的文件 URL
+  // Read a file from the inbox staging directory and upload it to the given page,
+  // returning a file URL that can be embedded in Markdown directly
   server.registerTool(
     'upload_attachment',
     {
@@ -98,13 +101,14 @@ export function registerAttachmentTools(
         await fs.mkdir(inbox, { recursive: true });
         await cleanupExpiredInboxFiles(inbox);
 
-        // 只允许引用 inbox 内的文件，拒绝绝对路径与 .. 越界
+        // Only allow references inside the inbox; reject absolute paths and '..' escaping
         const resolved = path.resolve(inbox, filePath);
         if (resolved !== inbox && !resolved.startsWith(inbox + path.sep)) {
           throw new BadRequestException('Path escapes the upload inbox');
         }
 
-        // 词法校验挡不住软链跳转，用真实路径再确认一次（inbox 基准同样取 realpath）
+        // Lexical checks can't catch symlink hops; re-verify with the real path
+        // (the inbox base is realpath'ed as well)
         const inboxReal = await fs.realpath(inbox);
         const resolvedReal = await fs.realpath(resolved).catch(() => null);
         if (!resolvedReal) {
@@ -131,7 +135,7 @@ export function registerAttachmentTools(
           );
         }
 
-        // 与 REST 上传保持同一大小上限
+        // Keep the same size limit as the REST upload
         const sizeLimitLabel = environmentService.getFileUploadSizeLimit();
         if (fileStat.size > bytes(sizeLimitLabel)) {
           throw new BadRequestException(
@@ -155,10 +159,11 @@ export function registerAttachmentTools(
           workspaceId: workspace.id,
         });
 
-        // 上传成功后清理暂存文件（consume 语义，失败时保留以便重试）
+        // Clean up the staged file after a successful upload (consume semantics; keep
+        // it on failure so the upload can be retried)
         await fs.rm(resolved, { force: true }).catch(() => undefined);
 
-        // 与 REST 上传保持一致记录审计事件
+        // Record the audit event consistently with the REST upload
         auditService.log({
           event: AuditEvent.ATTACHMENT_UPLOADED,
           resourceType: AuditResource.ATTACHMENT,

@@ -8,7 +8,8 @@ export const desktopSidebarAtom = atomWithWebStorage<boolean>(
   true,
 );
 
-// 鼠标接近屏幕左边缘时的临时预览状态（peek 悬浮已暂时停用，保留以备恢复）
+// Temporary preview state when the mouse approaches the left screen edge
+// (peek floating is temporarily disabled; kept for possible restoration)
 // export const sidebarPeekAtom = atom<boolean>(false);
 
 export const desktopAsideAtom = atom<boolean>(false);
@@ -24,5 +25,5 @@ export const asideStateAtom = atom<AsideStateType>({
   isAsideOpen: false,
 });
 
-// Notion 侧边栏宽度：默认 240，拖拽范围 220–400（global-app-shell 内统一 clamp）
+// Notion sidebar width: default 240, drag range 220–400 (clamped uniformly in global-app-shell)
 export const sidebarWidthAtom = atomWithWebStorage<number>("sidebarWidth", 270);

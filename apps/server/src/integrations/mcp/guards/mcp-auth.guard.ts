@@ -14,7 +14,8 @@ import {
   isUserDisabled,
 } from '../../../common/helpers';
 
-// 比较 token：长度不同直接拒绝，等长时使用恒定时间比较防时序攻击
+// Compare tokens: reject mismatched lengths immediately; for equal lengths use a
+// constant-time comparison to prevent timing attacks
 function tokensMatch(expected: string, received: string): boolean {
   const bufExpected = Buffer.from(expected, 'utf8');
   const bufReceived = Buffer.from(received, 'utf8');
@@ -24,7 +25,8 @@ function tokensMatch(expected: string, received: string): boolean {
   return crypto.timingSafeEqual(bufExpected, bufReceived);
 }
 
-// MCP 端点认证：校验静态 Bearer token 并解析到固定操作者用户
+// MCP endpoint authentication: validate the static Bearer token and resolve it to
+// a fixed operator user
 @Injectable()
 export class McpAuthGuard implements CanActivate {
   constructor(
@@ -32,11 +34,13 @@ export class McpAuthGuard implements CanActivate {
     private readonly userRepo: UserRepo,
   ) {}
 
-  // 校验流程：token 配置检查 → token 比对 → 解析用户并挂载到 request
+  // Validation flow: token config check → token comparison → resolve user and
+  // attach to request
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
-    // MCP_AUTH_TOKEN 未配置时视为功能关闭，端点以 404 隐藏
+    // When MCP_AUTH_TOKEN is not configured the feature is considered disabled and
+    // the endpoint hides behind a 404
     const expectedToken = this.environmentService.getMcpAuthToken();
     if (!expectedToken) {
       throw new NotFoundException('MCP is not enabled');
@@ -47,7 +51,7 @@ export class McpAuthGuard implements CanActivate {
       throw new UnauthorizedException('Invalid MCP token');
     }
 
-    // DomainMiddleware 已把 workspace 挂到 request.raw
+    // DomainMiddleware has already attached the workspace to request.raw
     const workspace = request.raw?.workspace;
     if (!workspace) {
       throw new BadRequestException('Invalid workspace');
@@ -63,7 +67,8 @@ export class McpAuthGuard implements CanActivate {
       throw new UnauthorizedException('MCP user not found');
     }
 
-    // 与 JwtAuthGuard 的用户结构对齐，AuthUser/AuthWorkspace 装饰器可直接使用
+    // Aligned with the JwtAuthGuard user shape so the AuthUser/AuthWorkspace
+    // decorators work directly
     request.user = { user, workspace };
     return true;
   }

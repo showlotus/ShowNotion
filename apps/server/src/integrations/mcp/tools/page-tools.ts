@@ -21,7 +21,7 @@ import {
   extractPageSlugId,
 } from '../../../integrations/export/utils';
 
-// searchPage 实际返回的字段比 SearchResponseDto 声明更丰富（SQL 额外 select 了 slugId/spaceId）
+// searchPage actually returns richer fields than SearchResponseDto declares (the SQL additionally selects slugId/spaceId)
 interface SearchItem {
   id: string;
   slugId: string;
@@ -34,20 +34,22 @@ interface SearchItem {
   highlight: string;
 }
 
-// 将页面标识归一化为 findById 兼容的形态（UUID 或 slugId）
-// 兼容输入：完整 URL（http://host/docs/space/page-slug）、路径、pageSlug、纯 slugId、UUID
+// Normalize a page identifier into a findById-compatible form (UUID or slugId)
+// Accepted inputs: full URL (http://host/docs/space/page-slug), path, pageSlug,
+// bare slugId, or UUID
 export function normalizePageId(input: string): string {
   const trimmed = input.trim();
   if (isValidUUID(trimmed)) {
     return trimmed;
   }
-  // 去掉 query/hash 后取路径最后一段，再从 pageSlug 中提取 slugId（slugId 字符集不含 -，解析无歧义）
+  // Strip query/hash, take the last path segment, then extract the slugId from the
+  // pageSlug (the slugId charset contains no '-', so parsing is unambiguous)
   const lastSegment =
     trimmed.split(/[?#]/)[0].split('/').filter(Boolean).pop() ?? trimmed;
   return extractPageSlugId(lastSegment);
 }
 
-// 注册页面相关的 9 个 MCP 工具（搜索、列表、读取、创建、更新、移动、删除）
+// Register the 9 page-related MCP tools (search, list, read, create, update, move, delete)
 export function registerPageTools(
   server: McpServer,
   ctx: McpToolContext,
@@ -62,7 +64,7 @@ export function registerPageTools(
     spaceAbility,
   } = services;
 
-  // 按 ID/slug/URL 读取页面并转换为 Markdown（get_page 与 get_page_by_url 共用）
+  // Read a page by ID/slug/URL and convert it to Markdown (shared by get_page and get_page_by_url)
   const fetchPageMarkdown = async (pageIdInput: string) => {
     const page = await pageService.findById(normalizePageId(pageIdInput), true);
     if (!page || page.deletedAt) {
@@ -78,7 +80,7 @@ export function registerPageTools(
     };
   };
 
-  // 全文搜索当前用户可见的页面
+  // Full-text search pages visible to the current user
   server.registerTool(
     'search',
     {
@@ -120,7 +122,7 @@ export function registerPageTools(
       }),
   );
 
-  // 列出用户可访问的空间
+  // List spaces accessible to the user
   server.registerTool(
     'list_spaces',
     {
@@ -144,7 +146,7 @@ export function registerPageTools(
       }),
   );
 
-  // 列出最近更新的页面，可按空间过滤
+  // List recently updated pages, optionally filtered by space
   server.registerTool(
     'list_pages',
     {
@@ -185,7 +187,7 @@ export function registerPageTools(
       }),
   );
 
-  // 读取单个页面，正文转换为 Markdown
+  // Read a single page with its content converted to Markdown
   server.registerTool(
     'get_page',
     {
@@ -202,7 +204,8 @@ export function registerPageTools(
     async ({ pageId }) => runTool(() => fetchPageMarkdown(pageId)),
   );
 
-  // 按 URL 读取页面（暂时隐藏：get_page 已支持 URL，需要时取消注释即可恢复）
+  // Read a page by URL (hidden for now: get_page already accepts URLs;
+  // uncomment to restore when needed)
   // server.registerTool(
   //   'get_page_by_url',
   //   {
@@ -217,7 +220,7 @@ export function registerPageTools(
   //   async ({ url }) => runTool(() => fetchPageMarkdown(url)),
   // );
 
-  // 创建页面，内容为 Markdown，可指定父页面
+  // Create a page with Markdown content, optionally nested under a parent page
   server.registerTool(
     'create_page',
     {
@@ -244,14 +247,14 @@ export function registerPageTools(
           ? normalizePageId(parentPageId)
           : undefined;
         if (normalizedParentId) {
-          // 有父页面时要求父页面可编辑（与 REST 端点行为一致）
+          // With a parent page, require the parent to be editable (consistent with the REST endpoint)
           const parentPage = await pageService.findById(normalizedParentId);
           if (!parentPage || parentPage.deletedAt) {
             throw new NotFoundException('Parent page not found');
           }
           await pageAccessService.validateCanEdit(parentPage, user);
         } else {
-          // 根级创建要求空间级创建权限
+          // Root-level creation requires space-level create permission
           const ability = await spaceAbility.createForUser(user, spaceId);
           if (ability.cannot(SpaceCaslAction.Create, SpaceCaslSubject.Page)) {
             throw new ForbiddenException();
@@ -270,7 +273,7 @@ export function registerPageTools(
       }),
   );
 
-  // 更新页面标题和/或正文，保留原页面 ID 与历史
+  // Update a page's title and/or body, preserving the original page ID and history
   server.registerTool(
     'update_page',
     {
@@ -319,7 +322,7 @@ export function registerPageTools(
       }),
   );
 
-  // 移动页面到新的父页面或空间根级
+  // Move a page under a new parent page or to the space root
   server.registerTool(
     'move_page',
     {
@@ -360,7 +363,8 @@ export function registerPageTools(
 
         await pageAccessService.validateCanEdit(movedPage, user);
 
-        // 归一化后可能仍是 slugId，需解析为页面记录以获取真实 UUID
+        // After normalization the id may still be a slugId; resolve it to the page
+        // record to get the real UUID
         const normalizedParentId = parentPageId
           ? normalizePageId(parentPageId)
           : null;
@@ -371,12 +375,12 @@ export function registerPageTools(
           throw new NotFoundException('Target parent page not found');
         }
 
-        // 目标父页面变化时才校验权限（与 REST 端点行为一致）
+        // Only validate permission when the target parent changes (consistent with the REST endpoint)
         if (targetParent && targetParent.id !== movedPage.parentPageId) {
           await pageAccessService.validateCanEdit(targetParent, user);
         }
 
-        // 未指定位置时追加到目标层级的末尾
+        // Without an explicit position, append to the end of the target level
         const nextPosition =
           position ??
           (await pageService.nextPagePosition(
@@ -397,7 +401,7 @@ export function registerPageTools(
       }),
   );
 
-  // 删除单个页面（软删除进回收站）
+  // Delete a single page (soft delete into trash)
   server.registerTool(
     'delete_page',
     {
@@ -423,7 +427,7 @@ export function registerPageTools(
       }),
   );
 
-  // 批量删除页面，逐页返回成功或失败原因
+  // Delete multiple pages, returning per-page success or failure reasons
   server.registerTool(
     'delete_pages',
     {

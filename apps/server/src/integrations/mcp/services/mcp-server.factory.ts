@@ -36,7 +36,7 @@ import { registerPageTools } from '../tools/page-tools';
 import { registerWorkspaceTools } from '../tools/workspace-tools';
 import { registerAttachmentTools } from '../tools/attachment-tools';
 
-// 组装 MCP server 实例：注入服务层并注册全部工具
+// Assemble an MCP server instance: inject the service layer and register all tools
 @Injectable()
 export class McpServerFactory {
   constructor(
@@ -53,17 +53,19 @@ export class McpServerFactory {
     private readonly spaceAbility: SpaceAbilityFactory,
     private readonly workspaceAbility: WorkspaceAbilityFactory,
   ) {
-    // 服务启动时预创建上传暂存目录，保证 docker cp 的目标目录始终存在
+    // Pre-create the upload staging directory at service startup so the docker cp
+    // target always exists
     try {
       mkdirSync(this.environmentService.getMcpUploadInbox(), {
         recursive: true,
       });
     } catch {
-      // 创建失败不阻断启动，工具调用时会再次尝试
+      // A creation failure doesn't block startup; tool calls will retry
     }
   }
 
-  // 创建绑定指定用户身份的 MCP server（stateless 模式下每个请求新建）
+  // Create an MCP server bound to the given user identity (a new one per request
+  // in stateless mode)
   createServer(user: User, workspace: Workspace): McpServer {
     const server = new McpServer({
       name: 'shownotion',

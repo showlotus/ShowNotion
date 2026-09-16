@@ -11,7 +11,8 @@ import { AttachmentModule } from '../../core/attachment/attachment.module';
 import { EnvironmentModule } from '../environment/environment.module';
 
 @Module({
-  // CaslModule、PageAccessModule、repo 层均为全局模块，无需重复导入
+  // CaslModule, PageAccessModule, and the repo layer are all global modules;
+  // no need to re-import them
   imports: [
     PageModule,
     SearchModule,
