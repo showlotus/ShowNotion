@@ -34,10 +34,11 @@ Key values to set:
 | Variable | Example value |
 | --- | --- |
 | `APP_SECRET` | a long random string |
-| `DATABASE_URL` | `postgresql://docmost:STRONG_DB_PASSWORD@localhost:5432/docmost` |
+| `POSTGRES_PASSWORD` | a strong password — the `db` container reads it from `.env` |
+| `DATABASE_URL` | `postgresql://shownotion:<your-password>@localhost:5432/shownotion` |
 | `REDIS_URL` | `redis://127.0.0.1:6379` |
 
-The DB password in `DATABASE_URL` must match `POSTGRES_PASSWORD` in `docker-compose.yml`.
+Set `POSTGRES_PASSWORD` in `.env` — the `db` container reads it, and `DATABASE_URL` must use the same password.
 
 ### 2. Install dependencies
 
@@ -51,7 +52,7 @@ pnpm install
 docker compose up -d db redis
 ```
 
-> Only start `db` and `redis` — the `docmost` container is not needed for local development
+> Only start `db` and `redis` — the `shownotion` container is not needed for local development
 > and would conflict with `pnpm dev` on port `3000`.
 
 ### 4. Run database migrations (required)
