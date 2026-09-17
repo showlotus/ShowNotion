@@ -1,7 +1,11 @@
 import { useEditor } from "@tiptap/react";
 import { TextSelection } from "@tiptap/pm/state";
 import { useEffect, useRef, useState } from "react";
-import { HeadingLink, recalculateLinks } from "./table-of-contents";
+import {
+  collectTocHeadings,
+  expandAncestorToggles,
+  HeadingLink,
+} from "./table-of-contents";
 import { getScrollContainer } from "@/hooks/use-scroll-container.ts";
 
 export const useTocHeadings = (editor: ReturnType<typeof useEditor>) => {
@@ -29,24 +33,10 @@ export const useTocHeadings = (editor: ReturnType<typeof useEditor>) => {
   const handleUpdate = () => {
     if (!editor || editor.isDestroyed) return;
 
-    const result = recalculateLinks(editor.$nodes("heading"));
+    const result = collectTocHeadings(editor);
 
-    // $nodes("heading").element can point at detached DOM nodes; pair the
-    // positions with the live heading elements rendered by the view instead.
-    const domHeadings = Array.from(
-      editor.view.dom.querySelectorAll<HTMLElement>("h1, h2, h3, h4, h5, h6"),
-    ).filter((heading) => heading.textContent && heading.textContent.length > 0);
-
-    const links =
-      domHeadings.length === result.links.length
-        ? result.links.map((link, index) => ({
-            ...link,
-            element: domHeadings[index],
-          }))
-        : result.links;
-
-    setLinks(links);
-    setHeadingDOMNodes(links.map((link) => link.element));
+    setLinks(result.links);
+    setHeadingDOMNodes(result.nodes);
   };
 
   useEffect(() => {
@@ -112,6 +102,8 @@ export const useTocHeadings = (editor: ReturnType<typeof useEditor>) => {
   const scrollToHeading = (position: number) => {
     if (!editor || editor.isDestroyed) return;
     const { view } = editor;
+
+    expandAncestorToggles(editor, position);
 
     const { node } = view.domAtPos(position);
     const element = node as HTMLElement;

@@ -19,20 +19,37 @@ export type HeadingLink = {
   position: number;
 };
 
+const TOGGLE_HEADING_SUMMARY_SELECTOR =
+  '[data-type="details"][data-level] > [data-type="detailsContainer"] > [data-type="detailsSummary"]';
+
+const TOC_DOM_SELECTOR = `h1, h2, h3, h4, h5, h6, ${TOGGLE_HEADING_SUMMARY_SELECTOR}`;
+
+const nodePosPosition = (item: NodePos): number => {
+  //@ts-ignore resolvedPos is available at runtime
+  return item.resolvedPos.pos;
+};
+
+const nodePosParent = (item: NodePos) => {
+  //@ts-ignore resolvedPos is available at runtime
+  return item.resolvedPos.node(-1);
+};
+
 export const recalculateLinks = (nodePos: NodePos[]) => {
   const nodes: HTMLElement[] = [];
 
   const links: HeadingLink[] = Array.from(nodePos).reduce<HeadingLink[]>(
     (acc, item) => {
       const label = item.node.textContent;
-      const level = Number(item.node.attrs.level);
-      if (label.length && level <= 6) {
+      const level =
+        item.node.type.name === "heading"
+          ? Number(item.node.attrs.level)
+          : Number(nodePosParent(item)?.attrs?.level ?? 0);
+      if (label.length && level >= 1 && level <= 6) {
         acc.push({
           label,
           level,
           element: item.element,
-          //@ts-ignore
-          position: item.resolvedPos.pos,
+          position: nodePosPosition(item),
         });
         nodes.push(item.element);
       }
@@ -41,6 +58,85 @@ export const recalculateLinks = (nodePos: NodePos[]) => {
     [],
   );
   return { links, nodes };
+};
+
+export const getTocNodePositions = (
+  editor: ReturnType<typeof useEditor>,
+): NodePos[] => {
+  if (!editor) return [];
+
+  const headings = editor.$nodes("heading") ?? [];
+  const toggleHeadings = (editor.$nodes("detailsSummary") ?? []).filter(
+    (item) => {
+      const level = Number(nodePosParent(item)?.attrs?.level ?? 0);
+      return level >= 1 && level <= 6;
+    },
+  );
+
+  return [...headings, ...toggleHeadings].sort(
+    (a, b) => nodePosPosition(a) - nodePosPosition(b),
+  );
+};
+
+export const collectTocHeadings = (
+  editor: ReturnType<typeof useEditor>,
+): { links: HeadingLink[]; nodes: HTMLElement[] } => {
+  const result = recalculateLinks(getTocNodePositions(editor));
+  if (!editor?.view?.dom) return result;
+
+  // $nodes(...).element can point at detached DOM nodes; pair the positions
+  // with the live elements rendered by the view instead.
+  const domHeadings = Array.from(
+    editor.view.dom.querySelectorAll<HTMLElement>(TOC_DOM_SELECTOR),
+  ).filter((heading) => heading.textContent && heading.textContent.length > 0);
+
+  if (domHeadings.length !== result.links.length) return result;
+
+  const links = result.links.map((link, index) => ({
+    ...link,
+    element: domHeadings[index],
+  }));
+  return { links, nodes: links.map((link) => link.element) };
+};
+
+export const expandAncestorToggles = (
+  editor: ReturnType<typeof useEditor>,
+  position: number,
+) => {
+  if (!editor || editor.isDestroyed) return;
+
+  const { state, view } = editor;
+  const $pos = state.doc.resolve(Math.min(position, state.doc.content.size));
+
+  const togglePositions: number[] = [];
+  for (let depth = $pos.depth; depth > 0; depth--) {
+    const node = $pos.node(depth);
+    if (node.type.name === "details" && !node.attrs.open) {
+      togglePositions.push($pos.before(depth));
+    }
+  }
+  if (!togglePositions.length) return;
+
+  if (editor.isEditable) {
+    const tr = state.tr;
+    togglePositions.forEach((pos) => {
+      const node = tr.doc.nodeAt(pos);
+      if (node) {
+        tr.setNodeMarkup(pos, undefined, { ...node.attrs, open: true });
+      }
+    });
+    view.dispatch(tr);
+    return;
+  }
+
+  // Read-only views keep the panel state in the DOM (the details NodeView
+  // never syncs programmatic attribute changes), so flip the attribute there.
+  togglePositions.forEach((pos) => {
+    const dom = view.nodeDOM(pos);
+    if (dom instanceof HTMLElement) {
+      dom.setAttribute("open", "true");
+    }
+  });
 };
 
 export const TableOfContents: FC<TableOfContentsProps> = (props) => {
@@ -53,6 +149,8 @@ export const TableOfContents: FC<TableOfContentsProps> = (props) => {
   const handleScrollToHeading = (position: number) => {
     if (!props.editor || props.editor.isDestroyed) return;
     const { view } = props.editor;
+
+    expandAncestorToggles(props.editor, position);
 
     const headerOffset = parseInt(
       window.getComputedStyle(headerPaddingRef.current).getPropertyValue("top"),
@@ -88,7 +186,7 @@ export const TableOfContents: FC<TableOfContentsProps> = (props) => {
   const handleUpdate = () => {
     if (!props.editor || props.editor.isDestroyed) return;
 
-    const result = recalculateLinks(props.editor.$nodes("heading"));
+    const result = collectTocHeadings(props.editor);
 
     setLinks(result.links);
     setHeadingDOMNodes(result.nodes);

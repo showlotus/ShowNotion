@@ -198,7 +198,10 @@ export const mainExtensions = [
         return i18n.t("Heading {{level}}", { level: node.attrs.level });
       }
       if (node.type.name === "detailsSummary") {
-        return i18n.t("Toggle title");
+        const level = editor.state.doc.resolve(pos).parent.attrs?.level ?? 0;
+        return level > 0
+          ? i18n.t("Heading {{level}}", { level })
+          : i18n.t("Toggle title");
       }
       if (node.type.name === "paragraph") {
         const doc = editor.state.doc;

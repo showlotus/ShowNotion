@@ -20,6 +20,9 @@ import type { Editor } from "@tiptap/react";
 import { useEditorState } from "@tiptap/react";
 import { useTranslation } from "react-i18next";
 import { isEditorReady } from "@docmost/editor-ext";
+import { IconToggleHeading1 } from "@/components/icons/icon-toggle-heading-1";
+import { IconToggleHeading2 } from "@/components/icons/icon-toggle-heading-2";
+import { IconToggleHeading3 } from "@/components/icons/icon-toggle-heading-3";
 import classes from "./bubble-menu.module.css";
 
 interface NodeSelectorProps {
@@ -49,6 +52,15 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
         return null;
       }
 
+      // Toggle states describe the block holding the selection, not any
+      // ancestor: read the level off the nearest details instead of using
+      // `isActive("details")`, which also matches enclosing toggles.
+      const $from = ctx.editor.state.selection.$from;
+      const toggleLevel =
+        $from.parent.type.name === "detailsSummary"
+          ? Number($from.node(-1)?.attrs?.level ?? 0)
+          : -1;
+
       return {
         isParagraph: ctx.editor.isActive("paragraph"),
         isBulletList: ctx.editor.isActive("bulletList"),
@@ -56,11 +68,14 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
         isHeading1: ctx.editor.isActive("heading", { level: 1 }),
         isHeading2: ctx.editor.isActive("heading", { level: 2 }),
         isHeading3: ctx.editor.isActive("heading", { level: 3 }),
+        isToggleHeading1: toggleLevel === 1,
+        isToggleHeading2: toggleLevel === 2,
+        isToggleHeading3: toggleLevel === 3,
         isTaskItem: ctx.editor.isActive("taskItem"),
         isBlockquote: ctx.editor.isActive("blockquote"),
         isCodeBlock: ctx.editor.isActive("codeBlock"),
         isCallout: ctx.editor.isActive("callout"),
-        isDetails: ctx.editor.isActive("details"),
+        isToggleBlock: toggleLevel === 0,
         isTransclusionSource: ctx.editor.isActive("transclusionSource"),
       };
     },
@@ -94,6 +109,24 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
       icon: IconH3,
       command: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
       isActive: () => editorState?.isHeading3,
+    },
+    {
+      name: "Toggle heading 1",
+      icon: IconToggleHeading1,
+      command: () => editor.chain().focus().setToggleHeading(1).run(),
+      isActive: () => editorState?.isToggleHeading1,
+    },
+    {
+      name: "Toggle heading 2",
+      icon: IconToggleHeading2,
+      command: () => editor.chain().focus().setToggleHeading(2).run(),
+      isActive: () => editorState?.isToggleHeading2,
+    },
+    {
+      name: "Toggle heading 3",
+      icon: IconToggleHeading3,
+      command: () => editor.chain().focus().setToggleHeading(3).run(),
+      isActive: () => editorState?.isToggleHeading3,
     },
     {
       name: "To-do List",
@@ -147,7 +180,7 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
       name: "Toggle block",
       icon: IconCaretRightFilled,
       command: () => editor.chain().focus().setDetails().run(),
-      isActive: () => editorState?.isDetails,
+      isActive: () => editorState?.isToggleBlock,
     },
   ];
 

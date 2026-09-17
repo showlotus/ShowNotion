@@ -4,8 +4,9 @@ import { useAtomValue } from "jotai";
 import { useTranslation } from "react-i18next";
 import { readOnlyEditorAtom } from "@/features/editor/atoms/editor-atoms.ts";
 import {
+  collectTocHeadings,
+  expandAncestorToggles,
   HeadingLink,
-  recalculateLinks,
 } from "@/features/editor/components/table-of-contents/table-of-contents.tsx";
 import styles from "./docs.module.css";
 
@@ -26,7 +27,7 @@ export default function DocsToc() {
 
   const handleUpdate = useCallback(() => {
     if (!editor || editor.isDestroyed) return;
-    const result = recalculateLinks(editor.$nodes("heading"));
+    const result = collectTocHeadings(editor);
     setLinks(result.links);
     setHeadingDOMNodes(result.nodes);
   }, [editor]);
@@ -68,6 +69,8 @@ export default function DocsToc() {
   const handleScrollToHeading = (position: number) => {
     if (!editor || editor.isDestroyed) return;
     const { view } = editor;
+
+    expandAncestorToggles(editor, position);
 
     const { node } = view.domAtPos(position);
     const element = node as HTMLElement;

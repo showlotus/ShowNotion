@@ -14,6 +14,9 @@ import {
   IconTypography,
 } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
+import { IconToggleHeading1 } from "@/components/icons/icon-toggle-heading-1";
+import { IconToggleHeading2 } from "@/components/icons/icon-toggle-heading-2";
+import { IconToggleHeading3 } from "@/components/icons/icon-toggle-heading-3";
 
 interface Props {
   editor: Editor;
@@ -24,19 +27,36 @@ export const BlockTypeGroup: FC<Props> = ({ editor }) => {
 
   const state = useEditorState({
     editor,
-    selector: (ctx) => ({
-      isHeading1: !!ctx.editor?.isActive("heading", { level: 1 }),
-      isHeading2: !!ctx.editor?.isActive("heading", { level: 2 }),
-      isHeading3: !!ctx.editor?.isActive("heading", { level: 3 }),
-      isBlockquote: !!ctx.editor?.isActive("blockquote"),
-      isCodeBlock: !!ctx.editor?.isActive("codeBlock"),
-    }),
+    selector: (ctx) => {
+      // Toggle states describe the block holding the selection, not any
+      // ancestor: read the level off the nearest details instead of using
+      // `isActive("details")`, which also matches enclosing toggles.
+      const $from = ctx.editor?.state.selection.$from;
+      const toggleLevel =
+        $from && $from.parent.type.name === "detailsSummary"
+          ? Number($from.node(-1)?.attrs?.level ?? 0)
+          : -1;
+
+      return {
+        isHeading1: !!ctx.editor?.isActive("heading", { level: 1 }),
+        isHeading2: !!ctx.editor?.isActive("heading", { level: 2 }),
+        isHeading3: !!ctx.editor?.isActive("heading", { level: 3 }),
+        isToggleHeading1: toggleLevel === 1,
+        isToggleHeading2: toggleLevel === 2,
+        isToggleHeading3: toggleLevel === 3,
+        isBlockquote: !!ctx.editor?.isActive("blockquote"),
+        isCodeBlock: !!ctx.editor?.isActive("codeBlock"),
+      };
+    },
   });
 
   let label = t("Normal text");
   if (state.isHeading1) label = t("Heading 1");
   else if (state.isHeading2) label = t("Heading 2");
   else if (state.isHeading3) label = t("Heading 3");
+  else if (state.isToggleHeading1) label = t("Toggle heading 1");
+  else if (state.isToggleHeading2) label = t("Toggle heading 2");
+  else if (state.isToggleHeading3) label = t("Toggle heading 3");
   else if (state.isBlockquote) label = t("Quote");
   else if (state.isCodeBlock) label = t("Code block");
 
@@ -84,6 +104,24 @@ export const BlockTypeGroup: FC<Props> = ({ editor }) => {
           }
         >
           {t("Heading 3")}
+        </Menu.Item>
+        <Menu.Item
+          leftSection={<IconToggleHeading1 size={16} />}
+          onClick={() => editor.chain().focus().setToggleHeading(1).run()}
+        >
+          {t("Toggle heading 1")}
+        </Menu.Item>
+        <Menu.Item
+          leftSection={<IconToggleHeading2 size={16} />}
+          onClick={() => editor.chain().focus().setToggleHeading(2).run()}
+        >
+          {t("Toggle heading 2")}
+        </Menu.Item>
+        <Menu.Item
+          leftSection={<IconToggleHeading3 size={16} />}
+          onClick={() => editor.chain().focus().setToggleHeading(3).run()}
+        >
+          {t("Toggle heading 3")}
         </Menu.Item>
         <Menu.Item
           leftSection={<IconBlockquote size={16} />}

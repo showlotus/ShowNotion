@@ -92,3 +92,44 @@
     transform: rotateZ(0deg);
   }
 }
+
+/* Toggle heading: the summary uses heading typography. Vertical padding lives
+ * on the summary, the root loses its own so the arrow can be offset per level. */
+.ProseMirror [data-type="details"][data-level] {
+  padding-block: 0;
+}
+
+.ProseMirror [data-type="details"][data-level] > [data-type="detailsContainer"] > [data-type="detailsSummary"] {
+  font-weight: 600;
+}
+
+.ProseMirror [data-type="details"][data-level="1"] > [data-type="detailsContainer"] > [data-type="detailsSummary"] {
+  font-size: 1.875rem;
+  line-height: 1.3;
+  padding: 32px 0 8px 6px;
+}
+
+.ProseMirror [data-type="details"][data-level="2"] > [data-type="detailsContainer"] > [data-type="detailsSummary"] {
+  font-size: 1.5rem;
+  line-height: 1.3;
+  padding: 28px 0 8px 6px;
+}
+
+.ProseMirror [data-type="details"][data-level="3"] > [data-type="detailsContainer"] > [data-type="detailsSummary"] {
+  font-size: 1.25rem;
+  line-height: 1.3;
+  padding: 24px 0 8px 6px;
+}
+
+/* Keep the toggle arrow centered on the heading's first line. */
+.ProseMirror [data-type="details"][data-level="1"] > [data-type="detailsButton"] {
+  margin-top: 38px;
+}
+
+.ProseMirror [data-type="details"][data-level="2"] > [data-type="detailsButton"] {
+  margin-top: 30px;
+}
+
+.ProseMirror [data-type="details"][data-level="3"] > [data-type="detailsButton"] {
+  margin-top: 23px;
+}

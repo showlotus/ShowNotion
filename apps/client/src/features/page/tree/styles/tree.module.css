@@ -44,6 +44,10 @@
 
 
 .icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
     margin: 0 rem(10px);
     flex-shrink: 0;
 }
@@ -107,6 +111,11 @@
     display: flex;
     align-items: center;
     border-radius: var(--mantine-radius-sm);
+
+    /* Pin the single-line row face (hover/selected surface) to the DocTree
+       32px row pitch: 32 - 2 (li padding-bottom) = 30. min-height (not height)
+       keeps intentional multi-line rows measurable. */
+    min-height: rem(30px);
 
     /* Row highlight owns the FULL row width: the tree indent (padding-left
      * here) only shifts content and must never shrink the hover/selected

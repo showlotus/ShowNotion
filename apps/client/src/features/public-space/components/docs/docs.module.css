@@ -798,6 +798,45 @@
   line-height: 1.5;
 }
 
+/* Toggle headings (details summary styled as a heading) follow the same
+ * public-docs type scale as regular headings. */
+.root.root :global(.ProseMirror) [data-type="details"][data-level] > [data-type="detailsContainer"] > [data-type="detailsSummary"] {
+  color: inherit;
+}
+
+.root.root :global(.ProseMirror) [data-type="details"][data-level="1"] > [data-type="detailsContainer"] > [data-type="detailsSummary"] {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.root.root :global(.ProseMirror) [data-type="details"][data-level="2"] > [data-type="detailsContainer"] > [data-type="detailsSummary"] {
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.4;
+}
+
+.root.root :global(.ProseMirror) [data-type="details"][data-level="3"] > [data-type="detailsContainer"] > [data-type="detailsSummary"] {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.45;
+}
+
+.root.root :global(.ProseMirror) [data-type="details"][data-level="1"] > [data-type="detailsButton"] {
+  margin-top: 36px;
+}
+
+.root.root :global(.ProseMirror) [data-type="details"][data-level="2"] > [data-type="detailsButton"] {
+  margin-top: 29px;
+}
+
+.root.root :global(.ProseMirror) [data-type="details"][data-level="3"] > [data-type="detailsButton"] {
+  margin-top: 23px;
+}
+
 .root.root :global(.ProseMirror) strong {
   font-weight: 600;
 }

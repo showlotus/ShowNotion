@@ -46,6 +46,9 @@ import IconMermaid from "@/components/icons/icon-mermaid";
 import IconDrawio from "@/components/icons/icon-drawio";
 import { IconColumns4 } from "@/components/icons/icon-columns-4";
 import { IconColumns5 } from "@/components/icons/icon-columns-5";
+import { IconToggleHeading1 } from "@/components/icons/icon-toggle-heading-1";
+import { IconToggleHeading2 } from "@/components/icons/icon-toggle-heading-2";
+import { IconToggleHeading3 } from "@/components/icons/icon-toggle-heading-3";
 import i18n from "@/i18n.ts";
 import {
   AirtableIcon,
@@ -127,6 +130,72 @@ const CommandGroups: SlashMenuGroupedItemsType = {
           .setNode("heading", { level: 3 })
           .run();
       },
+    },
+    {
+      title: "Toggle heading 1",
+      description: "Insert a collapsible heading panel.",
+      searchTerms: [
+        "toggle heading",
+        "collapsible",
+        "heading",
+        "h1",
+        "title",
+        "折叠标题",
+        "折叠",
+        "面板",
+      ],
+      icon: IconToggleHeading1,
+      command: ({ editor, range }: CommandProps) =>
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .setToggleHeading(1)
+          .run(),
+    },
+    {
+      title: "Toggle heading 2",
+      description: "Insert a collapsible heading panel.",
+      searchTerms: [
+        "toggle heading",
+        "collapsible",
+        "heading",
+        "h2",
+        "subtitle",
+        "折叠标题",
+        "折叠",
+        "面板",
+      ],
+      icon: IconToggleHeading2,
+      command: ({ editor, range }: CommandProps) =>
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .setToggleHeading(2)
+          .run(),
+    },
+    {
+      title: "Toggle heading 3",
+      description: "Insert a collapsible heading panel.",
+      searchTerms: [
+        "toggle heading",
+        "collapsible",
+        "heading",
+        "h3",
+        "subtitle",
+        "折叠标题",
+        "折叠",
+        "面板",
+      ],
+      icon: IconToggleHeading3,
+      command: ({ editor, range }: CommandProps) =>
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .setToggleHeading(3)
+          .run(),
     },
     {
       title: "Bullet list",

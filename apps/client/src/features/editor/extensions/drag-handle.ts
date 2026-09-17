@@ -632,7 +632,15 @@ export function DragHandlePlugin(
       };
     }
 
-    const compStyle = window.getComputedStyle(node);
+    // Toggle headings carry their typography (and first-line padding) on the
+    // summary, while the hit element is the details root; align the handle to
+    // the summary's first line.
+    const styleSource = node.matches('[data-type="details"][data-level]')
+      ? node.querySelector(
+          ':scope > [data-type="detailsContainer"] > [data-type="detailsSummary"]',
+        ) ?? node
+      : node;
+    const compStyle = window.getComputedStyle(styleSource);
     const parsedLineHeight = parseInt(compStyle.lineHeight, 10);
     const lineHeight = isNaN(parsedLineHeight)
       ? parseInt(compStyle.fontSize) * 1.2
