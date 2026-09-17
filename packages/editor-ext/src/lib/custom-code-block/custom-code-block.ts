@@ -40,6 +40,19 @@ export const CustomCodeBlock = CodeBlock.extend<CodeBlockLowlightOptions>({
     };
   },
 
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      // Notion-style "wrap lines" toggle; persisted per code block.
+      wrap: {
+        default: false,
+        parseHTML: (element) => element.getAttribute('data-wrap') === 'true',
+        renderHTML: (attributes) =>
+          attributes.wrap ? { 'data-wrap': 'true' } : null,
+      },
+    };
+  },
+
   addKeyboardShortcuts() {
     const isMermaid = (node: any) =>
       node?.type === this.type && node.attrs.language === 'mermaid';

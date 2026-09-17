@@ -1,56 +1,83 @@
+/* ===== Code block top toolbar (top-right, quiet chip + ghost icons) ===== */
+
 .selectInput {
-    height: 25px;
-    min-height: 25px;
+  height: 25px;
+  min-height: 25px;
 }
 
-/* Language selector (top-right of a code block): a quiet chip on the block
- * surface — subtle warm fill plus a hairline outline (light uses gray.6,
- * matching the WCAG-driven input border in styles/a11y-overrides.css; dark
- * uses the theme's pinned control outline). Hover deepens the fill; focus
- * keeps the blue --input-bd-focus ring for keyboard users. */
+/* Language selector: a quiet chip on the block surface — subtle warm fill
+ * plus a hairline outline (light uses gray.6, matching the WCAG-driven
+ * input border in styles/a11y-overrides.css; dark uses the theme's pinned
+ * control outline). Hover deepens the fill; focus keeps the blue
+ * --input-bd-focus ring for keyboard users. */
 .menuGroup .selectInput[data-variant="default"] {
-    border-color: light-dark(
-        var(--mantine-color-gray-6),
-        var(--mantine-color-default-border)
-    );
+  border-color: light-dark(
+    var(--mantine-color-gray-6),
+    var(--mantine-color-default-border)
+  );
+  background-color: light-dark(
+    rgba(33, 27, 23, 0.05),
+    rgba(255, 255, 255, 0.055)
+  );
+  color: var(--mantine-color-dimmed);
+
+  &:hover {
     background-color: light-dark(
-        rgba(33, 27, 23, 0.05),
-        rgba(255, 255, 255, 0.055)
+      rgba(33, 27, 23, 0.09),
+      rgba(255, 255, 255, 0.09)
     );
-    color: var(--mantine-color-dimmed);
+    color: var(--mantine-color-text);
+  }
 
-    &:hover {
-        background-color: light-dark(
-            rgba(33, 27, 23, 0.09),
-            rgba(255, 255, 255, 0.09)
-        );
-        color: var(--mantine-color-text);
-    }
+  &:focus {
+    border-color: var(--input-bd-focus);
+    color: var(--mantine-color-text);
+  }
+}
 
-    &:focus {
-        border-color: var(--input-bd-focus);
-        color: var(--mantine-color-text);
-    }
+.menuGroup {
+  min-height: 25px;
+  transition: opacity 0.15s ease;
+
+  @media print {
+    display: none;
+  }
+}
+
+/* Notion-style reveal: hidden until hovering the block, focusing inside it,
+ * or when the block is selected (menuPinned). */
+.wrapper:not(:hover):not(:focus-within) .menuGroup:not(.menuPinned) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Touch devices can't hover — keep the controls visible. */
+@media (hover: none) {
+  .wrapper:not(:hover):not(:focus-within) .menuGroup:not(.menuPinned) {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Wrap-lines toggle: white-space is driven inline on NodeViewContent
+ * (tiptap hardcodes pre-wrap there; style props win). The pre itself must
+ * out-specify prosemirror.css's `.ProseMirror pre` (0,1,1) for the
+ * not-wrapped horizontal-scroll mode. */
+.wrapper .pre {
+  white-space: pre;
+  overflow-x: auto;
 }
 
 .error {
-    color: light-dark(var(--mantine-color-red-8), var(--mantine-color-red-7));
-    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-gray-8));
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  color: light-dark(var(--mantine-color-red-8), var(--mantine-color-red-7));
+  background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-gray-8));
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mermaid {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.menuGroup.menuGroup {
-    gap: 6px;
-
-    @media print {
-        display: none;
-    }
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
