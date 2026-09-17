@@ -7,9 +7,20 @@
   background-color: light-dark(#f9f8f7, var(--mantine-color-dark-8));
 
   /* Same inset as the workspace sidebar (space-sidebar.module.css): 8px
-   * gutters keep row hover blocks off the shell seams. */
-  padding: rem(6px) rem(8px) var(--mantine-spacing-sm);
+   * gutters keep row hover blocks off the shell seams. The right gutter is
+   * NOT padding: the tree scrollbar must hug the sidebar edge, so the tree
+   * spans full width and re-insets its content below instead. */
+  padding: rem(6px) 0 var(--mantine-spacing-sm) rem(8px);
   border-right: 1px solid var(--notion-border);
+
+  /* Content padding inside the DocTree scroll container (ShareSidebarTree
+   * wrapper div > DocTree scroller div, both carry tree.module.css
+   * treeContainer) keeps the 8px row inset now that the scrollbar sits on
+   * the edge. The resizeHandle div (first child) is childless, so this only
+   * matches the tree chain. */
+  & > div > div {
+    padding-right: rem(8px);
+  }
 }
 
 /* Page scrolling belongs to the main column: the shell locks the viewport

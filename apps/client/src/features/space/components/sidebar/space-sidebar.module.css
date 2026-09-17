@@ -19,11 +19,25 @@
 
 .sectionPages {
     margin-bottom: 0;
+    /* 滚动条贴边：负右外边距把树区延伸进 navbar 的 8px 右 padding，
+     * DocTree 滚动容器右缘即侧边栏边缘，滚动条不再与边缘留距。
+     * 必须挂在本层（flex item）——挂在 .pages 上会让本层 overflow-x
+     * 计算值变 auto，8px 横向溢出会画出横向滚动条。 */
+    margin-right: calc(rem(8px) * -1);
     overflow-y: hidden;
 
     .pages {
         height: 100%;
         padding-bottom: 26px;
+
+        /* 滚动条贴边后，内容在滚动容器内部再右缩 8px，行悬停/选中高亮
+         * 块与拖放线维持原有 8px 边缘内缩。选择器定位 DocTree 滚动容器
+         * （.pages > SpaceTree 包裹层 > DocTree scroller，两层 div 均为
+         * tree.module.css 的 treeContainer）；CSS module 无法引用其哈希
+         * 类名，只能按此稳定嵌套结构定位，DocTree 增删包裹层时需同步。 */
+        & > div > div {
+            padding-right: rem(8px);
+        }
     }
 }
 
@@ -70,6 +84,8 @@
     margin-bottom: rem(5px);
     /* 分组标题与上方菜单图标同列 16px（navbar 8px + 此处 8px） */
     padding-left: rem(8px);
+    /* sectionPages 负右外边距外扩 8px 后在此补偿，+ / … 按钮保持原位 */
+    padding-right: rem(8px);
 }
 
 /* 功能区与页面区之间的 Notion 风格发丝分割线：负边距抵消 navbar 左右 8px，满宽贯穿 */

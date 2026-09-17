@@ -305,6 +305,15 @@
 .sidebarScroll {
   flex: 1;
   min-height: 0;
+
+  /* 滚动条贴边：负右外边距抵消 .sidebar 的 10px 右 padding，DocTree
+   * 滚动容器（唯一直接子 div.treeContainer）右缘达侧边栏边缘；内容在
+   * 容器内部再右缩 10px，行高亮块维持原有内缩视觉。 */
+  margin-right: rem(-10px);
+
+  & > div {
+    padding-right: rem(10px);
+  }
 }
 
 .main {
