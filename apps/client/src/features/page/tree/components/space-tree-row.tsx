@@ -31,6 +31,7 @@ import { useTreeMutation } from "@/features/page/tree/hooks/use-tree-mutation.ts
 import type { SpaceTreeNode } from "@/features/page/tree/types.ts";
 import type { RenderRowProps } from "./doc-tree";
 import { NodeMenu } from "./space-tree-node-menu";
+import { TruncatedPageTitle } from "./truncated-page-title";
 import classes from "@/features/page/tree/styles/tree.module.css";
 import { updateTreeNodeIcon } from "@/features/page/tree/utils/utils.ts";
 
@@ -177,7 +178,10 @@ export function SpaceTreeRow({
         />
       </div>
 
-      <span className={classes.text}>{getPageTitle(node.name, node.isBase, t)}</span>
+      <TruncatedPageTitle
+        className={classes.text}
+        title={getPageTitle(node.name, node.isBase, t)}
+      />
 
       <div className={classes.actions}>
         {canEdit && (

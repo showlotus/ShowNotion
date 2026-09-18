@@ -17,6 +17,9 @@ import {
 } from "@/features/page/tree/components/doc-tree";
 import treeClasses from "@/features/page/tree/styles/tree.module.css";
 import {
+  TruncatedPageTitle,
+} from "@/features/page/tree/components/truncated-page-title";
+import {
   sharedOpenTreeNodesAtom,
   sharedTreeDataAtom,
 } from "@/features/share/atoms/shared-page-atom.ts";
@@ -180,7 +183,10 @@ function ShareTreeRow({
         )}
       </span>
 
-      <span className={treeClasses.text}>{node.name || t("untitled")}</span>
+      <TruncatedPageTitle
+        className={treeClasses.text}
+        title={node.name || t("untitled")}
+      />
     </Link>
   );
 }
