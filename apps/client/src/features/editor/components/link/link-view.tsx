@@ -484,9 +484,8 @@ export default function LinkView(props: MarkViewProps) {
                     onClick={() => setShowSearch(true)}
                   >
                     <IconFileDescription
-                      size={16}
-                      stroke={1.5}
-                      color="var(--mantine-color-dimmed)"
+                      size={18}
+                      color="gray"
                       style={{ flexShrink: 0 }}
                     />
                     <Text size="sm" fw={500} truncate>
@@ -503,7 +502,7 @@ export default function LinkView(props: MarkViewProps) {
                     className={classes.removeLink}
                   >
                     <Group gap={8}>
-                      <IconLinkOff size={16} stroke={1.5} />
+                      <IconLinkOff size={18} color="gray" />
                       <Text size="sm">{t("Remove link")}</Text>
                     </Group>
                   </UnstyledButton>
@@ -518,11 +517,7 @@ export default function LinkView(props: MarkViewProps) {
               <>
                 <TextInput
                   leftSection={
-                    <IconWorld
-                      size={16}
-                      stroke={1.5}
-                      color="var(--mantine-color-dimmed)"
-                    />
+                    <IconWorld size={18} color="gray" />
                   }
                   classNames={{ input: classes.linkInput }}
                   value={linkUrl}
@@ -552,7 +547,7 @@ export default function LinkView(props: MarkViewProps) {
                   className={classes.removeLink}
                 >
                   <Group gap={8}>
-                    <IconLinkOff size={16} stroke={1.5} />
+                    <IconLinkOff size={18} color="gray" />
                     <Text size="sm">{t("Remove link")}</Text>
                   </Group>
                 </UnstyledButton>
@@ -582,9 +577,17 @@ export default function LinkView(props: MarkViewProps) {
               }}
             >
               {isInternal ? (
-                <IconFileDescription size={18} color="gray" />
+                <IconFileDescription
+                  size={18}
+                  color="gray"
+                  style={{ flexShrink: 0 }}
+                />
               ) : (
-                <IconExternalLink size={18} color="gray" />
+                <IconExternalLink
+                  size={18}
+                  color="gray"
+                  style={{ flexShrink: 0 }}
+                />
               )}
               <Text size="sm" truncate fw={500}>
                 {isInternal ? pageTitle || linkLabel : href}
@@ -593,7 +596,13 @@ export default function LinkView(props: MarkViewProps) {
 
             <Divider orientation="vertical" />
 
-            <Tooltip label={t("Edit link")} withArrow withinPortal={false}>
+            <Tooltip
+              label={t("Edit link")}
+              multiline={false}
+              offset={12}
+              withArrow
+              withinPortal={false}
+            >
               <ActionIcon
                 variant="subtle"
                 color="gray"
@@ -608,7 +617,13 @@ export default function LinkView(props: MarkViewProps) {
               </ActionIcon>
             </Tooltip>
 
-            <Tooltip label={t("Copy link")} withArrow withinPortal={false}>
+            <Tooltip
+              label={t("Copy link")}
+              multiline={false}
+              offset={12}
+              withArrow
+              withinPortal={false}
+            >
               <ActionIcon
                 variant="subtle"
                 color="gray"
@@ -622,7 +637,13 @@ export default function LinkView(props: MarkViewProps) {
               </ActionIcon>
             </Tooltip>
 
-            <Tooltip label={t("Remove link")} withArrow withinPortal={false}>
+            <Tooltip
+              label={t("Remove link")}
+              multiline={false}
+              offset={12}
+              withArrow
+              withinPortal={false}
+            >
               <ActionIcon
                 variant="subtle"
                 color="gray"

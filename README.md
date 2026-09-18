@@ -15,6 +15,32 @@
     <img src="./design/assets/showcase-dark.png" alt="ShowNotion — a Notion-like collaborative wiki and documentation software" width="100%" />
 </div>
 
+## Quick setup with AI
+
+Paste the following prompt into your AI coding agent (OpenCode, Claude Code, Codex, ...) to
+have it set up and run the project automatically:
+
+```text
+Set up and run the ShowNotion project from scratch in this repository:
+
+1. Copy .env.example to .env, then set APP_SECRET (long random string),
+   POSTGRES_PASSWORD (strong password), and DATABASE_URL
+   (postgresql://shownotion:<password>@localhost:5432/shownotion — must reuse
+   the same password) and REDIS_URL (redis://127.0.0.1:6379).
+2. Start only the infrastructure: docker compose up -d db redis.
+   NEVER start the `shownotion` service — it conflicts with the dev server on port 3000.
+3. Install dependencies with pnpm (Node.js 22+, enable once via `corepack enable`).
+4. Run database migrations (required in dev):
+   pnpm --filter ./apps/server run migration:latest
+5. Start the dev servers with `pnpm dev` — frontend at http://localhost:5173,
+   backend at http://localhost:3000.
+6. Verify: both apps start without errors, then open http://localhost:3000 —
+   a fresh database shows the setup wizard to create the workspace and admin account.
+
+Do not modify any source code; only environment/config steps above.
+If any step fails, diagnose and fix the environment issue before continuing.
+```
+
 ## Local development (from scratch)
 
 ### Prerequisites
@@ -87,7 +113,7 @@ docker compose up -d db redis && pnpm install && pnpm --filter ./apps/server run
 ## MCP server
 
 ShowNotion ships with a built-in MCP (Model Context Protocol) server, allowing AI clients
-(Claude Desktop, Claude Code, Cursor, opencode, ...) to search, read, and write wiki pages
+(Claude Code, Codex, OpenCode, ...) to search, read, and write wiki pages
 directly. The endpoint is `http://localhost:3000/mcp` (Streamable HTTP). When no auth token
 is configured, the endpoint is disabled entirely (404).
 
@@ -113,7 +139,7 @@ claude mcp add shownotion --transport http http://localhost:3000/mcp \
   --header "Authorization: Bearer <your-token>"
 ```
 
-Claude Desktop / Cursor (`mcpServers` in the MCP config):
+Claude Desktop (`mcpServers` in the MCP config):
 
 ```json
 {
@@ -127,7 +153,19 @@ Claude Desktop / Cursor (`mcpServers` in the MCP config):
 }
 ```
 
-opencode (`mcp` section in `~/.config/opencode/opencode.json`):
+Codex (MCP servers in `~/.codex/config.toml`):
+
+```toml
+[mcp_servers.shownotion]
+url = "http://localhost:3000/mcp"
+bearer_token_env_var = "SHOWNOTION_MCP_TOKEN"
+```
+
+The token is read from the `SHOWNOTION_MCP_TOKEN` environment variable (Codex's recommended
+way of providing a static Bearer token). Alternatively, pass it inline with
+`http_headers = { "Authorization" = "Bearer <your-token>" }`.
+
+OpenCode (`mcp` section in `~/.config/opencode/opencode.json`):
 
 ```json
 {
