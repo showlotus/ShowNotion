@@ -33,6 +33,14 @@ export function TruncatedPageTitle({ title, className }: TruncatedPageTitleProps
       disabled={!truncated}
       offset={axesOffsets}
       middlewares={{ flip: false }}
+      multiline={false}
+      styles={{
+        tooltip: {
+          maxWidth: "min(90vw, 640px)",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        },
+      }}
     >
       <span ref={textRef} className={className} onMouseEnter={handleMouseEnter}>
         {title}

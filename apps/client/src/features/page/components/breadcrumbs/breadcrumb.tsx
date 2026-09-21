@@ -8,7 +8,6 @@ import {
   Popover,
   Breadcrumbs,
   ActionIcon,
-  Text,
   Tooltip,
 } from "@mantine/core";
 import { IconCornerDownRightDouble, IconDots } from "@tabler/icons-react";
@@ -20,6 +19,7 @@ import { buildPageUrl, getPageTitle } from "@/features/page/page.utils.ts";
 import type { TFunction } from "i18next";
 import { usePageQuery } from "@/features/page/queries/page-query.ts";
 import { extractPageSlugId } from "@/lib";
+import { HoverScrollText } from "@/components/ui/hover-scroll-text.tsx";
 import { useMediaQuery } from "@mantine/hooks";
 import { useTranslation } from "react-i18next";
 
@@ -59,10 +59,11 @@ export default function Breadcrumb() {
           to={buildPageUrl(spaceSlug, node.slugId, node.name)}
           variant="default"
           style={{ border: "none" }}
+          data-hover-scroll
         >
-          <Text fz={"sm"} className={classes.truncatedText}>
+          <HoverScrollText fz={"sm"} className={classes.truncatedText}>
             {getTitle(node, t)}
-          </Text>
+          </HoverScrollText>
         </Button>
       </Button.Group>
     ));
@@ -76,10 +77,11 @@ export default function Breadcrumb() {
           to={buildPageUrl(spaceSlug, node.slugId, node.name)}
           variant="default"
           style={{ border: "none" }}
+          data-hover-scroll
         >
-          <Text fz={"sm"} className={classes.truncatedText}>
+          <HoverScrollText fz={"sm"} className={classes.truncatedText}>
             {getTitle(node, t)}
-          </Text>
+          </HoverScrollText>
         </Button>
       </Button.Group>
     ));

@@ -106,11 +106,11 @@
   flex-shrink: 0;
 }
 
+/* HoverScrollText owns overflow/ellipsis and the pointer panning; this keeps
+ * the row layout contract (grow, shrink below the content width). */
 .menuItemLabel {
   flex: 1 1 auto;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .menuItemCheck {

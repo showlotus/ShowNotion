@@ -14,6 +14,7 @@ import { SpaceTreeNode } from "@/features/page/tree/types.ts";
 import { useGetSidebarPagesQuery } from "@/features/page/queries/page-query.ts";
 import { treeModel } from "@/features/page/tree/model/tree-model";
 import { useTranslation } from "react-i18next";
+import { HoverScrollText } from "@/components/ui/hover-scroll-text.tsx";
 import classes from "./breadcrumb.module.css";
 
 export function useFlyout(openDelay: number, closeDelay: number) {
@@ -167,6 +168,7 @@ function PageMenuRow<T extends MenuNode>({
       className={classes.menuItem}
       data-active={isCurrent || undefined}
       data-subopen={flyout.opened || undefined}
+      data-hover-scroll
       onMouseEnter={hasChildren ? flyout.requestOpen : undefined}
       onMouseLeave={hasChildren ? flyout.requestClose : undefined}
     >
@@ -179,9 +181,9 @@ function PageMenuRow<T extends MenuNode>({
           className={classes.menuItemIcon}
         />
       )}
-      <Text fz="sm" className={classes.menuItemLabel}>
+      <HoverScrollText fz="sm" className={classes.menuItemLabel}>
         {getPageTitle(node.name, node.isBase, t)}
-      </Text>
+      </HoverScrollText>
       {isCurrent ? (
         <IconCheck size={16} stroke={2} className={classes.menuItemCheck} />
       ) : hasChildren ? (

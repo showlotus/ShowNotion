@@ -1,0 +1,26 @@
+/* HoverScrollText: a single-line ellipsis label that pans left and right while
+ * the pointer moves over its row, so a truncated title can be read in full.
+ * No popover is involved, which keeps hover flyouts (e.g. the breadcrumb
+ * sub-page menus) free to open at the same time. */
+
+.viewport {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  /* Flex children must be allowed to shrink below their content width for the
+   * ellipsis to appear. */
+  min-width: 0;
+}
+
+/* Hovering the row arms the pan, so the ellipsis makes way for the moving
+ * text; it comes back once the label is back at its start. */
+.viewport[data-panned],
+:global([data-hover-scroll]:hover) .viewport {
+  text-overflow: clip;
+}
+
+/* Inline on purpose: an atomic inline child would only be clipped by the
+ * viewport, never ellipsized. */
+.content {
+  display: inline;
+}

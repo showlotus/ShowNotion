@@ -8,12 +8,12 @@ import {
   Breadcrumbs,
   Button,
   Popover,
-  Text,
   Tooltip,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { IconCornerDownRightDouble, IconDots } from "@tabler/icons-react";
 import { extractPageSlugId } from "@/lib";
+import { HoverScrollText } from "@/components/ui/hover-scroll-text.tsx";
 import { sharedTreeDataAtom } from "@/features/share/atoms/shared-page-atom.ts";
 import { findAncestorTrail } from "@/features/public-space/utils/docs-tree.ts";
 import { buildSharedPageUrl } from "@/features/page/page.utils.ts";
@@ -71,10 +71,11 @@ function HiddenCrumbList({ crumbs }: { crumbs: Crumb[] }) {
             to={crumb.url}
             variant="default"
             style={{ border: "none" }}
+            data-hover-scroll
           >
-            <Text fz="sm" className={breadcrumbClasses.truncatedText}>
+            <HoverScrollText fz="sm" className={breadcrumbClasses.truncatedText}>
               {crumb.label}
-            </Text>
+            </HoverScrollText>
           </Button>
         </Button.Group>
       ))}
