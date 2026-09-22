@@ -233,7 +233,7 @@ function PageArrow({ isOpen, hasChildren, onToggle }: PageArrowProps) {
       size={20}
       variant="subtle"
       color="gray"
-      className={classes.actionIcon}
+      className={`${classes.actionIcon} ${classes.chevronIcon}`}
       aria-label={isOpen ? t("Collapse") : t("Expand")}
       aria-expanded={isOpen}
       tabIndex={-1}

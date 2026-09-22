@@ -51,7 +51,7 @@
 }
 
 .linkIcon {
-    color: light-dark(#8e8b86, #ada9a3);
+    color: var(--notion-icon-sidebar);
     margin-right: rem(10px);
     flex-shrink: 0;
 }

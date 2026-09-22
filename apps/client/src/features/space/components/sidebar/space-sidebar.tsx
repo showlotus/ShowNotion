@@ -2,7 +2,6 @@ import {
   ActionIcon,
   Group,
   Menu,
-  Text,
   Tooltip,
   UnstyledButton,
 } from "@mantine/core";
@@ -57,6 +56,10 @@ import {
 import { mobileSidebarAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { useToggleSidebar } from "@/components/layouts/global/hooks/hooks/use-toggle-sidebar.ts";
 import { searchSpotlight } from "@/features/search/constants";
+import FavoritesSidebarSection from "@/features/favorite/components/favorites-sidebar-section.tsx";
+import { homeTabAtom } from "@/features/home/atoms/home-tab-atom";
+import { SidebarSectionHeader } from "@/components/ui/sidebar-section-header";
+import { spaceSidebarPagesOpenAtom } from "@/features/space/atoms/space-sidebar-atom";
 const TemplatePickerModal = React.lazy(
   () => import("@/ee/template/components/template-picker-modal"),
 );
@@ -85,6 +88,10 @@ export function SpaceSidebar() {
   const { handleCreate } = useTreeMutation(space?.id ?? "");
   const toggleAside = useToggleAside();
   const [workspace] = useAtom(workspaceAtom);
+  const [, setActiveTab] = useAtom(homeTabAtom);
+  const [pagesOpen, setPagesOpen] = useAtom(spaceSidebarPagesOpenAtom);
+  const [spaceMenuOpen, setSpaceMenuOpen] = React.useState(false);
+  const pagesTreeId = React.useId();
   const aiChatEnabled = workspace?.settings?.ai?.chat === true;
   const isPageRoute = location.pathname.includes("/p/");
 
@@ -198,13 +205,29 @@ export function SpaceSidebar() {
 
         <div className={classes.divider} aria-hidden="true" />
 
+        <FavoritesSidebarSection
+          spaceId={space.id}
+          limit={8}
+          viewAllTo={getSpaceUrl(spaceSlug)}
+          onViewAllClick={() => setActiveTab("favorites")}
+          onNavigate={() => {
+            if (mobileSidebarOpened) {
+              toggleMobileSidebar();
+            }
+          }}
+        />
+
         <div className={clsx(classes.section, classes.sectionPages)}>
-          <Group className={classes.pagesHeader} justify="space-between">
-            <Group gap={4} wrap="nowrap">
-              <Text size="xs" fw={500} c="dimmed">
-                {t("Pages")}
-              </Text>
-              {isBetaPublicSpaces() && space.isPublished && (
+          <SidebarSectionHeader
+            className={classes.pagesHeader}
+            label={t("Pages")}
+            opened={pagesOpen}
+            onToggle={() => setPagesOpen(!pagesOpen)}
+            controlsId={pagesTreeId}
+            actionsPinned={spaceMenuOpen}
+            labelExtra={
+              isBetaPublicSpaces() &&
+              space.isPublished && (
                 <Tooltip label={t("This space is public")}>
                   <IconWorld
                     size={14}
@@ -212,39 +235,43 @@ export function SpaceSidebar() {
                     style={{ flexShrink: 0 }}
                   />
                 </Tooltip>
-              )}
-            </Group>
+              )
+            }
+          >
+            {spaceAbility.can(
+              SpaceCaslAction.Manage,
+              SpaceCaslSubject.Page,
+            ) && (
+              <Tooltip label={t("Create page")} position="top">
+                <ActionIcon
+                  variant="subtle"
+                  color="gray"
+                  size={28}
+                  onClick={handleCreatePage}
+                  aria-label={t("Create page")}
+                >
+                  <IconPlus size={20} />
+                </ActionIcon>
+              </Tooltip>
+            )}
 
-            <Group gap="xs">
-              {spaceAbility.can(
+            <SpaceMenu
+              spaceId={space.id}
+              canManagePages={spaceAbility.can(
                 SpaceCaslAction.Manage,
                 SpaceCaslSubject.Page,
-              ) && (
-                <Tooltip label={t("Create page")} position="top">
-                  <ActionIcon
-                    variant="subtle"
-                    color="gray"
-                    size={18}
-                    onClick={handleCreatePage}
-                    aria-label={t("Create page")}
-                  >
-                    <IconPlus />
-                  </ActionIcon>
-                </Tooltip>
               )}
+              onSpaceSettings={openSettings}
+              onOpenChange={setSpaceMenuOpen}
+            />
+          </SidebarSectionHeader>
 
-              <SpaceMenu
-                spaceId={space.id}
-                canManagePages={spaceAbility.can(
-                  SpaceCaslAction.Manage,
-                  SpaceCaslSubject.Page,
-                )}
-                onSpaceSettings={openSettings}
-              />
-            </Group>
-          </Group>
-
-          <div className={classes.pages} onContextMenu={handleTreeContextMenu}>
+          <div
+            className={classes.pages}
+            id={pagesTreeId}
+            hidden={!pagesOpen}
+            onContextMenu={handleTreeContextMenu}
+          >
             <SpaceTree
               spaceId={space.id}
               readOnly={spaceAbility.cannot(
@@ -297,11 +324,13 @@ interface SpaceMenuProps {
   spaceId: string;
   canManagePages: boolean;
   onSpaceSettings: () => void;
+  onOpenChange: (opened: boolean) => void;
 }
 function SpaceMenu({
   spaceId,
   canManagePages,
   onSpaceSettings,
+  onOpenChange,
 }: SpaceMenuProps) {
   const { t } = useTranslation();
   const { spaceSlug } = useParams();
@@ -346,16 +375,22 @@ function SpaceMenu({
 
   return (
     <>
-      <Menu width={200} shadow="md" withArrow floatingStrategy="fixed">
+      <Menu
+        width={200}
+        shadow="md"
+        withArrow
+        floatingStrategy="fixed"
+        onChange={onOpenChange}
+      >
         <Menu.Target>
           <Tooltip label={t("Space menu")} position="top">
             <ActionIcon
               variant="subtle"
               color="gray"
-              size={18}
+              size={28}
               aria-label={t("Space menu")}
             >
-              <IconDots />
+              <IconDots size={20} />
             </ActionIcon>
           </Tooltip>
         </Menu.Target>

@@ -1,10 +1,101 @@
-.page {
-    display: block;
-    width: 100%;
-    padding: var(--mantine-spacing-md);
-    color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
+/*
+ * Space overview (/s/:spaceSlug) presentation.
+ *
+ * The page lists (recent changes / favorites / created by me) are shared with
+ * the dashboard home page, so every override is scoped under `.page` /
+ * `.tabsList` and must not leak into other routes.
+ *
+ * Mantine v9 hashes its component class names, so the table is restyled
+ * through element selectors. Doubled class names keep these rules above
+ * Mantine's own regardless of stylesheet order.
+ */
 
-    @mixin hover {
-        background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-8));
-    }
+/* Space header: avatar, name and subtitle over a warm hairline. */
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-md);
+  padding-bottom: var(--mantine-spacing-lg);
+  border-bottom: 1px solid var(--notion-border);
+  margin-bottom: var(--mantine-spacing-md);
+}
+
+/* No row separators on this route: the hover highlight plus the header
+   hairline carry the structure, so Mantine's per-row border is cancelled. */
+.page.page tbody tr[data-with-row-border] {
+  border-bottom: none;
+}
+
+/* Mantine pins the row padding in the inline `--table-vertical-spacing` var,
+   so the cell padding itself is written here (6px vertical ≈ 34px rows). */
+.page.page tbody td {
+  padding: 6px var(--mantine-spacing-xs);
+}
+
+/* Rounded ends for the row highlight. Safe unconditionally — the cells carry
+   no background until a hover/focus rule paints them. Needed because browsers
+   ignore border-radius on <tr> under `border-collapse: collapse`. */
+.page.page tbody td:first-child {
+  border-start-start-radius: var(--mantine-radius-sm);
+  border-end-start-radius: var(--mantine-radius-sm);
+}
+
+.page.page tbody td:last-child {
+  border-start-end-radius: var(--mantine-radius-sm);
+  border-end-end-radius: var(--mantine-radius-sm);
+}
+
+/* Rows read as flat list items: Mantine's row-level highlight is cancelled
+   and repainted on the cells so the ends stay rounded. Pointer devices use
+   `:hover`, touch devices `:active` — same treatment as Mantine. */
+@media (hover: hover) {
+  .page.page tbody tr[data-hover]:hover {
+    background-color: transparent;
+  }
+
+  .page.page tbody tr[data-hover]:hover > td {
+    background-color: var(--notion-hover);
+  }
+}
+
+@media (hover: none) {
+  .page.page tbody tr[data-hover]:active {
+    background-color: transparent;
+  }
+
+  .page.page tbody tr[data-hover]:active > td {
+    background-color: var(--notion-hover);
+  }
+}
+
+/* Keyboard focus keeps the same warm highlight. Without this the shared row
+   stylesheet (clickable-table-row) paints the <tr>, which has square corners. */
+.page.page tbody tr:focus-within {
+  background-color: transparent;
+}
+
+.page.page tbody tr:focus-within > td {
+  background-color: var(--notion-hover);
+}
+
+/* Tabs: Notion's underline treatment — warm hairline track, ink-colored
+   active border, muted resting labels. */
+.tabsList.tabsList {
+  --tab-border-color: var(--notion-border);
+  --tabs-color: var(--notion-text-strong);
+  --tab-hover-color: var(--notion-hover);
+}
+
+.tabsList.tabsList button:not([data-active]) {
+  color: var(--notion-text-muted);
+}
+
+.tabsList.tabsList button[data-active],
+.tabsList.tabsList button:not([data-active]):hover {
+  color: var(--notion-text-strong);
+}
+
+/* Replaces the former <Space my="md" /> between the tab list and the panels. */
+.panel.panel {
+  padding-top: var(--mantine-spacing-md);
 }

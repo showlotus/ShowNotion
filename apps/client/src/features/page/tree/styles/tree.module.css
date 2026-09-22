@@ -68,11 +68,18 @@
     }
 }
 
-/* The row action buttons no longer carry the .actionIcon class (they render
- * bare Mantine ActionIcon classes + inline color), so pin the default file
- * icon color structurally: the button's inline gray-text is inherited by the
- * icon wrapper, and this !important wins over inheritance. */
+/* Default icon color inside a row: the page icon in the EmojiPicker trigger
+ * plus the trailing row actions (their buttons render bare Mantine classes
+ * with an inline gray-text, which this !important overrides). Overridable
+ * via --tree-icon-color so the space sidebar can brighten them while the
+ * share / docs trees keep Mantine's dimmed tint. */
 [role="treeitem"] :global(.mantine-ActionIcon-icon) {
+    color: var(--tree-icon-color, var(--mantine-color-dimmed)) !important;
+}
+
+/* The expand / collapse chevron stays dimmed — it is a secondary affordance,
+ * not a page icon. Wins over the rule above by specificity. */
+[role="treeitem"] .actionIcon.chevronIcon :global(.mantine-ActionIcon-icon) {
     color: var(--mantine-color-dimmed) !important;
 }
 
@@ -92,8 +99,11 @@
     display: flex;
 }
 
+/* Vertical gap between rows. Consumed by the row wrapper's min-height below
+ * so the DocTree pitch stays 32px; overridable so a host can make rows touch
+ * (the space sidebar sets --tree-row-gap: 0). */
 [role="treeitem"] {
-    padding-bottom: 2px;
+    padding-bottom: var(--tree-row-gap, 2px);
 }
 
 /* Strip the browser's default <ul> bullet + indent from the DocTree
@@ -111,11 +121,15 @@
     display: flex;
     align-items: center;
     border-radius: var(--mantine-radius-sm);
+    /* Trailing actions sit this far inside the row face; the space sidebar
+     * sets 8px so the tree's + / … line up with the favorites rows. Other
+     * trees (share / public docs) keep the flush default of 0. */
+    padding-right: var(--tree-actions-inset, 0);
 
     /* Pin the single-line row face (hover/selected surface) to the DocTree
-       32px row pitch: 32 - 2 (li padding-bottom) = 30. min-height (not height)
-       keeps intentional multi-line rows measurable. */
-    min-height: rem(30px);
+       32px row pitch: 32 - gap (li padding-bottom) = 30 by default. min-height
+       (not height) keeps intentional multi-line rows measurable. */
+    min-height: calc(rem(32px) - var(--tree-row-gap, 2px));
 
     /* Row highlight owns the FULL row width: the tree indent (padding-left
      * here) only shifts content and must never shrink the hover/selected
@@ -149,8 +163,11 @@
 /* 行内容整体右移 8px（navbar 8 + 此处 8 = 16），让前导符与上方菜单图标
  * 落在同一条 16px 导轨；行悬停/选中底色仍自 8px 起，保持与菜单行对齐。
  * 只作用于 rowWrapper 的直接子层，避免内外两层 .node 叠加双倍偏移。 */
+/* Base indent of every row's content. Overridable per surface via
+ * --tree-base-indent so a host (e.g. the space sidebar) can nest the whole
+ * tree one step deeper without touching the share / docs trees. */
 .rowWrapper > .node {
-    padding-left: rem(8px);
+    padding-left: var(--tree-base-indent, rem(8px));
 }
 
 .node[data-dragging="true"] {
@@ -208,7 +225,7 @@
 
 .dropLine {
     position: absolute;
-    left: calc(var(--drop-line-indent, 0px) + rem(8px));
+    left: calc(var(--drop-line-indent, 0px) + var(--tree-base-indent, rem(8px)));
     right: 8px;
     height: 2px;
     background: light-dark(

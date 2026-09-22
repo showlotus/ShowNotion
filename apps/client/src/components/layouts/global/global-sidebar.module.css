@@ -74,7 +74,7 @@
 
 .actionMenuItemIcon {
     margin-right: rem(10px);
-    color: light-dark(#8e8b86, #ada9a3);
+    color: var(--notion-icon-sidebar);
     flex-shrink: 0;
 }
 
@@ -104,7 +104,7 @@
 }
 
 .notificationRowIcon {
-    color: light-dark(#8e8b86, #ada9a3);
+    color: var(--notion-icon-sidebar);
     flex-shrink: 0;
 }
 

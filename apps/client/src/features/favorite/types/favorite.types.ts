@@ -16,6 +16,7 @@ export type IFavorite = {
     icon: string | null;
     isBase: boolean;
     spaceId: string;
+    hasChildren: boolean;
   };
   space?: {
     id: string;

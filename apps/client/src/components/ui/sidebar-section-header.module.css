@@ -1,0 +1,139 @@
+/*
+ * Collapsible sidebar section header (Favorites, Pages), styled as a page row:
+ * 32px tall, 14px/500 muted label that brightens on hover, an 18px caret in
+ * the row's chevron slot and the label landing on the row-title column — so a
+ * section header reads as the first row of its group.
+ */
+
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: rem(4px);
+  width: 100%;
+}
+
+/* The highlight paints edge-to-edge like a page row. Sections whose container
+ * extends into the navbar padding (the space sidebar's Pages tree) pull the
+ * right edge back through `--section-header-paint-right` so it matches the
+ * rows' right edge exactly. */
+.header::before {
+  content: "";
+  position: absolute;
+  inset: 0 var(--section-header-paint-right, 0) 0 0;
+  border-radius: var(--mantine-radius-sm);
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .header:hover::before {
+    background-color: var(--notion-hover);
+  }
+
+  .header:hover .toggle {
+    color: var(--notion-text-strong);
+  }
+
+  .header:hover .actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: rem(4px);
+  flex: 1;
+  min-width: 0;
+  min-height: rem(32px);
+  padding: rem(4px) rem(8px);
+  border: none;
+  border-radius: rem(6px);
+  background-color: transparent;
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
+  color: var(--notion-text-muted);
+  text-align: start;
+  cursor: pointer;
+  user-select: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--mantine-primary-color-filled);
+    outline-offset: 2px;
+  }
+}
+
+.caret {
+  flex-shrink: 0;
+  /* The label sits right after the caret (x=38); the rows below carry the
+   * indentation instead, so the group reads as a parent of its list. */
+  margin-right: 0;
+  /* Secondary affordance: keeps the tree rows' dimmed tint even when the
+   * toggle brightens on hover. */
+  color: var(--mantine-color-dimmed);
+  transition: transform 150ms ease;
+}
+
+.caretExpanded {
+  transform: rotate(90deg);
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Extra marker next to the label (e.g. the space's public badge). */
+.labelExtra {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Row actions: revealed on hover/focus, laid out in the same 28px columns as
+ * the page rows' action icons so they line up vertically. */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.header:focus-within .actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Keep the actions visible while one of their menus is open: Mantine v9 does
+ * not surface the open state on the trigger, so the sidebar pins it here. */
+.header[data-actions-pinned] .actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Touch devices never fire hover — keep the actions reachable (the tree rows
+ * lack this fallback today). */
+@media (hover: none) {
+  .actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* The row highlight carries the hover surface, so the buttons stay transparent
+ * — same rule as the tree rows' action icons. */
+.actions :global(.mantine-ActionIcon-root):hover {
+  background-color: transparent;
+}
+
+/* The sidebar's shared icon tint: same gray as the top functional icons and
+ * the tree rows. ActionIcon emits its color inline, so the override needs
+ * !important. */
+.actions :global(.mantine-ActionIcon-root) {
+  color: var(--notion-icon-sidebar) !important;
+}

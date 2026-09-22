@@ -305,9 +305,33 @@ export class FavoriteRepo {
           'pages.isBase',
           'pages.spaceId',
         ])
+        .select((eb) => this.withHasChildren(eb))
         .whereRef('pages.id', '=', 'favorites.pageId')
         .where(sql.ref('favorites.type'), '=', FavoriteType.PAGE),
     ).as('page');
+  }
+
+  /**
+   * Same shape as PageRepo.withHasChildren (private there): true when the
+   * page has at least one live child. Consumed by the sidebar favorites
+   * section to decide between the bullet and the expand chevron.
+   */
+  private withHasChildren(eb: ExpressionBuilder<DB, 'pages'>) {
+    return eb
+      .selectFrom('pages as child')
+      .select((eb) =>
+        eb
+          .case()
+          .when(eb.fn.countAll(), '>', 0)
+          .then(true)
+          .else(false)
+          .end()
+          .as('count'),
+      )
+      .whereRef('child.parentPageId', '=', 'pages.id')
+      .where('child.deletedAt', 'is', null)
+      .limit(1)
+      .as('hasChildren');
   }
 
   private withSpace(eb: ExpressionBuilder<DB, 'favorites'>) {

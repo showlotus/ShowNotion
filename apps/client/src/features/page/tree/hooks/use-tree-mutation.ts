@@ -42,7 +42,10 @@ export type UseTreeMutation = {
   ) => Promise<void>;
 };
 
-export function useTreeMutation(spaceId: string): UseTreeMutation {
+export function useTreeMutation(
+  spaceId: string,
+  options?: { spaceSlug?: string },
+): UseTreeMutation {
   const { t } = useTranslation();
   const [, setData] = useAtom(treeDataAtom);
   // `store` reads the *current* treeDataAtom imperatively in handlers — avoids
@@ -55,7 +58,10 @@ export function useTreeMutation(spaceId: string): UseTreeMutation {
   const movePageMutation = useMovePageMutation();
   const sortChildrenMutation = useSortChildrenMutation();
   const navigate = useNavigate();
-  const { spaceSlug, pageSlug } = useParams();
+  const { spaceSlug: routeSpaceSlug, pageSlug } = useParams();
+  // Rows rendered outside a space route (the favorites section on /home)
+  // pass their own slug; everywhere else this is the route param as before.
+  const spaceSlug = options?.spaceSlug ?? routeSpaceSlug;
   const emit = useQueryEmit();
 
   const handleMove = useCallback(

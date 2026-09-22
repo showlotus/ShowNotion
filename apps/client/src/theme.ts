@@ -199,6 +199,10 @@ export const mantineCssResolver: CSSVariablesResolver = (theme) => ({
     // brighten to the main ink — exactly how notion.so behaves.
     "--notion-text-muted": "#7D7A75",
     "--notion-text-strong": "#2C2C2B",
+    // Sidebar icon tint: the quiet gray the top functional icons, the section
+    // headers and the tree rows all share, so every sidebar icon matches in
+    // both themes (light #8e8b86 / dark #ada9a3).
+    "--notion-icon-sidebar": "#8e8b86",
     // Hover: Notion's warm-gray ~8% surface (grayscale ramp alpha Gra75).
     "--notion-hover": "rgba(84, 72, 49, 0.08)",
     // Selected (current page/tree node): one step above hover, ~12%.
@@ -271,6 +275,7 @@ export const mantineCssResolver: CSSVariablesResolver = (theme) => ({
     // and brightens text; selected stays one step stronger at 0.09.
     "--notion-text-muted": "#BCBAB6",
     "--notion-text-strong": "#F0EFED",
+    "--notion-icon-sidebar": "#ada9a3",
     "--notion-hover": "rgba(255, 255, 255, 0.055)",
     "--notion-selected": "rgba(255, 255, 255, 0.09)",
     // Notion hairlines, measured live 2026-09: sidebar seams paint

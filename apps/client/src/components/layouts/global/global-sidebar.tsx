@@ -12,6 +12,7 @@ import {
 } from "@tabler/icons-react";
 import { Link, useLocation } from "react-router-dom";
 import classes from "./global-sidebar.module.css";
+import FavoritesSidebarSection from "@/features/favorite/components/favorites-sidebar-section.tsx";
 import { useTranslation } from "react-i18next";
 import { useAtom } from "jotai";
 import { mobileSidebarAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom";
@@ -189,6 +190,12 @@ export default function GlobalSidebar() {
       <div className={classes.divider} aria-hidden="true" />
 
       <ScrollArea w="100%" style={{ flex: 1 }}>
+        <FavoritesSidebarSection
+          limit={8}
+          viewAllTo="/favorites"
+          onNavigate={handleNavClick}
+        />
+
         <div className={classes.section}>
           <Text component="h2" className={classes.sectionHeader}>{t("Favorite spaces")}</Text>
           {!isFavoritesPending && sortedFavoriteSpaces.length === 0 ? (

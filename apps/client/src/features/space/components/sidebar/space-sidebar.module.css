@@ -19,6 +19,18 @@
 
 .sectionPages {
     margin-bottom: 0;
+    /* 组下的列表整体缩进一档：树行内容右移 16px（前导符 33 / 页面图标 57 /
+     * 标题 84），拖放指示线用同一基数同步。分享与公共 docs 侧边栏不设此变量，
+     * 回落到 tree.module.css 的 8px 默认值。 */
+    --tree-base-indent: rem(24px);
+    /* 图标统一为「顶部功能区灰」：树行的页面图标与行内操作按钮同用
+     * --notion-icon-sidebar；展开箭头由 tree.module.css 的 .chevronIcon
+     * 规则保持 dimmed（次级提示色）。分享与公共 docs 侧边栏不设此变量。 */
+    --tree-icon-color: var(--notion-icon-sidebar);
+    /* 行内操作按钮（+ / …）距行面右缘 8px，与收藏行排在同一条竖线。 */
+    --tree-actions-inset: rem(8px);
+    /* 行与行之间不留缝：行面填满 32px 行距（默认值 2px 保留给其他场景）。 */
+    --tree-row-gap: 0px;
     /* 滚动条贴边：负右外边距把树区延伸进 navbar 的 8px 右 padding，
      * DocTree 滚动容器右缘即侧边栏边缘，滚动条不再与边缘留距。
      * 必须挂在本层（flex item）——挂在 .pages 上会让本层 overflow-x
@@ -72,7 +84,7 @@
 
 .menuItemIcon {
     margin-right: rem(10px);
-    color: light-dark(#8e8b86, #ada9a3);
+    color: var(--notion-icon-sidebar);
     flex-shrink: 0;
 }
 
@@ -80,12 +92,15 @@
     padding-bottom: var(--mantine-spacing-md);
 }
 
+/* 分组头本体（12px 弱色标题 + caret + 行高亮）在
+ * components/ui/sidebar-section-header；此处只补页面树需要的间距与右侧补偿。 */
 .pagesHeader {
-    margin-bottom: rem(5px);
-    /* 分组标题与上方菜单图标同列 16px（navbar 8px + 此处 8px） */
-    padding-left: rem(8px);
-    /* sectionPages 负右外边距外扩 8px 后在此补偿，+ / … 按钮保持原位 */
-    padding-right: rem(8px);
+    margin-bottom: 0;
+    /* sectionPages 负右外边距外扩 8px 后在此补偿，再补 8px 让组头的
+     * + / 空间菜单与行内操作图标排在同一条竖线。 */
+    padding-right: rem(16px);
+    /* 组头 hover 面右侧回收 8px：与页面行的 320px 高亮面右边界重合 */
+    --section-header-paint-right: rem(8px);
 }
 
 /* 功能区与页面区之间的 Notion 风格发丝分割线：负边距抵消 navbar 左右 8px，满宽贯穿 */
@@ -94,13 +109,6 @@
     height: 1px;
     margin: 0 rem(-8px) var(--mantine-spacing-xs);
     background-color: var(--notion-border);
-}
-
-/* 分组头小按钮（新建/空间菜单）hover 色与行高亮统一为 Notion token。
- * Mantine 把 --ai-hover 写在内联 style 上（varsResolver），变量覆盖无效，
- * 只能直接压 hover 背景色；选择器优先级高于组件的 .m_xxx:hover 规则。 */
-.pagesHeader :global(.mantine-ActionIcon-root):hover {
-    background-color: var(--notion-hover);
 }
 
 .pageLink {
