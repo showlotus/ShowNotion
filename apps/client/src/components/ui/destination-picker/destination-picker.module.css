@@ -35,7 +35,7 @@
             var(--mantine-color-blue-0),
             var(--mantine-color-dark-5)
     );
-    border-left: 2px solid var(--mantine-primary-color-filled);
+    box-shadow: inset 2px 0 0 var(--mantine-primary-color-filled);
 }
 
 .spaceRow {
@@ -54,6 +54,10 @@
     pointer-events: none;
 }
 
+.spaceRowDisabled {
+    opacity: 0.5;
+}
+
 .chevron {
     width: 20px;
     height: 20px;
@@ -65,11 +69,8 @@
     transition: transform 150ms ease;
     color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-2));
 
-    @mixin hover {
-        background-color: light-dark(
-                var(--mantine-color-gray-1),
-                var(--mantine-color-dark-5)
-        );
+    &:hover {
+        background-color: transparent;
     }
 }
 

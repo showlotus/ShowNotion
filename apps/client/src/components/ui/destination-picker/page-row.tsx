@@ -13,6 +13,7 @@ type PageRowProps = {
   limit: number;
   selectedId: string | null;
   excludePageId?: string;
+  isPageDisabled?: (page: Partial<IPage>) => boolean;
   onSelect: (page: Partial<IPage>) => void;
 };
 
@@ -22,12 +23,14 @@ export function PageRow({
   limit,
   selectedId,
   excludePageId,
+  isPageDisabled,
   onSelect,
 }: PageRowProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
-  const isExcluded = page.id === excludePageId;
+  const isExcluded =
+    page.id === excludePageId || isPageDisabled?.(page) === true;
   const isSelected = page.id === selectedId;
 
   const rowClasses = [

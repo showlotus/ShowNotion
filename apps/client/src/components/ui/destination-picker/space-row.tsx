@@ -15,6 +15,8 @@ type SpaceRowProps = {
   limit: number;
   selectedId: string | null;
   excludePageId?: string;
+  isSpaceDisabled?: boolean;
+  isPageDisabled?: (page: Partial<IPage>) => boolean;
   onSelectSpace: (space: ISpace) => void;
   onSelectPage: (page: Partial<IPage>, space: ISpace) => void;
 };
@@ -24,6 +26,8 @@ export function SpaceRow({
   limit,
   selectedId,
   excludePageId,
+  isSpaceDisabled,
+  isPageDisabled,
   onSelectSpace,
   onSelectPage,
 }: SpaceRowProps) {
@@ -33,17 +37,19 @@ export function SpaceRow({
   const writable =
     !!space.membership?.role && space.membership.role !== SpaceRole.READER;
   const isSelected = space.id === selectedId;
+  const selectDisabled = !writable || isSpaceDisabled;
 
   const rowClasses = [
     classes.spaceRow,
     isSelected && classes.selected,
     !writable && classes.disabled,
+    isSpaceDisabled && classes.spaceRowDisabled,
   ]
     .filter(Boolean)
     .join(" ");
 
   const handleSelect = () => {
-    if (writable) onSelectSpace(space);
+    if (!selectDisabled) onSelectSpace(space);
   };
 
   const handleRowKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -59,8 +65,8 @@ export function SpaceRow({
       className={rowClasses}
       data-space-id={space.id}
       role="button"
-      tabIndex={writable ? 0 : -1}
-      aria-disabled={!writable || undefined}
+      tabIndex={selectDisabled ? -1 : 0}
+      aria-disabled={selectDisabled || undefined}
       onClick={handleSelect}
       onKeyDown={handleRowKeyDown}
     >
@@ -101,18 +107,20 @@ export function SpaceRow({
     </div>
   );
 
+  const tooltipLabel = !writable
+    ? t("You don't have permission to create pages here")
+    : isSpaceDisabled
+      ? t("Page is already in this space")
+      : null;
+
   return (
     <>
-      {writable ? (
-        rowContent
-      ) : (
-        <Tooltip
-          label={t("You don't have permission to create pages here")}
-          position="right"
-          withArrow
-        >
+      {tooltipLabel ? (
+        <Tooltip label={tooltipLabel} position="right" withArrow>
           <div>{rowContent}</div>
         </Tooltip>
+      ) : (
+        rowContent
       )}
 
       {expanded && writable && (
@@ -122,6 +130,7 @@ export function SpaceRow({
           limit={limit}
           selectedId={selectedId}
           excludePageId={excludePageId}
+          isPageDisabled={isPageDisabled}
           onSelectPage={(page) => onSelectPage(page, space)}
         />
       )}

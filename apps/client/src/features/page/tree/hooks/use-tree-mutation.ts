@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { treeDataAtom } from "@/features/page/tree/atoms/tree-data-atom.ts";
+import { openTreeNodesAtom } from "@/features/page/tree/atoms/open-tree-nodes-atom.ts";
 import { treeModel } from "@/features/page/tree/model/tree-model";
 import type { DropOp } from "@/features/page/tree/model/tree-model.types";
 import {
@@ -13,6 +14,7 @@ import {
   sortPositionKeys,
 } from "@/features/page/tree/utils/utils.ts";
 import { dropOpToMovePayload } from "./drop-op-to-move-payload";
+import { useHydratePageTree } from "./use-hydrate-page-tree";
 import { SpaceTreeNode } from "@/features/page/tree/types.ts";
 import {
   IPage,
@@ -26,13 +28,15 @@ import {
   useSortChildrenMutation,
   useUpdatePageMutation,
   updateCacheOnMovePage,
+  fetchAllAncestorChildren,
 } from "@/features/page/queries/page-query.ts";
 import { buildPageUrl } from "@/features/page/page.utils.ts";
 import { getSpaceUrl } from "@/lib/config.ts";
 import { useQueryEmit } from "@/features/websocket/use-query-emit.ts";
 
 export type UseTreeMutation = {
-  handleMove: (sourceId: string, op: DropOp) => Promise<void>;
+  handleMove: (sourceId: string, op: DropOp) => Promise<boolean>;
+  handleMoveToPage: (sourceId: string, targetPageId: string) => Promise<boolean>;
   handleCreate: (parentId: string | null) => Promise<void>;
   handleRename: (id: string, name: string) => Promise<void>;
   handleDelete: (id: string) => Promise<void>;
@@ -48,10 +52,12 @@ export function useTreeMutation(
 ): UseTreeMutation {
   const { t } = useTranslation();
   const [, setData] = useAtom(treeDataAtom);
+  const [, setOpenTreeNodes] = useAtom(openTreeNodesAtom);
   // `store` reads the *current* treeDataAtom imperatively in handlers — avoids
   // stale-closure issues when the caller updates the tree (e.g. lazy-load
   // children) and then immediately invokes a handler.
   const store = useStore();
+  const hydratePageTree = useHydratePageTree();
   const createPageMutation = useCreatePageMutation();
   const updatePageMutation = useUpdatePageMutation();
   const removePageMutation = useRemovePageMutation();
@@ -65,14 +71,14 @@ export function useTreeMutation(
   const emit = useQueryEmit();
 
   const handleMove = useCallback(
-    async (sourceId: string, op: DropOp) => {
+    async (sourceId: string, op: DropOp): Promise<boolean> => {
       const before = spaceRoots(store.get(treeDataAtom), spaceId);
       const { tree: after, result } = treeModel.move(before, sourceId, op);
-      if (after === before) return;
+      if (after === before) return true;
 
       const payload = dropOpToMovePayload(before, sourceId, op);
       const source = treeModel.find(before, sourceId) as SpaceTreeNode | null;
-      if (!source) return;
+      if (!source) return false;
       const oldParentId = source.parentPageId ?? null;
 
       // optimistic apply with the new position from the payload
@@ -111,7 +117,7 @@ export function useTreeMutation(
           message: t("Failed to move page"),
           color: "red",
         });
-        return;
+        return false;
       }
 
       const pageData: Partial<IPage> = {
@@ -147,8 +153,69 @@ export function useTreeMutation(
           },
         });
       }, 50);
+
+      return true;
     },
     [setData, store, movePageMutation, spaceId, emit, t],
+  );
+
+  const handleMoveToPage = useCallback(
+    async (sourceId: string, targetPageId: string): Promise<boolean> => {
+      if (sourceId === targetPageId) return false;
+
+      try {
+        if (!treeModel.find(store.get(treeDataAtom), targetPageId)) {
+          await hydratePageTree(targetPageId);
+        }
+
+        // handleMove derives the new position from the loaded siblings; with
+        // an unloaded children array it would generate a mid-list fractional
+        // key instead of appending after the last child.
+        const target = treeModel.find(
+          store.get(treeDataAtom),
+          targetPageId,
+        ) as SpaceTreeNode | null;
+        if (!target) return false;
+        if (
+          target.hasChildren &&
+          (!target.children || target.children.length === 0)
+        ) {
+          const children = await fetchAllAncestorChildren({
+            pageId: targetPageId,
+            spaceId,
+          });
+          if (children.length > 0) {
+            setData((prev) =>
+              treeModel.appendChildren(prev, targetPageId, children),
+            );
+          }
+        }
+
+        const moved = await handleMove(sourceId, {
+          kind: "make-child",
+          targetId: targetPageId,
+        });
+        if (moved) {
+          setOpenTreeNodes((prev) => ({ ...prev, [targetPageId]: true }));
+        }
+        return moved;
+      } catch {
+        notifications.show({
+          message: t("Failed to move page"),
+          color: "red",
+        });
+        return false;
+      }
+    },
+    [
+      store,
+      hydratePageTree,
+      setData,
+      handleMove,
+      setOpenTreeNodes,
+      spaceId,
+      t,
+    ],
   );
 
   const handleCreate = useCallback(
@@ -332,6 +399,7 @@ export function useTreeMutation(
 
   return {
     handleMove,
+    handleMoveToPage,
     handleCreate,
     handleRename,
     handleDelete,

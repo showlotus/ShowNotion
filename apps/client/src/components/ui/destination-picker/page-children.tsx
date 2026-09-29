@@ -14,6 +14,7 @@ type PageChildrenProps = {
   limit: number;
   selectedId: string | null;
   excludePageId?: string;
+  isPageDisabled?: (page: Partial<IPage>) => boolean;
   onSelectPage: (page: Partial<IPage>) => void;
 };
 
@@ -24,6 +25,7 @@ export function PageChildren({
   limit,
   selectedId,
   excludePageId,
+  isPageDisabled,
   onSelectPage,
 }: PageChildrenProps) {
   const { t } = useTranslation();
@@ -70,6 +72,7 @@ export function PageChildren({
           limit={limit}
           selectedId={selectedId}
           excludePageId={excludePageId}
+          isPageDisabled={isPageDisabled}
           onSelect={onSelectPage}
         />
       ))}

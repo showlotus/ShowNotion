@@ -17,6 +17,8 @@ type DestinationPickerProps = {
   pageLimit?: number;
   initialSpaceId?: string;
   searchSpacesOnly?: boolean;
+  isPageDisabled?: (page: Partial<IPage>) => boolean;
+  isSpaceDisabled?: (space: ISpace) => boolean;
 };
 
 export function DestinationPicker({
@@ -25,6 +27,8 @@ export function DestinationPicker({
   pageLimit = 15,
   initialSpaceId,
   searchSpacesOnly,
+  isPageDisabled,
+  isSpaceDisabled,
 }: DestinationPickerProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -73,6 +77,7 @@ export function DestinationPicker({
 
   const handleSearchResultClick = (page: Partial<IPage>) => {
     if (!page.space || !page.id) return;
+    if (isPageDisabled?.(page)) return;
 
     updateSelection({
       type: "page",
@@ -158,9 +163,15 @@ export function DestinationPicker({
                 page && (
                   <div
                     key={page.id}
-                    className={classes.searchResult}
+                    className={[
+                      classes.searchResult,
+                      isPageDisabled?.(page) && classes.disabled,
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
                     role="button"
-                    tabIndex={0}
+                    tabIndex={isPageDisabled?.(page) ? -1 : 0}
+                    aria-disabled={isPageDisabled?.(page) || undefined}
                     onClick={() => handleSearchResultClick(page)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
@@ -215,6 +226,8 @@ export function DestinationPicker({
               limit={pageLimit}
               selectedId={selectedId}
               excludePageId={excludePageId}
+              isSpaceDisabled={isSpaceDisabled?.(space)}
+              isPageDisabled={isPageDisabled}
               onSelectSpace={handleSelectSpace}
               onSelectPage={handleSelectPage}
             />

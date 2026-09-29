@@ -22,4 +22,6 @@ export type DestinationPickerModalProps = {
   pageLimit?: number;
   initialSpaceId?: string;
   searchSpacesOnly?: boolean;
+  isPageDisabled?: (page: Partial<IPage>) => boolean;
+  isSpaceDisabled?: (space: ISpace) => boolean;
 };

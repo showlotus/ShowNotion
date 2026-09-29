@@ -12,10 +12,10 @@ import classes from "@/features/page/tree/styles/tree.module.css";
 import { treeDataAtom } from "@/features/page/tree/atoms/tree-data-atom.ts";
 import { openTreeNodesAtom } from "@/features/page/tree/atoms/open-tree-nodes-atom.ts";
 import { useTreeMutation } from "@/features/page/tree/hooks/use-tree-mutation.ts";
+import { useHydratePageTree } from "@/features/page/tree/hooks/use-hydrate-page-tree.ts";
 import { useSidebarTreeSort } from "@/features/page/tree/hooks/use-sidebar-tree-sort.ts";
 import {
   buildTree,
-  buildTreeWithChildren,
   mergeRootTrees,
   sortRootsByUpdatedAtDesc,
   spaceRoots,
@@ -24,8 +24,6 @@ import {
 import { SpaceTreeNode } from "@/features/page/tree/types.ts";
 import { getPageTitle } from "@/features/page/page.utils";
 import { treeModel } from "@/features/page/tree/model/tree-model";
-import { getPageBreadcrumbs } from "@/features/page/services/page-service.ts";
-import { IPage } from "@/features/page/types/page.types.ts";
 import { extractPageSlugId } from "@/lib";
 import { DocTree } from "./doc-tree";
 import type { DropOp } from "@/features/page/tree/model/tree-model.types";
@@ -42,6 +40,7 @@ export default function SpaceTree({ spaceId, readOnly }: SpaceTreeProps) {
   const [data, setData] = useAtom(treeDataAtom);
   const store = useStore();
   const { handleMove } = useTreeMutation(spaceId);
+  const hydratePageTree = useHydratePageTree();
   const { sortMode, setSortMode } = useSidebarTreeSort();
   const {
     data: pagesData,
@@ -98,62 +97,9 @@ export default function SpaceTree({ spaceId, readOnly }: SpaceTreeProps) {
 
         // if not found, fetch and build its ancestors and their children
         if (!currentPage.id) return;
-        const ancestors = await getPageBreadcrumbs(currentPage.id);
-
-        if (spaceIdRef.current !== effectSpaceId) return;
-
-        if (ancestors && ancestors.length > 1) {
-          let flatTreeItems = [...buildTree(ancestors)];
-
-          const fetchAndUpdateChildren = async (ancestor: IPage) => {
-            // we don't want to fetch the children of the opened page
-            if (ancestor.id === currentPage.id) return;
-            const children = await fetchAllAncestorChildren({
-              pageId: ancestor.id,
-              spaceId: ancestor.spaceId,
-            });
-
-            flatTreeItems = [
-              ...flatTreeItems,
-              ...children.filter(
-                (child) => !flatTreeItems.some((item) => item.id === child.id),
-              ),
-            ];
-          };
-
-          const fetchPromises = ancestors.map((ancestor) =>
-            fetchAndUpdateChildren(ancestor),
-          );
-
-          Promise.all(fetchPromises).then(() => {
-            if (spaceIdRef.current !== effectSpaceId) return;
-
-            // build tree with children
-            const ancestorsTree = buildTreeWithChildren(flatTreeItems);
-            // child of root page we're attaching the built ancestors to
-            const rootChild = ancestorsTree[0];
-
-            // attach built ancestors to tree using functional updater
-            setData((currentData) =>
-              treeModel.appendChildren(
-                currentData,
-                rootChild.id,
-                rootChild.children ?? [],
-              ),
-            );
-
-            // open all ancestors of the current page. DocTree picks up the
-            // selectedId change and scrolls the row into view on its own once
-            // flat contains it.
-            setOpenTreeNodes((prev) => {
-              const next = { ...prev };
-              for (const a of ancestors) {
-                if (a.id !== currentPage.id) next[a.id] = true;
-              }
-              return next;
-            });
-          });
-        }
+        await hydratePageTree(currentPage.id, {
+          isStale: () => spaceIdRef.current !== effectSpaceId,
+        });
       }
     };
 

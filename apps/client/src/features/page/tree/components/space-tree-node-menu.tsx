@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from "react";
 import { useAtom } from "jotai";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
@@ -17,9 +18,11 @@ import {
 } from "@tabler/icons-react";
 
 import ExportModal from "@/components/common/export-modal";
-import MovePageModal from "@/features/page/components/move-page-modal.tsx";
 import CopyPageModal from "@/features/page/components/copy-page-modal.tsx";
+import { DestinationPickerModal } from "@/components/ui/destination-picker/destination-picker-modal.tsx";
+import type { DestinationSelection } from "@/components/ui/destination-picker/destination-picker.types.ts";
 import { useDeletePageModal } from "@/features/page/hooks/use-delete-page-modal.tsx";
+import { useMovePageToSpace } from "@/features/page/hooks/use-move-page-to-space.ts";
 import { buildPageUrl } from "@/features/page/page.utils.ts";
 import { getPageTitle } from "@/features/page/page.utils";
 import { duplicatePage } from "@/features/page/services/page-service.ts";
@@ -40,6 +43,8 @@ import {
 } from "@/features/page/tree/utils/utils.ts";
 import { useTreeMutation } from "@/features/page/tree/hooks/use-tree-mutation.ts";
 import { SortChildrenBy } from "@/features/page/types/page.types.ts";
+import type { IPage } from "@/features/page/types/page.types.ts";
+import type { ISpace } from "@/features/space/types/space.types.ts";
 import type { SpaceTreeNode } from "@/features/page/tree/types.ts";
 import classes from "@/features/page/tree/styles/tree.module.css";
 
@@ -53,14 +58,16 @@ export function NodeMenu({ node, canEdit }: NodeMenuProps) {
   const clipboard = useClipboard({ timeout: 500 });
   const { spaceSlug } = useParams();
   const { openDeleteModal } = useDeletePageModal();
-  const { handleDelete, handleSortChildren } = useTreeMutation(node.spaceId);
+  const { handleDelete, handleSortChildren, handleMoveToPage } =
+    useTreeMutation(node.spaceId);
   const [data, setData] = useAtom(treeDataAtom);
   const emit = useQueryEmit();
+  const movePageToSpace = useMovePageToSpace();
   const [exportOpened, { open: openExportModal, close: closeExportModal }] =
     useDisclosure(false);
   const [
-    movePageModalOpened,
-    { open: openMovePageModal, close: closeMoveSpaceModal },
+    moveToOpened,
+    { open: openMoveToPicker, close: closeMoveToPicker },
   ] = useDisclosure(false);
   const [
     copyPageModalOpened,
@@ -70,6 +77,43 @@ export function NodeMenu({ node, canEdit }: NodeMenuProps) {
   const addFavorite = useAddFavoriteMutation();
   const removeFavorite = useRemoveFavoriteMutation();
   const isFavorited = favoriteIds.has(node.id);
+
+  const descendantIds = useMemo(() => {
+    const ids = new Set<string>();
+    const source = treeModel.find(data, node.id);
+    const walk = (nodes: SpaceTreeNode[]) => {
+      for (const child of nodes) {
+        ids.add(child.id);
+        walk(child.children ?? []);
+      }
+    };
+    walk(source?.children ?? []);
+    return ids;
+  }, [data, node.id]);
+
+  const isPageDisabled = useCallback(
+    (page: Partial<IPage>) => {
+      const pageSpaceId = page.spaceId ?? page.space?.id;
+      if (pageSpaceId !== node.spaceId) return true;
+      return page.id != null && descendantIds.has(page.id);
+    },
+    [node.spaceId, descendantIds],
+  );
+
+  const isSpaceDisabled = useCallback(
+    (space: ISpace) => space.id === node.spaceId,
+    [node.spaceId],
+  );
+
+  const handleSelectDestination = async (selection: DestinationSelection) => {
+    closeMoveToPicker();
+    if (selection.type === "space") {
+      await movePageToSpace(node.id, node.slugId, selection.space);
+      return;
+    }
+    if (selection.spaceId !== node.spaceId) return;
+    await handleMoveToPage(node.id, selection.pageId);
+  };
 
   const handleCopyLink = () => {
     const pageUrl =
@@ -238,10 +282,10 @@ export function NodeMenu({ node, canEdit }: NodeMenuProps) {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  openMovePageModal();
+                  openMoveToPicker();
                 }}
               >
-                {t("Move")}
+                {t("Move to")}
               </Menu.Item>
 
               <Menu.Item
@@ -291,12 +335,15 @@ export function NodeMenu({ node, canEdit }: NodeMenuProps) {
         </Menu.Dropdown>
       </Menu>
 
-      <MovePageModal
-        pageId={node.id}
-        slugId={node.slugId}
-        currentSpaceSlug={spaceSlug}
-        onClose={closeMoveSpaceModal}
-        open={movePageModalOpened}
+      <DestinationPickerModal
+        opened={moveToOpened}
+        onClose={closeMoveToPicker}
+        title={t("Move to")}
+        actionLabel={t("Move")}
+        excludePageId={node.id}
+        isPageDisabled={isPageDisabled}
+        isSpaceDisabled={isSpaceDisabled}
+        onSelect={handleSelectDestination}
       />
 
       <CopyPageModal

@@ -18,6 +18,8 @@ export function DestinationPickerModal({
   pageLimit,
   initialSpaceId,
   searchSpacesOnly,
+  isPageDisabled,
+  isSpaceDisabled,
 }: DestinationPickerModalProps) {
   const { t } = useTranslation();
   const [selection, setSelection] = useState<DestinationSelection | null>(null);
@@ -50,6 +52,8 @@ export function DestinationPickerModal({
             pageLimit={pageLimit}
             initialSpaceId={initialSpaceId}
             searchSpacesOnly={searchSpacesOnly}
+            isPageDisabled={isPageDisabled}
+            isSpaceDisabled={isSpaceDisabled}
           />
 
           <Divider my="md" />

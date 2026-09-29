@@ -1,13 +1,9 @@
 import { Modal, Button, Group, Text } from "@mantine/core";
-import { movePageToSpace } from "@/features/page/services/page-service.ts";
 import { useState } from "react";
-import { notifications } from "@mantine/notifications";
 import { useTranslation } from "react-i18next";
 import { ISpace } from "@/features/space/types/space.types.ts";
-import { queryClient } from "@/main.tsx";
 import { SpaceSelect } from "@/features/space/components/sidebar/space-select.tsx";
-import { useNavigate } from "react-router-dom";
-import { buildPageUrl } from "@/features/page/page.utils.ts";
+import { useMovePageToSpace } from "@/features/page/hooks/use-move-page-to-space.ts";
 
 interface MovePageModalProps {
   pageId: string;
@@ -26,33 +22,15 @@ export default function MovePageModal({
 }: MovePageModalProps) {
   const { t } = useTranslation();
   const [targetSpace, setTargetSpace] = useState<ISpace>(null);
-  const navigate = useNavigate();
+  const movePageToSpace = useMovePageToSpace();
 
   const handlePageMove = async () => {
     if (!targetSpace) return;
 
-    try {
-      await movePageToSpace({ pageId, spaceId: targetSpace.id });
-      queryClient.removeQueries({
-        predicate: (item) =>
-          ["pages", "sidebar-pages", "root-sidebar-pages"].includes(
-            item.queryKey[0] as string,
-          ),
-      });
-
-      const pageUrl = buildPageUrl(targetSpace.slug, slugId, undefined);
-      navigate(pageUrl);
-      notifications.show({
-        message: t("Page moved successfully"),
-      });
+    const moved = await movePageToSpace(pageId, slugId, targetSpace);
+    if (moved) {
       onClose();
       setTargetSpace(null);
-    } catch (err) {
-      notifications.show({
-        message: err.response?.data.message || "An error occurred",
-        color: "red",
-      });
-      console.log(err);
     }
   };
 
