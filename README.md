@@ -1,4 +1,5 @@
 <div align="center">
+    <img src="./apps/client/public/icons/app-icon-512x512.png" alt="ShowNotion icon" width="120" />
     <h1><b>ShowNotion</b></h1>
     <p>
         Open-source collaborative wiki and documentation software.
