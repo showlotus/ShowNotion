@@ -40,20 +40,30 @@ export function HoverScrollText({
     setScrollable(truncated);
   }, []);
 
+  const syncClipping = useCallback(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    viewport.toggleAttribute("data-panned", viewport.scrollLeft > 0);
+    viewport.toggleAttribute(
+      "data-cut-end",
+      overflowRef.current - viewport.scrollLeft > 1,
+    );
+  }, []);
+
   useLayoutEffect(() => {
     const viewport = viewportRef.current;
     if (!viewport) return;
 
     measure();
     viewport.scrollLeft = 0;
-    viewport.removeAttribute("data-panned");
+    syncClipping();
 
     // Keep the measured overflow fresh for the pointer mapping.
     const observer = new ResizeObserver(measure);
     observer.observe(viewport);
     if (contentRef.current) observer.observe(contentRef.current);
     return () => observer.disconnect();
-  }, [children, measure]);
+  }, [children, measure, syncClipping]);
 
   useLayoutEffect(() => {
     const viewport = viewportRef.current;
@@ -67,6 +77,7 @@ export function HoverScrollText({
     const handleMouseEnter = (event: MouseEvent) => {
       lastXRef.current = event.clientX;
       measure();
+      syncClipping();
     };
 
     const handleMouseMove = (event: MouseEvent) => {
@@ -95,13 +106,13 @@ export function HoverScrollText({
         overflow,
       );
       viewport.scrollLeft = next;
-      viewport.toggleAttribute("data-panned", next > 0);
+      syncClipping();
     };
 
     const handleMouseLeave = () => {
       lastXRef.current = null;
       viewport.scrollLeft = 0;
-      viewport.removeAttribute("data-panned");
+      syncClipping();
     };
 
     track.addEventListener("mouseenter", handleMouseEnter);
@@ -112,7 +123,7 @@ export function HoverScrollText({
       track.removeEventListener("mousemove", handleMouseMove);
       track.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [measure]);
+  }, [measure, syncClipping]);
 
   return (
     <Text
