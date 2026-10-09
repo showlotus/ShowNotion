@@ -20,7 +20,7 @@ export function TruncatedPageTitle({ title, className }: TruncatedPageTitleProps
       const textRect = el.getBoundingClientRect();
       const rowRect = row.getBoundingClientRect();
       setAxesOffsets({
-        mainAxis: 6 + Math.max(0, rowRect.right - textRect.right),
+        mainAxis: 12 + Math.max(0, rowRect.right - textRect.right),
         crossAxis: rowRect.top + rowRect.height / 2 - (textRect.top + textRect.height / 2),
       });
     }
